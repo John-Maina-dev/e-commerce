@@ -1,0 +1,10 @@
+Hello {{ order.customer_name }},
+
+Your order {{ order.number }} is now: {{ order.get_status_display }}.
+
+Track it here: {{ protocol }}://{{ domain }}{{ order_url }}
+
+Questions? Contact us at {{ site.phone }}.
+
+Thanks,
+The {{ site.store_name }} team

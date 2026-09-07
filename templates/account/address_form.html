@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ title }}</h1></div>
+<div class="auth-wrap">
+  <div class="auth-card panel">
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row"><label for="id_full_name">Full name</label>{{ form.full_name }}</div>
+      <div class="form-row"><label for="id_phone">Phone</label>{{ form.phone }}</div>
+      <div class="form-row"><label for="id_line1">Street address</label>{{ form.line1 }}</div>
+      <div class="form-row"><label for="id_line2">Address line 2 (optional)</label>{{ form.line2 }}</div>
+      <div class="form-grid">
+        <div class="form-row"><label for="id_city">City</label>{{ form.city }}</div>
+        <div class="form-row"><label for="id_county">County</label>{{ form.county }}</div>
+      </div>
+      <div class="form-row"><label for="id_postal_code">Postal code</label>{{ form.postal_code }}</div>
+      <label class="check"><input type="checkbox" name="is_default" {% if form.is_default.value %}checked{% endif %}> Set as default address</label>
+      {% for field, errors in form.errors.items %}{% for e in errors %}<p class="form-errors">{{ e }}</p>{% endfor %}{% endfor %}
+      <button class="btn btn-full" type="submit">Save address</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

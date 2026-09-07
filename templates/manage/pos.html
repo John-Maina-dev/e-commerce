@@ -1,0 +1,175 @@
+{% extends 'manage/base_manage.html' %}
+{% load static store_extras %}
+{% block title %}POS · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">POINT OF SALE</span><h1>Till</h1>
+    <p class="muted">{% if session %}Shift open since {{ session.opened_at|date:'H:i' }} · <a href="{% url 'pos_session_close' %}">Close shift</a>{% else %}No open shift — open one to start selling.{% endif %}</p>
+  </div>
+  {% if not mpesa_ready %}<span class="status-badge is-pending">M-Pesa not configured</span>{% endif %}
+</div>
+
+{% if not session %}
+<div class="panel pos-open-shift">
+  <h2>Open your shift</h2>
+  <p class="muted">Count the opening float and enter it below. Sales are reconciled per shift.</p>
+  <form method="post" action="{% url 'pos_session_open' %}" class="pos-open-form">
+    {% csrf_token %}
+    <label for="opening_cash">Opening cash float ({{ currency }})</label>
+    <input type="number" id="opening_cash" name="opening_cash" min="0" step="0.01" value="0" required>
+    <button class="btn" type="submit">Open shift</button>
+  </form>
+</div>
+{% else %}
+
+<div class="pos-layout" id="posRoot"
+     data-search-url="{% url 'pos_search' %}"
+     data-checkout-url="{% url 'pos_checkout' %}"
+     data-state-url-base="{% url 'pos_order_state' 'NUMBER' %}"
+     data-currency="{{ currency }}"
+     data-can-discount="{{ can_discount|yesno:'1,0' }}">
+  {% csrf_token %}
+
+  <!-- Left: catalogue -->
+  <section class="pos-catalogue panel" aria-label="Products">
+    <div class="search-box pos-search-box">
+      <input id="posSearch" type="search" placeholder="Scan barcode or search name / SKU…"
+             autocomplete="off" autofocus aria-label="Search products">
+      <button type="button" id="posSearchBtn" aria-label="Search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+    </div>
+    <div id="posResults" class="pos-results" role="listbox" aria-label="Search results" hidden></div>
+
+    <div class="pos-quick" id="posQuick" aria-label="Quick products">
+      <p class="muted small">Search loads matching products here. Scan a barcode or press Enter on an exact match to add it instantly.</p>
+    </div>
+  </section>
+
+  <!-- Right: cart -->
+  <section class="pos-cart panel" aria-label="Sale">
+    <div class="panel-head"><h2>Current sale</h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="posClear" {% if not session %}disabled{% endif %}>Clear</button>
+    </div>
+    <div class="table-wrap pos-cart-wrap">
+      <table class="pos-cart-table">
+        <thead><tr><th>Product</th><th>Qty</th><th>Unit</th><th>Total</th><th></th></tr></thead>
+        <tbody id="posCartBody">
+          <tr class="pos-empty"><td colspan="5" class="muted">No items yet. Search or scan to begin.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pos-totals">
+      <div class="summary-row"><span>Subtotal</span><b id="posSubtotal">{{ currency }} 0</b></div>
+      <div class="summary-row pos-discount-row" {% if not can_discount %}hidden{% endif %}>
+        <label for="posDiscount">Discount</label>
+        <input type="number" id="posDiscount" min="0" step="0.01" value="0">
+      </div>
+      <div class="summary-row total"><span>TOTAL</span><b id="posTotal">{{ currency }} 0</b></div>
+    </div>
+
+    <div class="pos-printer-select">
+      <span class="muted small">Receipt printer:</span>
+      <div class="pos-printer-btns">
+        <button type="button" class="pos-printer-size btn-sm" data-size="80">80mm</button>
+        <button type="button" class="pos-printer-size btn-sm" data-size="58">58mm</button>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-lg pos-pay-btn" id="posPayBtn" disabled>Charge</button>
+  </section>
+</div>
+
+<!-- Payment modal -->
+<div class="modal-backdrop" id="payModal" hidden>
+  <div class="modal panel" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+    <div class="panel-head">
+      <h2 id="payTitle">Take payment · <span id="payTotalLabel"></span></h2>
+      <button type="button" class="icon-btn" id="payClose" aria-label="Close">×</button>
+    </div>
+    <div class="pay-methods" role="radiogroup" aria-label="Payment method">
+      <button type="button" class="pay-method is-active" data-method="cash">CASH</button>
+      <button type="button" class="pay-method" data-method="mpesa" {% if not mpesa_ready %}disabled title="M-Pesa is not configured"{% endif %}>M-PESA</button>
+      <button type="button" class="pay-method" data-method="card">CARD</button>
+      <button type="button" class="pay-method" data-method="other">OTHER</button>
+    </div>
+
+    <div class="pay-body" data-panel="cash">
+      <div class="form-row">
+        <label for="cashReceived">Cash received ({{ currency }})</label>
+        <input type="number" id="cashReceived" min="0" step="0.01">
+      </div>
+      <div class="summary-row"><span>Change due</span><b id="changeDue">{{ currency }} 0</b></div>
+      <p class="alert-error" id="cashError" hidden>Cash received is less than the total.</p>
+    </div>
+
+    <div class="pay-body" data-panel="mpesa" hidden>
+      <div class="form-row">
+        <label for="mpesaPhone">Customer phone number</label>
+        <input type="tel" id="mpesaPhone" placeholder="07XX XXX XXX" autocomplete="tel">
+      </div>
+      <p class="muted small">An STK prompt is sent to the customer's phone. They approve it with their M-Pesa PIN on their own handset — never ask for the PIN here. The sale completes only after Safaricom confirms.</p>
+    </div>
+
+    <div class="pay-body" data-panel="card" hidden>
+      <p class="muted small">Record a card-terminal payment. Confirm the terminal approved before charging.</p>
+    </div>
+    <div class="pay-body" data-panel="other" hidden>
+      <div class="form-row">
+        <label for="otherName">Customer name / note</label>
+        <input type="text" id="otherName" placeholder="Walk-in customer">
+      </div>
+      <p class="muted small">Manual tender (e.g. invoice later). Recorded as paid by you.</p>
+    </div>
+
+    <div class="form-row pay-customer" data-panel-shared>
+      <label for="customerName">Customer (optional)</label>
+      <input type="text" id="customerName" placeholder="Walk-in customer">
+    </div>
+
+    <p class="alert-error" id="payError" hidden></p>
+    <button type="button" class="btn btn-lg" id="payConfirm">Complete sale</button>
+  </div>
+</div>
+
+<!-- Result modal -->
+<div class="modal-backdrop" id="doneModal" hidden>
+  <div class="modal panel pos-done" role="dialog" aria-modal="true">
+    <div id="donePending" hidden>
+      <h2>M-PESA prompt sent</h2>
+      <p class="muted">Waiting for the customer to approve on their phone…</p>
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="alert-warning" id="pendingNote" hidden></p>
+    </div>
+
+    <div id="donePaid" hidden>
+      <h2>Sale complete</h2>
+      <p class="muted" id="doneSummary"></p>
+      <div class="pos-receipt-actions">
+        <a class="btn btn-lg" id="receiptLink" href="#" target="_blank" rel="noopener">View receipt</a>
+        <a class="btn btn-outline btn-lg" id="receiptPrint" href="#" target="_blank" rel="noopener">Print receipt</a>
+        <button type="button" class="btn btn-outline btn-lg" id="receiptDownload">Download receipt</button>
+      </div>
+    </div>
+
+    <div id="donePrintError" hidden>
+      <p class="pos-print-error-msg">Payment successful. Receipt could not be printed because the printer is unavailable.</p>
+      <div class="pos-receipt-actions">
+        <button type="button" class="btn" id="retryPrint">Retry print</button>
+        <button type="button" class="btn btn-outline" id="downloadReceipt">Download receipt</button>
+        <button type="button" class="btn btn-outline" id="manualPrint">Print receipt</button>
+      </div>
+    </div>
+
+    <div id="doneFailed" hidden>
+      <h2>Payment failed</h2>
+      <p class="alert-error" id="failedReason"></p>
+      <p class="muted">Nothing was charged and no stock has left inventory. Retry the sale from the till.</p>
+    </div>
+    <button type="button" class="btn btn-ghost" id="doneClose">New sale</button>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}{% if session %}<script src="{% static 'pos.js' %}" defer></script>{% endif %}{% endblock %}

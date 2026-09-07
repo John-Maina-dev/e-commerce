@@ -1,0 +1,174 @@
+{% load static store_extras %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Receipt {{ order.number }} · {{ site_settings.store_name }}</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', ui-monospace, monospace;
+    background: #f1f3f5; color: #111;
+    display: flex; flex-direction: column; align-items: center; padding: 24px 12px;
+  }
+  .receipt {
+    background: #fff; padding: 6mm 5mm; font-size: 12px; line-height: 1.45;
+    max-width: 100%;
+  }
+  .receipt.size-80 { width: 80mm; }
+  .receipt.size-58 { width: 58mm; font-size: 10px; line-height: 1.35; }
+  .receipt.size-58 .store-name { font-size: 12px; }
+  .receipt.size-58 h1 { font-size: 11px; }
+  .receipt.size-58 .totals .grand { font-size: 12px; }
+  .receipt.size-58 .item-sub { font-size: 8px; }
+  .receipt.size-58 th { font-size: 8px; }
+  .receipt.size-58 .muted { font-size: 8px; }
+  .receipt img.logo { max-width: 32mm; max-height: 16mm; display: block; margin: 0 auto 4px; }
+  .receipt.size-58 img.logo { max-width: 24mm; max-height: 12mm; }
+  .center { text-align: center; }
+  .store-name { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+  h1 { font-size: 13px; text-align: center; letter-spacing: 2px; margin: 2px 0 8px; }
+  .meta div { display: flex; justify-content: space-between; gap: 8px; }
+  .meta span:first-child { text-transform: uppercase; }
+  hr { border: none; border-top: 1px dashed #000; margin: 7px 0; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; border-bottom: 1px solid #000; padding: 2px 0; }
+  th.num, td.num { text-align: right; }
+  td { padding: 2.5px 0; vertical-align: top; }
+  .item-name { word-break: break-word; }
+  .item-sub { display: block; font-size: 10px; }
+  .totals div { display: flex; justify-content: space-between; }
+  .totals .grand { font-weight: bold; font-size: 14px; margin-top: 2px; }
+  .thanks { text-align: center; margin-top: 8px; letter-spacing: 1px; }
+  .muted { font-size: 10px; }
+  .actions {
+    position: fixed; top: 12px; right: 12px; display: flex; gap: 8px;
+    font-family: system-ui, sans-serif;
+  }
+  .actions a, .actions button {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #111; color: #fff; border: none; border-radius: 8px;
+    padding: 9px 16px; font-size: 14px; cursor: pointer; text-decoration: none;
+  }
+  .actions button.ghost { background: #fff; color: #111; border: 1px solid #ccc; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .receipt { width: auto; padding: 0 2mm; }
+    .actions { display: none; }
+    @page { margin: 4mm; size: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="actions no-print">
+  <button type="button" onclick="window.print()">Print receipt</button>
+  <a class="ghost" href="?download=1" download="receipt-{{ order.number }}.html">Download</a>
+  {% if request.user.is_staff %}<button type="button" class="ghost" onclick="history.back()">Back to till</button>{% endif %}
+</div>
+
+<div class="receipt size-80" id="receiptBody">
+  <div class="center">
+    {% if site_settings.logo %}<img class="logo" src="{{ site_settings.logo.url }}" alt="">{% endif %}
+    <div class="store-name">{{ site_settings.store_name }}</div>
+    <h1>Sales Receipt</h1>
+    {% if site_settings.address %}<div class="muted">{{ site_settings.address }}</div>{% endif %}
+    {% if site_settings.phone %}<div class="muted">Tel: {{ site_settings.phone }}</div>{% endif %}
+    {% if site_settings.contact_email %}<div class="muted">{{ site_settings.contact_email }}</div>{% endif %}
+  </div>
+  <hr>
+  <div class="meta">
+    <div><span>Receipt No</span><b>{{ order.number }}</b></div>
+    <div><span>Date</span><span>{{ order.created_at|date:'d/m/Y' }}</span></div>
+    <div><span>Time</span><span>{{ order.created_at|date:'H:i A' }}</span></div>
+    {% if order.served_by %}<div><span>Cashier</span><span>{{ order.served_by.get_full_name|default:order.served_by.username }}</span></div>{% endif %}
+    {% if order.customer_name and order.customer_name != 'Walk-in customer' %}<div><span>Customer</span><span>{{ order.customer_name }}</span></div>{% endif %}
+    {% if order.phone %}<div><span>Phone</span><span>{{ order.phone }}</span></div>{% endif %}
+  </div>
+  <hr>
+  <table>
+    <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Total</th></tr></thead>
+    <tbody>
+      {% for i in order.items.all %}
+      <tr>
+        <td class="item-name">{{ i.product_name }}<span class="item-sub muted">SKU {{ i.product_sku }}</span></td>
+        <td class="num">{{ i.quantity }}</td>
+        <td class="num">{{ i.price|money:currency }}</td>
+        <td class="num">{{ i.subtotal|money:currency }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <hr>
+  <div class="totals">
+    <div><span>Subtotal</span><span>{{ order.subtotal|money:currency }}</span></div>
+    {% if order.discount %}
+    <div><span>Discount</span><span>-{{ order.discount|money:currency }}</span></div>
+    {% endif %}
+    {% if order.shipping %}<div><span>Delivery</span><span>{{ order.shipping|money:currency }}</span></div>{% endif %}
+    {% if order.tax %}<div><span>Tax</span><span>{{ order.tax|money:currency }}</span></div>{% endif %}
+    <div class="grand"><span>TOTAL</span><span>{{ order.total|money:currency }}</span></div>
+    {% if payment.amount_paid is not None %}<div><span>Paid</span><span>{{ payment.amount_paid|money:currency }}</span></div>{% endif %}
+    {% if payment.change_given is not None and payment.change_given %}<div><span>Change</span><span>{{ payment.change_given|money:currency }}</span></div>{% endif %}
+    <div><span>Payment</span><span>{% if order.pos_payment_method %}{{ order.get_pos_payment_method_display|upper }}{% else %}{{ order.get_payment_method_display|upper }}{% endif %}</span></div>
+    {% if payment.status == 'paid' %}
+    <div><span>Status</span><span>PAID</span></div>
+    {% if payment.transaction_id or payment.reference %}<div class="muted"><span>Ref</span><span>{{ payment.transaction_id|default:payment.reference }}</span></div>{% endif %}
+    {% else %}
+    <div><span>Status</span><span>{{ order.get_payment_status_display|upper }}</span></div>
+    {% endif %}
+  </div>
+  <hr>
+  <p class="thanks"><b>THANK YOU!</b></p>
+  <p class="thanks"><b>COME AGAIN</b></p>
+  {% if site_settings.social_whatsapp %}<p class="center muted">WhatsApp: {{ site_settings.social_whatsapp }}</p>{% endif %}
+  <p class="center muted">{{ site_settings.footer_text|default:site_settings.tagline }}</p>
+</div>
+<script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+
+    // Apply printer size from URL param or localStorage
+    var size = params.get('size') || localStorage.getItem('pos_printer_size') || '80';
+    var receipt = document.getElementById('receiptBody');
+    if (receipt) {
+      receipt.className = 'receipt size-' + (size === '58' ? '58' : '80');
+    }
+
+    // ?download=1 → serve as attachment (handled server-side via Content-Disposition)
+    if (params.get('download') === '1') {
+      document.querySelector('.actions').style.display = 'none';
+      return;
+    }
+
+    // ?print=1 → auto-print silently (used by POS auto-print via iframe)
+    // ?auto=1  → auto-print then close window
+    if (params.get('print') === '1' || params.get('auto') === '1') {
+      document.querySelector('.actions').style.display = 'none';
+      var shouldClose = params.get('auto') === '1';
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          try {
+            window.print();
+          } catch (e) {
+            // Printer unavailable — notify parent if in iframe
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({ type: 'receipt-print-failed', number: '{{ order.number }}' }, '*');
+            }
+            return;
+          }
+          if (shouldClose) {
+            // Notify parent print was triggered, then close
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({ type: 'receipt-print-triggered', number: '{{ order.number }}' }, '*');
+            }
+            setTimeout(function () { window.close(); }, 300);
+          }
+        }, 200);
+      });
+    }
+  })();
+</script>
+</body>
+</html>

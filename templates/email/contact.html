@@ -1,0 +1,12 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>We received your message</h2>
+<p>Hi {{ contact.name }}, thank you for contacting {{ site.store_name }}. We've received your message and will get back to you shortly.</p>
+<div class="card">
+  <table>
+    <tr><td>Subject</td><td align="right"><b>{{ contact.subject }}</b></td></tr>
+    <tr><td>Your message</td><td align="right" style="max-width:300px;">{{ contact.message|truncatechars:160 }}</td></tr>
+  </table>
+</div>
+<p>If it's urgent, reach us directly on <b>{{ site.phone }}</b>.</p>
+{% endblock %}

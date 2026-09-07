@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block body_class %}manage-page{% endblock %}
+{% block header %}
+<header class="manage-topbar">
+  <div class="manage-topbar-inner">
+    <button class="icon-btn manage-toggle" id="manageToggle" aria-label="Toggle sidebar" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="manage-brand-mini" href="{% url 'dashboard' %}">
+      {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" alt="" class="brand-logo">{% else %}<span class="brand-mark">RB</span>{% endif %}
+      <b>{{ site_settings.store_name }}</b>
+    </a>
+    <nav class="manage-topbar-nav" aria-label="Quick links">
+      <a href="{% url 'home' %}" target="_blank" rel="noopener">View store</a>
+      <a href="/django-admin/" target="_blank" rel="noopener">Django admin</a>
+    </nav>
+    <form class="manage-search" action="{% url 'manage_products' %}" method="get" role="search">
+      <div class="search-box">
+        <input type="search" name="q" placeholder="Search products…" aria-label="Search products" autocomplete="off">
+        <button type="submit" aria-label="Search">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+      </div>
+    </form>
+    <div class="manage-actions">
+      <div class="topbar-dropdown">
+        <button class="icon-btn" id="notifToggle" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          {% if unread_notifications %}<span class="badge-count">{{ unread_notifications }}</span>{% endif %}
+        </button>
+        <div class="topbar-menu wide" id="notifMenu" role="menu" aria-label="Notifications">
+          <div class="topbar-menu-head">Notifications
+            {% if unread_notifications %}
+            <form method="post" action="{% url 'notifications_clear' %}">{% csrf_token %}<button class="link-btn" type="submit">Mark all read</button></form>
+            {% endif %}
+          </div>
+          {% for n in recent_notifications %}
+          <a class="topbar-menu-item {% if not n.read %}unread{% endif %}" href="{% if n.link %}{{ n.link }}{% else %}{% url 'dashboard' %}{% endif %}">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span><b>{{ n.title }}</b>{% if n.message %}<small>{{ n.message }}</small>{% endif %}<small>{{ n.created_at|timesince }} ago</small></span>
+          </a>
+          {% empty %}
+          <div class="topbar-menu-item"><span class="muted">You're all caught up.</span></div>
+          {% endfor %}
+          <div class="topbar-menu-foot"><a href="{% url 'manage_notifications' %}">View all notifications →</a></div>
+        </div>
+      </div>
+      <div class="topbar-dropdown">
+        <button class="profile-btn" id="profileToggle" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar">{{ user.username|first|upper }}</span>
+          <b>{{ user.get_full_name|default:user.username }}</b>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="topbar-menu" id="profileMenu" role="menu" aria-label="Profile">
+          <div class="profile-chip">
+            <span class="avatar">{{ user.username|first|upper }}</span>
+            <div><b>{{ user.get_full_name|default:user.username }}</b><small>{{ user.email }}</small></div>
+          </div>
+          <a class="topbar-menu-item" href="{% url 'account' %}">My account</a>
+          <a class="topbar-menu-item" href="{% url 'home' %}" target="_blank" rel="noopener">View store</a>
+          <a class="topbar-menu-item" href="/django-admin/" target="_blank" rel="noopener">Django admin</a>
+          <div class="topbar-menu-foot">
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link-btn" type="submit">Log out</button></form>
+          </div>
+        </div>
+      </div>
+      <div class="theme-picker">
+        <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Change theme" aria-haspopup="true" aria-expanded="false">
+          <svg class="icon-sun" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="icon-system" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+        </button>
+        <div class="theme-menu" id="themeMenu" role="menu" aria-label="Theme">
+          <button type="button" data-theme-choice="light" role="menuitem">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+            Light
+            <svg class="theme-check" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg>
+          </button>
+          <button type="button" data-theme-choice="dark" role="menuitem">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            Dark
+            <svg class="theme-check" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg>
+          </button>
+          <button type="button" data-theme-choice="system" role="menuitem">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+            System
+            <svg class="theme-check" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+{% endblock %}
+{% block content %}
+<div class="manage-layout">
+  <aside class="manage-sidebar" id="manageSidebar">
+    <nav aria-label="Management">
+      <a href="{% url 'dashboard' %}" class="{% if request.path == '/manage/' %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Dashboard
+        {% if unread_notifications %}<span class="badge-count">{{ unread_notifications }}</span>{% endif %}
+      </a>
+      <a href="{% url 'manage_notifications' %}" class="{% if '/manage/notifications' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        Notifications
+      </a>
+      <a href="{% url 'pos_terminal' %}" class="pos-nav-link {% if '/manage/pos' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 9h4M7 12h7"/></svg>
+        POS till
+      </a>
+      <a href="{% url 'manage_products' %}" class="{% if '/manage/products' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
+        Products
+      </a>
+      <a href="{% url 'manage_categories' %}" class="{% if '/manage/categories' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Categories
+      </a>
+      <a href="{% url 'inventory' %}" class="{% if '/manage/inventory' in request.path and 'history' not in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>
+        Inventory
+      </a>
+      <a href="{% url 'inventory_history' %}" class="{% if '/manage/inventory/history' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Inventory history
+      </a>
+      <a href="{% url 'manage_orders' %}" class="{% if '/manage/orders' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Orders
+      </a>
+      <a href="{% url 'manage_customers' %}" class="{% if '/manage/customers' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a>
+      <a href="{% url 'manage_reviews' %}" class="{% if '/manage/reviews' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+        Reviews
+      </a>
+      <a href="{% url 'manage_coupons' %}" class="{% if '/manage/coupons' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"/><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M7 13h2M7 17h2M15 13h2M15 17h2"/></svg>
+        Coupons
+      </a>
+      <a href="{% url 'manage_payments' %}" class="{% if '/manage/payments' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Payments
+      </a>
+      <span class="sidebar-section">Settings</span>
+      <a href="{% url 'manage_settings' %}" class="{% if '/manage/settings' in request.path and not '/email' in request.path and not '/payments' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        Store settings
+      </a>
+      <a href="{% url 'manage_email_settings' %}" class="{% if '/manage/settings/email' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+        Email / SMTP
+      </a>
+      <a href="{% url 'manage_payment_settings' %}" class="{% if '/manage/settings/payments' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        M-Pesa
+      </a>
+      <a href="{% url 'manage_analytics' %}" class="{% if '/manage/analytics' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+        Analytics
+      </a>
+      <a href="{% url 'system_health' %}" class="{% if '/manage/system-health' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        System health
+      </a>
+    </nav>
+    <div class="manage-sidebar-foot">
+      <a href="{% url 'home' %}" target="_blank" rel="noopener">View store ↗</a>
+      <a href="/django-admin/" target="_blank" rel="noopener">Django admin ↗</a>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link-btn" type="submit">Log out</button></form>
+    </div>
+  </aside>
+  <div class="manage-main">
+    {% if unread_notifications %}
+    <div class="manage-notices">
+      <span>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        {{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}
+      </span>
+      <form method="post" action="{% url 'notifications_clear' %}">{% csrf_token %}<button class="link-btn" type="submit">Mark all read</button></form>
+    </div>
+    {% endif %}
+    {% block manage_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

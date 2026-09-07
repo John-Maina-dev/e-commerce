@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Notifications · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Notifications</h1><p>Updates about your orders, payments and account.</p></div>
+<div class="account-layout">
+  {% include 'partials/account_nav.html' %}
+  <div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>All notifications</h2>
+        {% if page.paginator.count %}
+        <form method="post" action="{% url 'account_notifications_clear' %}">{% csrf_token %}<button class="link-btn" type="submit">Mark all read</button></form>
+        {% endif %}
+      </div>
+      {% if page %}
+      <ul class="notification-list">
+        {% for n in page %}
+        <li class="notification-item {% if not n.read %}unread{% endif %}">
+          <span class="notification-cat cat-{{ n.category }}">{{ n.get_category_display|default:'Update' }}</span>
+          <div class="notification-body">
+            {% if n.link %}<a href="{{ n.link }}"><b>{{ n.title }}</b></a>{% else %}<b>{{ n.title }}</b>{% endif %}
+            {% if n.message %}<span class="muted">{{ n.message }}</span>{% endif %}
+            <small class="muted">{{ n.created_at|timesince }} ago</small>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <p class="muted">You're all caught up.</p>
+      </div>
+      {% endif %}
+      {% include 'partials/pagination.html' %}
+    </div>
+  </div>
+</div>
+{% endblock %}

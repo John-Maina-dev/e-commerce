@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Wishlist · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Your wishlist</h1><p>{{ items|length }} item{{ items|length|pluralize }}</p></div>
+
+{% if items %}
+<div class="product-grid">
+  {% for w in items %}
+  {% with p=w.product %}
+  <article class="product-card">
+    <a class="product-media" href="{% url 'product_detail' p.slug %}">
+      {% if p.image_src %}<img src="{{ p.image_src }}" alt="{{ p.name }}">{% else %}<div class="placeholder">RB</div>{% endif %}
+      {% if p.has_discount %}<span class="badge badge-sale">-{{ p.discount_percent }}%</span>{% endif %}
+    </a>
+    <div class="product-body">
+      <span class="muted">{{ p.category.name }}</span>
+      <h3><a href="{% url 'product_detail' p.slug %}">{{ p.name }}</a></h3>
+      <div class="price-row"><strong>{{ p.effective_price|money:currency }}</strong></div>
+      <form method="post" action="{% url 'wishlist_move_to_cart' w.id %}">{% csrf_token %}
+        <button class="btn btn-full" {% if p.out_of_stock %}disabled{% endif %}>Move to cart</button>
+      </form>
+      <form method="post" action="{% url 'wishlist_toggle' p.id %}">{% csrf_token %}
+        <button class="btn btn-ghost btn-full">Remove</button>
+      </form>
+    </div>
+  </article>
+  {% endwith %}
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <h2>Your wishlist is empty</h2>
+  <p>Tap the heart on any product to save it here.</p>
+  <a class="btn" href="{% url 'catalogue' %}">Browse products</a>
+</div>
+{% endif %}
+{% endblock %}

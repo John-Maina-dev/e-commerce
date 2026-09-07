@@ -1,0 +1,42 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Reviews · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head"><div><span class="muted">MODERATION</span><h1>Product reviews</h1></div></div>
+
+<form method="get" class="filter-bar">
+  <select name="status" onchange="this.form.submit()">
+    <option value="">All reviews</option>
+    <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending approval</option>
+    <option value="approved" {% if status == 'approved' %}selected{% endif %}>Approved</option>
+  </select>
+  <a class="btn btn-ghost" href="{% url 'manage_reviews' %}">Clear</a>
+</form>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Product</th><th>Author</th><th>Rating</th><th>Review</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for r in page.object_list %}
+      <tr>
+        <td><a href="{% url 'product_edit' r.product.id %}">{{ r.product.name }}</a></td>
+        <td>{% if r.user %}{{ r.user.username }}{% else %}{{ r.name|default:'Guest' }}{% endif %}{% if r.verified_purchase %} <span class="badge badge-default">verified</span>{% endif %}</td>
+        <td><b>{{ r.rating }}★</b></td>
+        <td>{{ r.comment|truncatechars:90 }}</td>
+        <td>{% if r.active %}<span class="status-badge is-healthy">Approved</span>{% else %}<span class="status-badge is-low">Pending</span>{% endif %}</td>
+        <td class="row-actions">
+          <form method="post" action="{% url 'review_action' r.id %}" class="inline-form">
+            {% csrf_token %}
+            {% if not r.active %}<button class="btn btn-sm" name="action" value="approve">Approve</button>{% endif %}
+            <button class="btn btn-ghost btn-sm" name="action" value="reject">Reject</button>
+            <button class="btn btn-danger btn-sm" name="action" value="delete">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="6">No reviews found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% include 'partials/pagination.html' %}
+{% endblock %}

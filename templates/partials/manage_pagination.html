@@ -1,0 +1,11 @@
+{% if page.paginator.num_pages > 1 %}
+<nav class="pagination" aria-label="Page navigation">
+  {% if page.has_previous %}<a href="?q={{ q }}&category={{ category }}&status={{ status }}&stock={{ stock }}&sort={{ sort }}&page={{ page.previous_page_number }}" aria-label="Previous page">← Prev</a>{% endif %}
+  {% for n in page.paginator.page_range %}
+    {% if n == page.number %}<span class="current" aria-current="page">{{ n }}</span>
+    {% elif n >= page.number|add:'-3' and n <= page.number|add:'3' %}<a href="?q={{ q }}&category={{ category }}&status={{ status }}&stock={{ stock }}&sort={{ sort }}&page={{ n }}">{{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if page.has_next %}<a href="?q={{ q }}&category={{ category }}&status={{ status }}&stock={{ stock }}&sort={{ sort }}&page={{ page.next_page_number }}" aria-label="Next page">Next →</a>{% endif %}
+</nav>
+{% endif %}

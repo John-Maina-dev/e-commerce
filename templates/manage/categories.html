@@ -1,0 +1,29 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Categories · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CATALOGUE</span><h1>Categories</h1></div>
+  <div class="head-actions"><a class="btn" href="{% url 'category_add' %}">+ Add category</a></div>
+</div>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Category</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in categories %}
+      <tr>
+        <td><b>{{ c.name }}</b>{% if c.description %}<div class="muted small">{{ c.description|truncatechars:60 }}</div>{% endif %}</td>
+        <td>{{ c.product_count }}</td>
+        <td>{% if c.active %}<span class="status-badge is-healthy">Visible</span>{% else %}<span class="status-badge is-out">Hidden</span>{% endif %}</td>
+        <td class="row-actions">
+          <a class="btn btn-ghost btn-sm" href="{% url 'category_edit' c.id %}">Edit</a>
+          <a class="btn btn-danger btn-sm" href="{% url 'category_delete' c.id %}">Delete</a>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="4">No categories yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

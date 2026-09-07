@@ -1,0 +1,506 @@
+[
+  [
+    "Floral Midi Dress",
+    "Women's Fashion",
+    4500.0,
+    7000.0,
+    4.8,
+    128,
+    "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500&q=80"
+  ],
+  [
+    "White Linen Blouse",
+    "Women's Fashion",
+    2800.0,
+    4200.0,
+    4.6,
+    95,
+    "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500&q=80"
+  ],
+  [
+    "Wrap Maxi Skirt",
+    "Women's Fashion",
+    3800.0,
+    5500.0,
+    4.6,
+    93,
+    "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500&q=80"
+  ],
+  [
+    "Black Blazer Jacket",
+    "Women's Fashion",
+    6200.0,
+    9000.0,
+    4.7,
+    156,
+    "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500&q=80"
+  ],
+  [
+    "Flowy Summer Dress",
+    "Women's Fashion",
+    3500.0,
+    5200.0,
+    4.5,
+    112,
+    "https://images.unsplash.com/photo-1515649934662-b06095a072fe?w=500&q=80"
+  ],
+  [
+    "Elegant Evening Gown",
+    "Women's Fashion",
+    12000.0,
+    18000.0,
+    4.9,
+    234,
+    "https://images.unsplash.com/photo-1595777712802-08d01e6b6034?w=500&q=80"
+  ],
+  [
+    "Casual T-shirt Dress",
+    "Women's Fashion",
+    2200.0,
+    3300.0,
+    4.4,
+    87,
+    "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=500&q=80"
+  ],
+  [
+    "Striped Cardigan",
+    "Women's Fashion",
+    3200.0,
+    4800.0,
+    4.6,
+    78,
+    "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=500&q=80"
+  ],
+  [
+    "Men's Slim Fit Suit",
+    "Men's Fashion",
+    18000.0,
+    25000.0,
+    4.7,
+    89,
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80"
+  ],
+  [
+    "Men's Polo Shirt",
+    "Men's Fashion",
+    2800.0,
+    3500.0,
+    4.4,
+    178,
+    "https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?w=500&q=80"
+  ],
+  [
+    "Casual Denim Jacket",
+    "Men's Fashion",
+    5500.0,
+    8000.0,
+    4.6,
+    145,
+    "https://images.unsplash.com/photo-1576871337622-98d48d1cf531?w=500&q=80"
+  ],
+  [
+    "Formal White Shirt",
+    "Men's Fashion",
+    3200.0,
+    4500.0,
+    4.5,
+    102,
+    "https://images.unsplash.com/photo-1596385109122-b56d7b3c7e6b?w=500&q=80"
+  ],
+  [
+    "Chinos Trousers",
+    "Men's Fashion",
+    4200.0,
+    6000.0,
+    4.6,
+    134,
+    "https://images.unsplash.com/photo-1473966143000-9802de107933?w=500&q=80"
+  ],
+  [
+    "Casual Hoodie",
+    "Men's Fashion",
+    2500.0,
+    3800.0,
+    4.7,
+    201,
+    "https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=500&q=80"
+  ],
+  [
+    "Bomber Jacket",
+    "Men's Fashion",
+    6000.0,
+    8500.0,
+    4.6,
+    87,
+    "https://images.unsplash.com/photo-1544131519-9f1b4e97c4df?w=500&q=80"
+  ],
+  [
+    "Oxford Button-Down Shirt",
+    "Men's Fashion",
+    3800.0,
+    5200.0,
+    4.5,
+    76,
+    "https://images.unsplash.com/photo-1602810318383-e386cc432b60?w=500&q=80"
+  ],
+  [
+    "Leather Ankle Boots",
+    "Shoes",
+    9500.0,
+    13000.0,
+    4.6,
+    204,
+    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=500&q=80"
+  ],
+  [
+    "Strappy Heels",
+    "Shoes",
+    7200.0,
+    10000.0,
+    4.7,
+    221,
+    "https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=500&q=80"
+  ],
+  [
+    "White Sneakers",
+    "Shoes",
+    5800.0,
+    8200.0,
+    4.8,
+    312,
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80"
+  ],
+  [
+    "Formal Oxford Shoes",
+    "Shoes",
+    8500.0,
+    12000.0,
+    4.6,
+    156,
+    "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?w=500&q=80"
+  ],
+  [
+    "Comfortable Loafers",
+    "Shoes",
+    6500.0,
+    9000.0,
+    4.5,
+    189,
+    "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=500&q=80"
+  ],
+  [
+    "Running Trainers",
+    "Shoes",
+    7800.0,
+    11000.0,
+    4.7,
+    267,
+    "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=500&q=80"
+  ],
+  [
+    "Summer Sandals",
+    "Shoes",
+    2800.0,
+    4200.0,
+    4.4,
+    145,
+    "https://images.unsplash.com/photo-1595405748375-a9a83547cd70?w=500&q=80"
+  ],
+  [
+    "Leather Flip Flops",
+    "Shoes",
+    2200.0,
+    3500.0,
+    4.3,
+    98,
+    "https://images.unsplash.com/photo-1572821160211-efdc51a8d64f?w=500&q=80"
+  ],
+  [
+    "Quilted Shoulder Bag",
+    "Bags",
+    6200.0,
+    null,
+    4.6,
+    156,
+    "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&q=80"
+  ],
+  [
+    "Tote Handbag",
+    "Bags",
+    5500.0,
+    7800.0,
+    4.5,
+    134,
+    "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500&q=80"
+  ],
+  [
+    "Crossbody Leather Bag",
+    "Bags",
+    7200.0,
+    10000.0,
+    4.7,
+    198,
+    "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80"
+  ],
+  [
+    "Backpack Travel Bag",
+    "Bags",
+    6800.0,
+    9500.0,
+    4.6,
+    167,
+    "https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=500&q=80"
+  ],
+  [
+    "Clutch Evening Bag",
+    "Bags",
+    4200.0,
+    6000.0,
+    4.7,
+    143,
+    "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=500&q=80"
+  ],
+  [
+    "Satchel Messenger Bag",
+    "Bags",
+    7800.0,
+    11000.0,
+    4.5,
+    112,
+    "https://images.unsplash.com/photo-1547949003-9792a18a2601?w=500&q=80"
+  ],
+  [
+    "Mini Shoulder Bag",
+    "Bags",
+    3800.0,
+    5500.0,
+    4.6,
+    201,
+    "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=500&q=80"
+  ],
+  [
+    "Laptop Backpack",
+    "Bags",
+    8200.0,
+    11500.0,
+    4.8,
+    289,
+    "https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?w=500&q=80"
+  ],
+  [
+    "Gold Hoop Earrings",
+    "Accessories",
+    1800.0,
+    2500.0,
+    4.5,
+    312,
+    "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80"
+  ],
+  [
+    "Silk Scarf",
+    "Accessories",
+    2200.0,
+    3000.0,
+    4.7,
+    88,
+    "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=500&q=80"
+  ],
+  [
+    "Leather Belt",
+    "Accessories",
+    2800.0,
+    4000.0,
+    4.6,
+    145,
+    "https://images.unsplash.com/photo-1548690312-e8f50a42b67a?w=500&q=80"
+  ],
+  [
+    "Oversized Sunglasses",
+    "Accessories",
+    3500.0,
+    5000.0,
+    4.7,
+    234,
+    "https://images.unsplash.com/photo-1572821260409-51b2b6c20072?w=500&q=80"
+  ],
+  [
+    "Pearl Necklace",
+    "Accessories",
+    4200.0,
+    6000.0,
+    4.8,
+    267,
+    "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&q=80"
+  ],
+  [
+    "Wool Watch Cap",
+    "Accessories",
+    1800.0,
+    2500.0,
+    4.4,
+    102,
+    "https://images.unsplash.com/photo-1588287537226-7db58dc01d3e?w=500&q=80"
+  ],
+  [
+    "Statement Bracelet",
+    "Accessories",
+    2800.0,
+    4000.0,
+    4.6,
+    178,
+    "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80"
+  ],
+  [
+    "Leather Gloves",
+    "Accessories",
+    2500.0,
+    3500.0,
+    4.5,
+    87,
+    "https://images.unsplash.com/photo-1520099820605-87e4680ef7de?w=500&q=80"
+  ],
+  [
+    "Matte Lipstick Set",
+    "Beauty",
+    3200.0,
+    4000.0,
+    4.8,
+    445,
+    "https://images.unsplash.com/photo-1586495777744-4e6232bf2f9b?w=500&q=80"
+  ],
+  [
+    "Facial Skincare Kit",
+    "Beauty",
+    5200.0,
+    7200.0,
+    4.7,
+    223,
+    "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=500&q=80"
+  ],
+  [
+    "Eye Shadow Palette",
+    "Beauty",
+    2800.0,
+    4000.0,
+    4.9,
+    567,
+    "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80"
+  ],
+  [
+    "Foundation & Primer Set",
+    "Beauty",
+    4500.0,
+    6300.0,
+    4.6,
+    312,
+    "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500&q=80"
+  ],
+  [
+    "Mascara & Eyeliner Duo",
+    "Beauty",
+    2200.0,
+    3200.0,
+    4.7,
+    289,
+    "https://images.unsplash.com/photo-1631214524020-3c69b3b0e5e8?w=500&q=80"
+  ],
+  [
+    "Professional Brush Set",
+    "Beauty",
+    3800.0,
+    5500.0,
+    4.8,
+    334,
+    "https://images.unsplash.com/photo-1596704017254-9b4c8915c481?w=500&q=80"
+  ],
+  [
+    "Anti-Aging Serum",
+    "Beauty",
+    4800.0,
+    6800.0,
+    4.7,
+    198,
+    "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&q=80"
+  ],
+  [
+    "Luxury Face Cream",
+    "Beauty",
+    5500.0,
+    7800.0,
+    4.9,
+    412,
+    "https://images.unsplash.com/photo-1611080626919-7cf5a9dbab12?w=500&q=80"
+  ],
+  [
+    "Kids Sneakers",
+    "Kids",
+    3500.0,
+    5000.0,
+    4.3,
+    67,
+    "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=500&q=80"
+  ],
+  [
+    "Colorful Kids T-shirt",
+    "Kids",
+    1800.0,
+    2500.0,
+    4.4,
+    89,
+    "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=500&q=80"
+  ],
+  [
+    "Kids Denim Jacket",
+    "Kids",
+    3200.0,
+    4500.0,
+    4.5,
+    102,
+    "https://images.unsplash.com/photo-1604671801908-6f0c6a092c05?w=500&q=80"
+  ],
+  [
+    "Kids Hoodie Sweatshirt",
+    "Kids",
+    2200.0,
+    3200.0,
+    4.6,
+    145,
+    "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=500&q=80"
+  ],
+  [
+    "Kids Summer Shorts",
+    "Kids",
+    1500.0,
+    2200.0,
+    4.3,
+    78,
+    "https://images.unsplash.com/photo-1471286174890-9c112ffca5b4?w=500&q=80"
+  ],
+  [
+    "Girls Princess Dress",
+    "Kids",
+    4200.0,
+    6000.0,
+    4.7,
+    267,
+    "https://images.unsplash.com/photo-1477114905385-0e0da6b0cac3?w=500&q=80"
+  ],
+  [
+    "Kids Backpack",
+    "Kids",
+    2800.0,
+    4000.0,
+    4.5,
+    123,
+    "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&q=80"
+  ],
+  [
+    "Kids Winter Boots",
+    "Kids",
+    3800.0,
+    5500.0,
+    4.6,
+    134,
+    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=500&q=80"
+  ]
+]

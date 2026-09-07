@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Order {{ order.number }} · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="order-hero panel">
+  <span class="muted">Order confirmation</span>
+  <h1>Order {{ order.number }}</h1>
+  <p>{{ order.customer_name }} · {{ order.phone }}</p>
+  <div class="order-badges">
+    <span class="status-badge {{ order.status|status_class }}">{{ order.get_status_display }}</span>
+    <span class="status-badge {{ order.payment_status|status_class }}">Payment: {{ order.get_payment_status_display }}</span>
+  </div>
+  {% if order.payment_method == 'mpesa' and order.payment_status == 'pending' %}
+  <div id="mpesa-waiting" class="mpesa-waiting">
+    <p class="hint">We are waiting for the M-Pesa confirmation. This page updates automatically once Safaricom confirms the payment.</p>
+    <div class="mpesa-waiting-status">
+      <span class="mpesa-spinner" aria-hidden="true"></span>
+      <span id="mpesa-status-text">Waiting for payment…</span>
+    </div>
+  </div>
+  {% endif %}
+  {% if order.payment_method == 'mpesa' and order.payment_status == 'processing' %}
+  <div id="mpesa-waiting" class="mpesa-waiting">
+    <p class="hint">M-Pesa prompt was sent to your phone. Please enter your PIN on your handset to complete the payment.</p>
+    <div class="mpesa-waiting-status">
+      <span class="mpesa-spinner" aria-hidden="true"></span>
+      <span id="mpesa-status-text">Waiting for M-Pesa PIN entry…</span>
+    </div>
+  </div>
+  {% endif %}
+  {% if order.payment_method == 'mpesa' and order.payment_status == 'paid' %}
+  <div class="mpesa-success">
+    <p>&#10003; Payment confirmed. Thank you!</p>
+  </div>
+  {% endif %}
+  {% if order.payment_method == 'mpesa' and order.payment_status == 'failed' %}
+  <div class="mpesa-failed">
+    <p>Payment was not completed. You can try again or choose a different payment method.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="order-layout">
+  <div class="panel">
+    <h2>Items</h2>
+    {% for i in order.items.all %}
+    <div class="cart-row">
+      <span>{{ i.product_name }} <small class="muted">SKU {{ i.product_sku }}</small> × {{ i.quantity }}</span>
+      <strong>{{ i.subtotal|money:currency }}</strong>
+    </div>
+    {% endfor %}
+    <hr>
+    <div class="summary-row"><span>Subtotal</span><strong>{{ order.subtotal|money:currency }}</strong></div>
+    {% if order.discount %}<div class="summary-row"><span>Discount</span><strong class="good">-{{ order.discount|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row"><span>Shipping</span><strong>{% if order.shipping %}{{ order.shipping|money:currency }}{% else %}Free{% endif %}</strong></div>
+    {% if order.tax %}<div class="summary-row"><span>Tax</span><strong>{{ order.tax|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row total"><span>Total</span><strong>{{ order.total|money:currency }}</strong></div>
+  </div>
+
+  <div class="panel">
+    <h2>Delivery</h2>
+    <p><b>{{ order.customer_name }}</b><br>{{ order.phone }}<br>{{ order.address_line1 }}{% if order.city %}, {{ order.city }}{% endif %}{% if order.county %}, {{ order.county }}{% endif %}</p>
+    <p class="muted">Placed on {{ order.created_at|date:'d M Y H:i' }}</p>
+    <p>Keep your order number for reference. Questions? <a href="{% url 'contact' %}">Contact us</a>.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if order.payment_method == 'mpesa' and order.payment_status in 'pending,processing' %}
+<script>
+(function () {
+  'use strict';
+  var orderNumber = '{{ order.number }}';
+  var pollUrl = '/orders/' + encodeURIComponent(orderNumber) + '/status/';
+  var statusEl = document.getElementById('mpesa-status-text');
+  var attempts = 0;
+  var maxAttempts = 90;
+  var pollTimer = setInterval(function () {
+    attempts += 1;
+    fetch(pollUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.payment_status === 'paid') {
+          clearInterval(pollTimer);
+          location.reload();
+        } else if (data.payment_status === 'failed' || data.payment_status === 'cancelled') {
+          clearInterval(pollTimer);
+          location.reload();
+        } else if (data.payment_status === 'timeout') {
+          clearInterval(pollTimer);
+          if (statusEl) statusEl.textContent = 'Payment timed out. The prompt may have expired.';
+        } else if (attempts >= maxAttempts) {
+          clearInterval(pollTimer);
+          if (statusEl) statusEl.textContent = 'Still waiting. Your order will update once M-Pesa confirms.';
+        }
+      })
+      .catch(function () { /* transient; keep polling */ });
+  }, 3000);
+})();
+</script>
+{% endif %}
+{% endblock %}

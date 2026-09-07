@@ -1,0 +1,10 @@
+Hi {{ contact.name }},
+
+Thank you for contacting {{ site.store_name }}. We've received your message and will reply shortly.
+
+Subject: {{ contact.subject }}
+
+If it's urgent, call us on {{ site.phone }}.
+
+Thanks,
+The {{ site.store_name }} team

@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Checkout · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Checkout</h1></div>
+
+<form method="post" action="{% url 'checkout' %}" class="checkout-layout" data-submit-loading>
+  {% csrf_token %}
+  <div class="checkout-sections">
+    <section class="panel">
+      <h2>1 · Your details</h2>
+      {% if user.is_authenticated and addresses %}
+      <label for="saved-address" class="sr-only">Saved addresses</label>
+      <select id="saved-address" class="address-picker">
+        <option value="">Choose a saved address…</option>
+        {% for a in addresses %}
+        <option value="{{ a.line1 }}|{{ a.city }}|{{ a.county }}" data-name="{{ a.full_name }}" data-phone="{{ a.phone }}">{{ a.full_name }} — {{ a.line1 }}, {{ a.city }}</option>
+        {% endfor %}
+      </select>
+      {% endif %}
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="id-name">Full name *</label>
+          <input id="id-name" type="text" name="customer_name" required value="{{ initial.customer_name }}" autocomplete="name">
+        </div>
+        <div class="form-row">
+          <label for="id-phone">Phone (M-Pesa) *</label>
+          <input id="id-phone" type="tel" name="phone" required value="{{ initial.phone }}" placeholder="e.g. 0712345678" autocomplete="tel">
+        </div>
+        <div class="form-row">
+          <label for="id-email">Email</label>
+          <input id="id-email" type="email" name="email" value="{{ initial.email }}" autocomplete="email">
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>2 · Shipping address</h2>
+      <div class="form-grid">
+        <div class="form-row form-wide">
+          <label for="id-address">Street address</label>
+          <input id="id-address" type="text" name="address_line1" value="{{ initial.address_line1 }}" placeholder="Building, street, area">
+        </div>
+        <div class="form-row">
+          <label for="id-city">City / town</label>
+          <input id="id-city" type="text" name="city" value="{{ initial.city }}">
+        </div>
+        <div class="form-row">
+          <label for="id-county">County</label>
+          <input id="id-county" type="text" name="county" value="{{ initial.county }}">
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>3 · Payment method</h2>
+      <div class="pay-options">
+        {% if mpesa_available %}
+        <label class="pay-option">
+          <input type="radio" name="payment_method" value="mpesa" checked>
+          <span><b>M-Pesa STK Push</b><small>Instant payment to your phone</small></span>
+        </label>
+        {% endif %}
+        <label class="pay-option">
+          <input type="radio" name="payment_method" value="cod" {% if not mpesa_available %}checked{% endif %}>
+          <span><b>Pay on delivery</b><small>We contact you to arrange payment</small></span>
+        </label>
+      </div>
+      {% if not mpesa_available %}<p class="hint">M-Pesa is currently disabled by the store. You can still pay on delivery.</p>{% endif %}
+    </section>
+
+    <section class="panel">
+      <h2>4 · Order summary</h2>
+      {% for i in items %}
+      <div class="summary-row"><span>{{ i.product.name }} × {{ i.quantity }}</span><strong>{{ i.line|money:currency }}</strong></div>
+      {% endfor %}
+      <hr>
+      {% if coupon %}<div class="summary-row"><span>Discount ({{ coupon.code }})</span><strong class="good">-{{ discount|money:currency }}</strong></div>{% endif %}
+      <div class="summary-row"><span>Shipping</span><strong>{% if shipping %}{{ shipping|money:currency }}{% else %}Free{% endif %}</strong></div>
+      {% if tax %}<div class="summary-row"><span>Tax</span><strong>{{ tax|money:currency }}</strong></div>{% endif %}
+      <div class="summary-row total"><span>Total</span><strong>{{ total|money:currency }}</strong></div>
+      <button class="btn btn-full btn-lg" type="submit" data-loading-text="Placing order…">Place order</button>
+    </section>
+  </div>
+
+  <aside class="summary panel sticky-summary">
+    <h2>Total</h2>
+    <div class="summary-row total"><span>To pay</span><strong>{{ total|money:currency }}</strong></div>
+    <div class="summary-row"><span>Items</span><strong>{{ items|length }}</strong></div>
+    <button class="btn btn-full btn-lg" type="submit" data-loading-text="Placing order…">Place order</button>
+    <p class="hint">Your payment amount is calculated securely by the server. You confirm the order only once.</p>
+  </aside>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  var picker = document.querySelector('.address-picker');
+  if (picker) picker.addEventListener('change', function () {
+    var parts = (this.value || '').split('|');
+    if (parts.length === 3) {
+      var opt = this.selectedOptions[0];
+      if (opt.dataset.name) document.getElementById('id-name').value = opt.dataset.name;
+      if (opt.dataset.phone) document.getElementById('id-phone').value = opt.dataset.phone;
+      document.getElementById('id-address').value = parts[0];
+      document.getElementById('id-city').value = parts[1];
+      document.getElementById('id-county').value = parts[2];
+    }
+  });
+  var payRadio = document.querySelector('input[name="payment_method"]');
+  if (payRadio) payRadio.checked = true;
+</script>
+{% endblock %}

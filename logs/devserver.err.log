@@ -1,0 +1,38 @@
+INFO 2026-08-12 17:07:26,621 "GET / HTTP/1.1" 200 63290
+INFO 2026-08-12 17:07:27,031 "GET /products/ HTTP/1.1" 200 38134
+INFO 2026-08-12 17:07:27,211 - Broken pipe from ('127.0.0.1', 56481)
+INFO 2026-08-12 17:15:48,285 "GET / HTTP/1.1" 200 63290
+INFO 2026-08-12 17:15:48,344 "GET /products/ HTTP/1.1" 200 38134
+INFO 2026-08-12 17:15:48,380 "GET /cart/ HTTP/1.1" 200 9675
+INFO 2026-08-12 17:15:48,438 "GET /contact/ HTTP/1.1" 200 10403
+INFO 2026-08-12 17:15:48,508 "GET /account/register/ HTTP/1.1" 200 10814
+ERROR 2026-08-12 17:15:51,914 Email failed to st13usercf5dab4f@example.com (Welcome to Reeves Boutique): (530, b'5.7.0 Authentication Required. For more information, go to\n5.7.0  https://support.google.com/accounts/troubleshooter/2402620. ffacd0b85a97d-48150d4c10asm7737285f8f.20 - gsmtp', 'Reeves Boutique <noreply@store.com>')
+INFO 2026-08-12 17:15:51,936 "POST /account/register/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:15:52,028 "GET /account/ HTTP/1.1" 200 11861
+WARNING 2026-08-12 17:15:52,035 "GET /account/logout/ HTTP/1.1" 405 0
+INFO 2026-08-12 17:15:52,063 "POST /account/logout/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:15:52,068 "GET /account/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:15:52,119 "GET /account/login/?next=/account/ HTTP/1.1" 200 10137
+INFO 2026-08-12 17:15:52,161 "GET /account/login/ HTTP/1.1" 200 10122
+INFO 2026-08-12 17:15:54,463 User logged in: st13usercf5dab4f
+INFO 2026-08-12 17:15:54,495 "POST /account/login/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:15:54,577 "GET /account/ HTTP/1.1" 200 11425
+INFO 2026-08-12 17:15:54,622 "GET /account/password-change/ HTTP/1.1" 200 11220
+INFO 2026-08-12 17:15:58,636 "POST /account/password-change/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:15:58,657 "GET /account/login/ HTTP/1.1" 200 10122
+INFO 2026-08-12 17:16:01,214 User logged in: st13usercf5dab4f
+INFO 2026-08-12 17:16:01,226 "POST /account/login/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:16:01,269 "GET /account/password-reset/ HTTP/1.1" 200 10441
+ERROR 2026-08-12 17:16:02,787 Email failed to st13usercf5dab4f@example.com (Password reset for Reeves Boutique): (530, b'5.7.0 Authentication Required. For more information, go to\n5.7.0  https://support.google.com/accounts/troubleshooter/2402620. ffacd0b85a97d-48150d4e260sm7750677f8f.17 - gsmtp', 'Reeves Boutique <noreply@store.com>')
+INFO 2026-08-12 17:16:02,805 "POST /account/password-reset/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:16:05,472 "GET /account/reset/Mw/dd7jys-7314f48f0b9ce0953ea59dd4d53a8ed1/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:16:05,516 "GET /account/reset/Mw/set-password/ HTTP/1.1" 200 10482
+WARNING 2026-08-12 17:16:05,561 "GET /account/reset/dd7jys-7314f48f0b9ce0953ea59dd4d53a8ed1// HTTP/1.1" 404 23545
+WARNING 2026-08-12 17:16:05,603 "POST /account/reset/dd7jys-7314f48f0b9ce0953ea59dd4d53a8ed1// HTTP/1.1" 404 23546
+INFO 2026-08-12 17:16:05,629 "GET /account/login/ HTTP/1.1" 200 10122
+INFO 2026-08-12 17:16:07,749 "POST /account/login/ HTTP/1.1" 200 10249
+INFO 2026-08-12 17:16:12,150 "GET /account/login/ HTTP/1.1" 200 10122
+INFO 2026-08-12 17:16:14,433 User logged in: st13admin6187cb0e
+INFO 2026-08-12 17:16:14,461 "POST /account/login/ HTTP/1.1" 302 0
+INFO 2026-08-12 17:16:14,706 "GET /manage/products/ HTTP/1.1" 200 65960
+INFO 2026-08-12 17:16:14,794 "GET /manage/products/add/ HTTP/1.1" 200 21906

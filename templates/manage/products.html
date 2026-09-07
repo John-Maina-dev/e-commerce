@@ -1,0 +1,181 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Products · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CATALOGUE</span><h1>Products <span class="muted">({{ page.paginator.count }})</span></h1></div>
+  <div class="head-actions">
+    <a class="btn" href="{% url 'product_add' %}">+ Add product</a>
+  </div>
+</div>
+
+<form method="get" class="filter-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search name, SKU, brand…">
+  <select name="category" onchange="this.form.submit()" aria-label="Filter by category">
+    <option value="">All categories</option>
+    {% for c in categories %}<option value="{{ c.slug }}" {% if category == c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <select name="status" onchange="this.form.submit()" aria-label="Filter by status">
+    <option value="">All statuses</option>
+    <option value="active" {% if status == 'active' %}selected{% endif %}>Active &amp; live</option>
+    <option value="hidden" {% if status == 'hidden' %}selected{% endif %}>Hidden from storefront</option>
+    <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+    <option value="archived" {% if status == 'archived' %}selected{% endif %}>Archived ({{ archived_count }})</option>
+  </select>
+  <select name="stock" onchange="this.form.submit()" aria-label="Filter by stock">
+    <option value="">All stock levels</option>
+    <option value="healthy" {% if stock == 'healthy' %}selected{% endif %}>In stock</option>
+    <option value="low" {% if stock == 'low' %}selected{% endif %}>Low stock</option>
+    <option value="out" {% if stock == 'out' %}selected{% endif %}>Out of stock</option>
+  </select>
+  <button class="btn" type="submit">Filter</button>
+  <a class="btn btn-ghost" href="{% url 'manage_products' %}">Clear</a>
+</form>
+
+<form method="post" action="{% url 'product_bulk_action' %}">
+{% csrf_token %}
+<div class="bulk-bar">
+  <label class="check-all"><input type="checkbox" id="selectAll" class="select-all"> Select all on page</label>
+  <select name="bulk_action" aria-label="Bulk action">
+    <option value="">Bulk action…</option>
+    <option value="activate">Activate</option>
+    <option value="deactivate">Deactivate</option>
+    <option value="hide">Hide from storefront</option>
+    <option value="unhide">Unhide</option>
+    <option value="archive">Archive</option>
+    <option value="delete">Delete (only if no order history)</option>
+  </select>
+  <button class="btn btn-sm" type="submit">Apply</button>
+  <span class="muted">{{ page.paginator.count }} product{{ page.paginator.count|pluralize }}</span>
+</div>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table class="product-table table-hover">
+    <thead>
+      <tr>
+        <th class="col-check"><input type="checkbox" class="select-all" aria-label="Select all on page"></th>
+        <th class="col-img"></th>
+        <th><a class="sort-link {% if sort == 'name' or sort == '-name' %}is-sorted{% endif %}" href="{% sort_url 'name' %}">Product{% if sort == 'name' %} ↑{% elif sort == '-name' %} ↓{% endif %}</a></th>
+        <th><a class="sort-link {% if sort == 'sku' or sort == '-sku' %}is-sorted{% endif %}" href="{% sort_url 'sku' %}">SKU{% if sort == 'sku' %} ↑{% elif sort == '-sku' %} ↓{% endif %}</a></th>
+        <th><a class="sort-link {% if sort == 'category' or sort == '-category' %}is-sorted{% endif %}" href="{% sort_url 'category' %}">Category{% if sort == '-category' %} ↓{% endif %}</a></th>
+        <th><a class="sort-link {% if sort == 'price' or sort == '-price' %}is-sorted{% endif %}" href="{% sort_url 'price' %}">Price{% if sort == 'price' %} ↑{% elif sort == '-price' %} ↓{% endif %}</a></th>
+        <th><a class="sort-link {% if sort == 'stock' or sort == '-stock' %}is-sorted{% endif %}" href="{% sort_url 'stock' %}">Stock{% if sort == 'stock' %} ↑{% elif sort == '-stock' %} ↓{% endif %}</a></th>
+        <th>Stock status</th>
+        <th>Active status</th>
+        <th><a class="sort-link {% if sort == 'created' or sort == '-created' %}is-sorted{% endif %}" href="{% sort_url 'created' %}">Added{% if sort == '-created' %} ↓{% endif %}</a></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in page.object_list %}
+      <tr class="{% if p.is_archived %}is-archived{% elif not p.is_visible %}is-offline{% endif %}">
+        <td class="col-check"><input type="checkbox" name="selected" value="{{ p.id }}" class="row-check"></td>
+        <td>{% if p.image_src %}<img class="thumb-img" src="{{ p.image_src }}" alt="">{% else %}<span class="thumb-img placeholder-sm">RB</span>{% endif %}</td>
+        <td>
+          <b>{{ p.name }}</b>
+          {% if p.is_archived %}<span class="badge badge-danger">Archived</span>
+          {% elif p.hidden %}<span class="badge badge-warn">Hidden</span>
+          {% elif not p.active %}<span class="badge badge-muted">Inactive</span>{% endif %}
+          {% if p.featured %}<span class="badge badge-default">Featured</span>{% endif %}
+          {% if p.id in open_alert_product_ids %}<span class="badge badge-danger">⚠ Alert</span>{% endif %}
+        </td>
+        <td class="mono">{{ p.sku }}{% if p.barcode %}<br><small class="muted">Barcode {{ p.barcode }}</small>{% endif %}</td>
+        <td>{{ p.category.name }}</td>
+        <td>{% if p.has_discount %}<s class="muted">{{ p.price|money:currency }}</s> {% endif %}<b>{{ p.effective_price|money:currency }}</b>{% if p.cost_price %}<br><small class="muted">Cost {{ p.cost_price|money:currency }}</small>{% endif %}</td>
+        <td>
+          {% if p.out_of_stock %}<span class="status-badge is-out">{{ p.stock }}</span>
+          {% elif p.low_stock %}<span class="status-badge is-low">{{ p.stock }}</span>
+          {% else %}<span class="status-badge is-healthy">{{ p.stock }}</span>{% endif %}
+        </td>
+        <td>
+          <span class="status-badge {% if p.is_archived %}is-out{% elif p.is_visible %}is-healthy{% elif p.hidden %}is-pending{% else %}is-low{% endif %}">
+            {% if p.is_archived %}Archived{% elif p.is_visible %}Live{% elif p.hidden %}Hidden{% else %}Inactive{% endif %}
+          </span>
+        </td>
+        <td>{{ p.created_at|date:'d M Y' }}</td>
+        <td class="row-actions">
+          <a class="btn btn-ghost btn-sm" href="{% url 'product_edit' p.id %}">Edit</a>
+          {% if p.is_visible %}<a class="btn btn-ghost btn-sm" href="{% url 'product_detail' p.slug %}" target="_blank" rel="noopener">View</a>{% endif %}
+          {% if not p.is_archived %}
+            {% if p.hidden %}
+            <form method="post" action="{% url 'product_action' p.id %}">{% csrf_token %}<input type="hidden" name="action" value="unhide"><button class="btn btn-ghost btn-sm" type="submit">Unhide</button></form>
+            {% else %}
+            <form method="post" action="{% url 'product_action' p.id %}">{% csrf_token %}<input type="hidden" name="action" value="hide"><button class="btn btn-ghost btn-sm" type="submit">Hide</button></form>
+            {% endif %}
+            {% if p.active %}
+            <form method="post" action="{% url 'product_action' p.id %}">{% csrf_token %}<input type="hidden" name="action" value="deactivate"><button class="btn btn-ghost btn-sm" type="submit">Deactivate</button></form>
+            {% else %}
+            <form method="post" action="{% url 'product_action' p.id %}">{% csrf_token %}<input type="hidden" name="action" value="activate"><button class="btn btn-ghost btn-sm" type="submit">Activate</button></form>
+            {% endif %}
+            <form method="post" action="{% url 'product_action' p.id %}">{% csrf_token %}<input type="hidden" name="action" value="archive"><button class="btn btn-ghost btn-sm" type="submit">Archive</button></form>
+          {% else %}
+            <form method="post" action="{% url 'product_action' p.id %}">{% csrf_token %}<input type="hidden" name="action" value="restore"><button class="btn btn-ghost btn-sm" type="submit">Restore</button></form>
+          {% endif %}
+          {% if p.order_count == 0 %}
+          <button type="button" class="btn btn-danger btn-sm" data-modal-open="deleteModal"
+                  data-delete-url="{% url 'product_delete' p.id %}" data-delete-name="{{ p.name }}"
+                  data-has-orders="false">Delete</button>
+          {% else %}
+          <button type="button" class="btn btn-danger btn-sm" data-modal-open="deleteModal"
+                  data-delete-url="{% url 'product_delete' p.id %}" data-delete-name="{{ p.name }}"
+                  data-archive-url="{% url 'product_action' p.id %}"
+                  data-has-orders="true">Delete</button>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="11">No products found. <a href="{% url 'product_add' %}">Add a product</a>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+</form>
+
+<div class="modal-backdrop" id="deleteModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+  <div class="modal" role="document">
+    <h2 id="deleteModalTitle">Delete product</h2>
+    <p id="deleteModalText">Delete this product permanently?</p>
+    <form method="post" id="deleteModalForm" action="">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="deleteModalAction" value="delete">
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-modal-close>Cancel</button>
+        <button type="submit" class="btn btn-danger" id="deleteModalConfirm">Delete product</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% include 'partials/manage_pagination.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.querySelectorAll('.select-all').forEach(function (box) {
+    box.addEventListener('change', function () {
+      document.querySelectorAll('.row-check').forEach(function (c) { c.checked = box.checked; });
+    });
+  });
+  document.querySelectorAll('[data-delete-url]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var form = document.getElementById('deleteModalForm');
+      var title = document.getElementById('deleteModalTitle');
+      var text = document.getElementById('deleteModalText');
+      var actionInput = document.getElementById('deleteModalAction');
+      var confirmBtn = document.getElementById('deleteModalConfirm');
+      var name = btn.getAttribute('data-delete-name');
+      var hasOrders = btn.getAttribute('data-has-orders') === 'true';
+      if (form) form.action = hasOrders ? btn.getAttribute('data-archive-url')
+                                        : btn.getAttribute('data-delete-url');
+      if (actionInput) actionInput.value = hasOrders ? 'archive' : 'delete';
+      if (title) title.textContent = hasOrders ? 'Archive product' : 'Delete product';
+      if (confirmBtn) confirmBtn.textContent = hasOrders ? 'Archive product' : 'Delete product';
+      if (text) text.textContent = hasOrders
+        ? '"' + name + '" has order history, so it cannot be permanently deleted. Archive it instead? It will disappear from the storefront and can be restored later.'
+        : 'Delete "' + name + '" permanently? This cannot be undone. Order history keeps product names.';
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <span class="eyebrow">Curated for you</span>
+    <h1>{{ site_settings.hero_title }}</h1>
+    <p>{{ site_settings.hero_subtitle }}</p>
+    <div class="hero-actions">
+      <a class="btn btn-lg" href="{% url 'catalogue' %}">Shop collection</a>
+      <a class="btn btn-outline btn-lg" href="{% url 'catalogue' %}?sort=newest">New arrivals</a>
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    <div class="hero-card">RB<span>01</span></div>
+  </div>
+</section>
+
+{% if categories %}
+<section class="section">
+  <div class="section-head">
+    <h2>Shop by category</h2>
+    <a href="{% url 'catalogue' %}">View all →</a>
+  </div>
+  <div class="category-grid">
+    {% for c in categories %}
+    <a class="category-card" href="{% url 'catalogue' %}?category={{ c.slug }}">
+      {% if c.image %}<img src="{{ c.image.url }}" alt="{{ c.name }}">{% else %}<div class="category-placeholder">{{ c.name }}</div>{% endif %}
+      <span>{{ c.name }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if new_arrivals %}
+<section class="section">
+  <div class="section-head">
+    <h2>New arrivals</h2>
+    <a href="{% url 'catalogue' %}?sort=newest">View all →</a>
+  </div>
+  <div class="slider" id="newArrivalsSlider">
+    <button type="button" class="slider-nav prev" data-dir="-1" aria-label="Previous products">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <div class="slider-track" tabindex="0" aria-label="New arrivals carousel">
+      {% for p in new_arrivals %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
+    </div>
+    <button type="button" class="slider-nav next" data-dir="1" aria-label="Next products">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+    </button>
+  </div>
+</section>
+{% endif %}
+
+{% if best_sellers %}
+<section class="section">
+  <div class="section-head">
+    <h2>Best sellers</h2>
+    <a href="{% url 'catalogue' %}?sort=bestseller">View all →</a>
+  </div>
+  <div class="product-grid">
+    {% for p in best_sellers %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if featured %}
+<section class="section">
+  <div class="section-head">
+    <h2>Featured products</h2>
+    <a href="{% url 'catalogue' %}">View all →</a>
+  </div>
+  <div class="product-grid">
+    {% for p in featured %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="promo-banner">
+  <div>
+    <span class="eyebrow">Limited time</span>
+    <h2>Free delivery on orders over {{ site_settings.free_shipping_threshold|money:currency }}</h2>
+    <p>Flat-rate shipping {{ site_settings.flat_rate|money:currency }} on smaller orders. Shop the latest collection today.</p>
+    <a class="btn btn-lg" href="{% url 'catalogue' %}">Start shopping</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><h2>Why shop with us</h2></div>
+  <div class="perks">
+    <div class="perk"><h3>Curated quality</h3><p>Every piece is hand-picked for style and durability.</p></div>
+    <div class="perk"><h3>M-Pesa friendly</h3><p>Pay securely with M-Pesa STK Push at checkout.</p></div>
+    <div class="perk"><h3>Fast dispatch</h3><p>Orders are processed quickly and tracked every step.</p></div>
+    <div class="perk"><h3>Easy support</h3><p>Reach us any time for help with your order.</p></div>
+  </div>
+</section>
+
+{% if testimonials %}
+<section class="section">
+  <div class="section-head"><h2>What our customers say</h2></div>
+  <div class="testimonial-grid">
+    {% for r in testimonials %}
+    <figure class="testimonial">
+      <div class="rating-row">{% include 'partials/stars.html' with rating=r.rating %}</div>
+      <blockquote>{{ r.comment|truncatechars:180 }}</blockquote>
+      <figcaption>{% if r.verified_purchase %}<span class="verified">✓ Verified purchase</span>{% endif %}<b>{{ r.user.get_full_name|default:r.name|default:'A customer' }}</b> on {{ r.product.name }}</figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="newsletter-band">
+  <h2>Join the {{ site_settings.store_name }} newsletter</h2>
+  <p>Be first to hear about new arrivals and exclusive offers.</p>
+  <form class="newsletter" action="{% url 'newsletter' %}" method="post">{% csrf_token %}
+    <label for="nl-email" class="sr-only">Email address</label>
+    <input id="nl-email" type="email" name="email" required placeholder="your@email.com">
+    <button class="btn btn-lg" type="submit">Subscribe</button>
+  </form>
+</section>
+{% endblock %}

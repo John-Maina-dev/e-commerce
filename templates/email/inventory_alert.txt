@@ -1,0 +1,15 @@
+Inventory alert
+
+{{ product.name }} is {{ alert.get_alert_type_display }}.
+
+Status: {{ alert.get_alert_type_display }}
+Units in stock: {{ stock }}
+Low-stock alert at: {{ low_stock_threshold }}
+Desired stock level: {{ desired_stock_level }}
+Suggested restock: {{ recommended_restock_qty }}
+
+{{ alert.message }}
+
+Restock and manage inventory here: {{ protocol }}://{{ domain }}/manage/inventory/
+
+This is an automated inventory alert from {{ site.store_name }}.

@@ -1,0 +1,24 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>We received your order</h2>
+<p>Hi {{ order.customer_name }}, thanks for shopping with {{ site.store_name }}. We're getting your order ready.</p>
+<div class="card">
+  <table>
+    <tr><td>Order number</td><td align="right"><b>{{ order.number }}</b></td></tr>
+    <tr><td>Placed</td><td align="right">{{ order.created_at|date:'d M Y H:i' }}</td></tr>
+  </table>
+  <table>
+    <tr><th style="text-align:left; padding-top:8px;">Item</th><th style="text-align:right; padding-top:8px;">Qty</th><th style="text-align:right; padding-top:8px;">Price</th></tr>
+    {% for i in order.items.all %}
+    <tr>
+      <td>{{ i.product_name }}</td>
+      <td align="right">{{ i.quantity }}</td>
+      <td align="right">{{ site.currency }} {{ i.subtotal }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div class="total" style="text-align:right;">Total: {{ site.currency }} {{ order.total }}</div>
+</div>
+<p>We'll email you again once your payment is confirmed and your order ships.</p>
+<p><a class="btn" href="{{ protocol }}://{{ domain }}{{ order_url }}">Track your order</a></p>
+{% endblock %}

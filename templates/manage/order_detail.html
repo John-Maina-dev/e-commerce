@@ -1,0 +1,162 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Order {{ order.number }} · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">SALES · {{ order.get_sales_channel_display }}</span><h1>Order {{ order.number }}</h1>
+    <p class="muted">Placed {{ order.created_at|date:'d M Y H:i' }}{% if order.served_by %} · Served by <b>{{ order.served_by.get_full_name|default:order.served_by.username }}</b>{% endif %} · <a href="{% url 'manage_orders' %}">← All orders</a></p>
+  </div>
+  <div class="head-actions">
+    <a class="btn btn-outline" href="{% url 'receipt' order.number %}" target="_blank" rel="noopener">Receipt</a>
+    <span class="status-badge {{ order.status|status_class }}">{{ order.get_status_display }}</span>
+    <span class="status-badge {{ order.payment_status|status_class }}">{{ order.get_payment_status_display }}</span>
+  </div>
+</div>
+
+<div class="manage-grid">
+  <div class="panel">
+    <h2>Items</h2>
+    {% for i in order.items.all %}
+    <div class="cart-row">
+      <span>{{ i.product_name }} <small class="muted">× {{ i.quantity }}</small>
+        {% if i.returns.all %}<small class="status-badge is-cancelled">{{ i.returned_quantity }} returned</small>{% endif %}
+        {% if i.product %} <a class="btn btn-ghost btn-sm" href="{% url 'product_edit' i.product.id %}">Edit product</a>{% endif %}
+      </span>
+      <strong>{{ i.subtotal|money:currency }}</strong>
+    </div>
+    {% if can_manage_returns and order.payment_status == 'paid' and i.returnable_quantity > 0 %}
+    <details class="return-row">
+      <summary class="link-btn">Process return for this item</summary>
+      <form method="post" action="{% url 'order_return_item' order.number %}" class="form-inline-return">
+        {% csrf_token %}
+        <input type="hidden" name="item_id" value="{{ i.pk }}">
+        <label>Qty
+          <input type="number" name="quantity" min="1" max="{{ i.returnable_quantity }}" value="1" required>
+        </label>
+        <label>Reason
+          <input type="text" name="reason" placeholder="Damaged, wrong item…" required maxlength="300">
+        </label>
+        <label class="checkbox-label"><input type="checkbox" name="restock" checked> Restock</label>
+        <button class="btn btn-sm" type="submit">Record return</button>
+      </form>
+    </details>
+    {% endif %}
+    {% endfor %}
+    <hr>
+    <div class="summary-row"><span>Subtotal</span><strong>{{ order.subtotal|money:currency }}</strong></div>
+    {% if order.discount %}<div class="summary-row"><span>Discount</span><strong class="good">-{{ order.discount|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row"><span>Shipping</span><strong>{% if order.shipping %}{{ order.shipping|money:currency }}{% else %}Free{% endif %}</strong></div>
+    {% if order.tax %}<div class="summary-row"><span>Tax</span><strong>{{ order.tax|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row total"><span>Total</span><strong>{{ order.total|money:currency }}</strong></div>
+
+    {% if order.returns.all %}
+    <hr>
+    <h3>Returns on this sale</h3>
+    <ul class="return-list">
+      {% for r in order.returns.all %}
+      <li>
+        <b>{{ r.quantity }} × {{ r.item.product_name }}</b>
+        <span>{{ r.refunded_amount|money:currency }}</span>
+        {% if not r.restocked %}<span class="muted">(not restocked)</span>{% endif %}
+        {% if r.reason %}<span class="muted">— {{ r.reason }}</span>{% endif %}
+        <small class="muted">{{ r.created_at|date:'d M Y H:i' }}{% if r.processed_by %} · {{ r.processed_by.username }}{% endif %}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Customer</h2>
+      <p><b>{{ order.customer_name }}</b><br>{{ order.phone }}{% if order.email %}<br>{{ order.email }}{% endif %}</p>
+      <p class="muted">{{ order.address_line1 }}{% if order.city %}, {{ order.city }}{% endif %}{% if order.county %}, {{ order.county }}{% endif %}</p>
+      {% if order.user %}<p>Account: <b>{{ order.user.username }}</b></p>{% else %}<p class="muted">Guest order</p>{% endif %}
+    </div>
+
+    <div class="panel">
+      <h2>Update status</h2>
+      <form method="post" action="{% url 'order_status_update' order.number %}">
+        {% csrf_token %}
+        <div class="form-row"><label for="status">New status</label>
+          <select name="status" id="status">
+            {% for value, label in status_choices %}<option value="{{ value }}" {% if value == order.status %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-row"><label for="note">Staff note (shown to customer)</label><input type="text" name="note" id="note" placeholder="Optional"></div>
+        <button class="btn" type="submit">Update order</button>
+      </form>
+      <p class="muted small">Cancelling or refunding automatically restocks items once.</p>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Timeline</h2>
+  {% if order.status_history.all %}
+  <ol class="timeline-list">
+    {% for h in order.status_history.all %}
+    <li class="done">
+      <span class="dot"></span>
+      <div><b>{{ h.get_status_display }}</b>
+        <span class="muted">{{ h.created_at|date:'d M Y H:i' }}{% if h.actor %} · {{ h.actor.username }}{% endif %}{% if h.note %} — {{ h.note }}{% endif %}</span>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}<p class="muted">No status history.</p>{% endif %}
+</div>
+
+{% if order.payments.all %}
+<div class="panel">
+  <h2>Payments</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Method</th><th>Amount</th><th>Status</th><th>Verification</th><th>Reference</th><th>Time</th><th></th></tr></thead>
+    <tbody>
+      {% for p in order.payments.all %}
+      <tr>
+        <td>{{ p.get_method_display }}</td>
+        <td>{{ p.amount|money:currency }}</td>
+        <td><span class="status-badge {{ p.status|status_class }}">{{ p.get_status_display }}</span></td>
+        <td>
+          {% if p.is_gateway_verified %}<span class="status-badge is-healthy">Gateway verified</span>
+          {% elif p.is_manually_reviewed %}<span class="status-badge is-pending">Manually reviewed</span>
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td class="mono">{{ p.transaction_id|default:p.reference|default:'—' }}</td>
+        <td>{{ p.created_at|date:'d M Y H:i' }}</td>
+        <td><a class="btn btn-ghost btn-sm" href="{% url 'manage_payment_detail' p.pk %}">Review</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+
+{% if order.mpesa_transactions.all %}
+<div class="panel">
+  <h2>M-Pesa transactions</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Reference</th><th>Amount</th><th>Status</th><th>Time</th></tr></thead>
+    <tbody>
+      {% for t in order.mpesa_transactions.all %}
+      <tr>
+        <td>{{ t.checkout_request_id|default:'—' }}</td>
+        <td>{{ t.amount|money:currency }}</td>
+        <td>
+          <span class="status-badge {{ t.status|status_class }}">{{ t.get_status_display }}</span>
+          {% if t.mpesa_receipt %}<small class="muted">{{ t.mpesa_receipt }}</small>{% endif %}
+          {% if t.result_description and t.status == 'failed' %}<small class="muted">{{ t.result_description|truncatechars:60 }}</small>{% endif %}
+        </td>
+        <td>{{ t.created_at|date:'d M Y H:i' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

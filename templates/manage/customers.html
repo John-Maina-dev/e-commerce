@@ -1,0 +1,40 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Customers · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head"><div><span class="muted">SALES</span><h1>Customers</h1></div></div>
+
+<div class="manage-grid">
+  <div class="panel">
+    <h2>Registered accounts</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Username</th><th>Email</th><th>Joined</th><th>Orders</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr><td>{{ u.username }}</td><td>{{ u.email|default:'—' }}</td><td>{{ u.date_joined|date:'d M Y' }}</td><td>{{ u.order_count }}</td></tr>
+        {% empty %}<tr><td colspan="4">No registered customers yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Guest checkouts</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Orders</th><th>Spent</th></tr></thead>
+      <tbody>
+        {% for g in guest_phones %}
+        <tr>
+          <td>{{ g.customer_name|default:'—' }}</td>
+          <td>{{ g.phone }}</td>
+          <td>{{ g.order_count }}</td>
+          <td>{{ g.total }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="4">No guest orders.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

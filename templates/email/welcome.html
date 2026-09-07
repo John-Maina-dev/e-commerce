@@ -1,0 +1,15 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>Welcome, {{ user.first_name|default:user.username }}!</h2>
+<p>Thanks for creating an account at {{ site.store_name }}. You now have:</p>
+<div class="card">
+  <ul>
+    <li>A wishlist to save items you love</li>
+    <li>Order tracking in one place</li>
+    <li>Faster checkout with saved addresses</li>
+  </ul>
+</div>
+<p>Ready to explore? Start with our latest arrivals and bestsellers.</p>
+<p><a class="btn" href="{{ protocol }}://{{ domain }}">Browse the store</a></p>
+<p class="muted">If you didn't create this account, you can safely ignore this email.</p>
+{% endblock %}

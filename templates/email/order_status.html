@@ -1,0 +1,14 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>Order status update</h2>
+<p>Hi {{ order.customer_name }}, your order <b>{{ order.number }}</b> is now <span class="badge">{{ order.get_status_display }}</span>.</p>
+<div class="card">
+  <table>
+    <tr><td>Order</td><td align="right"><b>{{ order.number }}</b></td></tr>
+    <tr><td>Status</td><td align="right"><span class="badge">{{ order.get_status_display }}</span></td></tr>
+    <tr><td>Total</td><td align="right"><b>{{ site.currency }} {{ order.total }}</b></td></tr>
+  </table>
+</div>
+<p><a class="btn" href="{{ protocol }}://{{ domain }}{{ order_url }}">Track your order</a></p>
+<p>Questions? Reply to this email or call {{ site.phone }}.</p>
+{% endblock %}

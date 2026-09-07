@@ -1,0 +1,23 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}{% if coupon %}Edit{% else %}Add{% endif %} coupon · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">PROMOTIONS</span><h1>{% if coupon %}Edit coupon{% else %}Add coupon{% endif %}</h1></div>
+  <a class="btn btn-ghost" href="{% url 'manage_coupons' %}">← Back to coupons</a>
+</div>
+
+<div class="auth-wrap"><div class="auth-card panel">
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-row">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}
+      {% for e in field.errors %}<p class="form-errors">{{ e }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+    <button class="btn btn-full" type="submit">Save coupon</button>
+  </form>
+</div></div>
+{% endblock %}

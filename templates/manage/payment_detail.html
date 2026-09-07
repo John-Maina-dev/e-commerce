@@ -1,0 +1,127 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Payment · {{ payment.order.number }} · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">PAYMENTS</span><h1>Payment #{{ payment.pk }}</h1>
+    <p class="muted">For <a href="{% url 'manage_order_detail' payment.order.number %}">order {{ payment.order.number }}</a> · <a href="{% url 'manage_payments' %}">← All payments</a></p>
+  </div>
+  <div class="head-actions">
+    <span class="status-badge {{ payment.status|status_class }}">{{ payment.get_status_display }}</span>
+    {% if payment.is_gateway_verified %}
+      <span class="status-badge is-healthy">✓ Gateway verified</span>
+    {% elif payment.is_manually_reviewed %}
+      <span class="status-badge is-pending">Manually reviewed / approved</span>
+    {% else %}
+      <span class="status-badge is-pending">Not verified</span>
+    {% endif %}
+  </div>
+</div>
+
+{% if payment.status == 'requires_review' %}
+<div class="alert-panel">
+  <div>
+    <h2>⚠ Payment requires review</h2>
+    <p>The gateway result could not be trusted automatically. Do not treat this as paid until you verify the funds independently.</p>
+  </div>
+</div>
+{% endif %}
+
+<div class="manage-grid">
+  <div class="panel">
+    <h2>Payment details</h2>
+    <div class="meta-list">
+      <div><span>Order</span><b><a href="{% url 'manage_order_detail' payment.order.number %}">{{ payment.order.number }}</a></b></div>
+      <div><span>Customer</span><b>{{ payment.order.customer_name }}</b></div>
+      <div><span>Amount</span><b>{{ payment.amount|money:currency }}</b></div>
+      <div><span>Phone</span><b class="mono">{{ payment.phone|default:payment.order.phone }}</b></div>
+      <div><span>Method</span><b>{{ payment.get_method_display }}</b></div>
+      <div><span>Transaction ID</span><b class="mono">{{ payment.transaction_id|default:'—' }}</b></div>
+      <div><span>Reference / receipt</span><b class="mono">{{ payment.reference|default:'—' }}</b></div>
+      <div><span>Created</span><b>{{ payment.created_at|date:'d M Y H:i' }}</b></div>
+      <div><span>Result code</span><b class="mono">{{ payment.result_code|default:'—' }}</b></div>
+      <div><span>Result description</span><b>{{ payment.result_description|default:'—' }}</b></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Verification</h2>
+      <p>
+        {% if payment.is_gateway_verified %}
+          <span class="status-badge is-healthy">Gateway verified</span>
+          This payment was confirmed by the payment gateway (Safaricom) via its callback.
+        {% elif payment.is_manually_reviewed %}
+          <span class="status-badge is-pending">Manually reviewed / approved</span>
+          This payment was reviewed and approved by a staff member, <b>not</b> by the payment gateway.
+        {% else %}
+          <span class="status-badge is-pending">Not verified</span>
+          No gateway callback or staff approval has confirmed this payment yet.
+        {% endif %}
+      </p>
+      {% if payment.verified_by %}
+      <hr>
+      <div class="meta-list">
+        <div><span>Reviewed by</span><b>{{ payment.verified_by.get_full_name|default:payment.verified_by.username }}</b></div>
+        <div><span>Reviewed at</span><b>{{ payment.verified_at|date:'d M Y H:i' }}</b></div>
+        {% if payment.action_note %}<div><span>Note</span><b>{{ payment.action_note }}</b></div>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {% if reviewable %}
+    <div class="panel">
+      <h2>Approve or reject</h2>
+      <p class="muted small">Manual approval records a <b>manually reviewed</b> payment — it never claims gateway verification.</p>
+      <form method="post" action="{% url 'payment_action' payment.pk %}">
+        {% csrf_token %}
+        <div class="form-row"><label for="note">Note (optional)</label><input type="text" name="note" id="note" placeholder="e.g. cash received at the store"></div>
+        <div class="form-row"><label for="reference">Reference (optional)</label><input type="text" name="reference" id="reference" value="{{ payment.reference }}" placeholder="e.g. bank slip number"></div>
+        <div class="form-row">
+          <label class="check"><input type="checkbox" name="mark_cancelled"> Mark as cancelled instead of failed when rejecting</label>
+        </div>
+        <button class="btn" name="action" value="approve" type="submit">Approve payment</button>
+        <button class="btn btn-danger" name="action" value="reject" type="submit">Reject payment</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if payment.method == 'mpesa' and payment.status in 'pending,processing,timeout' %}
+    <div class="panel">
+      <h2>M-Pesa status query</h2>
+      <p class="muted small">If the callback was not received, query Safaricom directly to check the actual payment status.</p>
+      <form method="post" action="{% url 'payment_action' payment.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-ghost" name="action" value="query_timeout" type="submit"
+                onclick="return confirm('Query Safaricom for the actual status of this payment?')">
+          Query M-Pesa status
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if transactions %}
+<div class="panel">
+  <h2>M-Pesa transactions</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Transaction</th><th>Checkout request</th><th>Amount</th><th>Status</th><th>Receipt</th><th>Time</th></tr></thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td class="mono">{{ t.transaction_id }}</td>
+        <td class="mono">{{ t.checkout_request_id|default:'—' }}</td>
+        <td>{{ t.amount|money:currency }}</td>
+        <td><span class="status-badge {{ t.status|status_class }}">{{ t.get_status_display }}</span></td>
+        <td class="mono">{{ t.mpesa_receipt|default:'—' }}</td>
+        <td>{{ t.created_at|date:'d M Y H:i' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Payments · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">SALES</span><h1>Payments</h1>
+    <p class="muted">Payment records across all orders. Gateway-confirmed and manually-reviewed payments are clearly distinguished.</p>
+  </div>
+  <div class="head-actions"><a class="btn btn-ghost" href="{% url 'manage_payment_settings' %}">Payment settings →</a></div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card"><small>Total payments</small><b>{{ summary.total }}</b></div>
+  <div class="stat-card"><small>Pending / processing</small><b>{{ summary.pending }}</b></div>
+  <div class="stat-card"><small>Paid</small><b>{{ summary.paid }}</b></div>
+  <div class="stat-card"><small>Requires review</small><b>{{ summary.review }}</b></div>
+  <div class="stat-card"><small>Failed / cancelled</small><b>{{ summary.failed }}</b></div>
+  <div class="stat-card"><small>Refunded</small><b>{{ summary.refunded }}</b></div>
+</div>
+
+<form method="get" class="filter-bar">
+  <input type="search" name="q" value="{{ q }}" placeholder="Order, customer, phone, reference…">
+  <select name="status" onchange="this.form.submit()">
+    <option value="">All statuses</option>
+    {% for value, label in status_choices %}
+    <option value="{{ value }}" {% if value == status %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="method" onchange="this.form.submit()">
+    <option value="">All methods</option>
+    {% for value, label in method_choices %}
+    <option value="{{ value }}" {% if value == method %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn btn-ghost" type="submit">Filter</button>
+  {% if q or status or method %}<a class="link-btn" href="{% url 'manage_payments' %}">Clear</a>{% endif %}
+</form>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th><a href="{% sort_url 'order' %}">Order</a></th>
+        <th>Customer</th>
+        <th><a href="{% sort_url 'amount' %}">Amount</a></th>
+        <th>Phone</th>
+        <th>Method</th>
+        <th>Transaction ID</th>
+        <th><a href="{% sort_url 'date' %}">Date</a></th>
+        <th>Status / verification</th>
+        <th>Result</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in page.object_list %}
+      <tr>
+        <td><a href="{% url 'manage_order_detail' p.order.number %}">{{ p.order.number }}</a></td>
+        <td>{{ p.order.customer_name }}</td>
+        <td>{{ p.amount|money:currency }}</td>
+        <td class="mono">{{ p.phone|default:p.order.phone }}</td>
+        <td>{{ p.get_method_display }}</td>
+        <td class="mono">{{ p.transaction_id|default:p.reference|default:'—' }}</td>
+        <td>{{ p.created_at|date:'d M Y H:i' }}</td>
+        <td>
+          <span class="status-badge {{ p.status|status_class }}">{{ p.get_status_display }}</span>
+          {% if p.is_gateway_verified %}
+            <span class="status-badge is-healthy">Gateway verified</span>
+          {% elif p.is_manually_reviewed %}
+            <span class="status-badge is-pending">Manually reviewed</span>
+          {% endif %}
+        </td>
+        <td class="small">
+          {% if p.result_description %}<span class="muted">{{ p.result_description|truncatechars:60 }}</span>{% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td>
+          <a class="btn btn-ghost btn-sm" href="{% url 'manage_payment_detail' p.pk %}">Review</a>
+          {% if p.status in reviewable_statuses %}
+          <form method="post" action="{% url 'payment_action' p.pk %}" class="inline-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'manage_payments' %}">
+            <button class="btn btn-sm" name="action" value="approve" type="submit">Approve</button>
+            <button class="btn btn-sm btn-danger" name="action" value="reject" type="submit">Reject</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="10">No payments match your filters.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% include 'partials/manage_pagination.html' %}
+{% endblock %}

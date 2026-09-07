@@ -1,0 +1,57 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}{{ title }} · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CATALOGUE</span><h1>{{ title }}</h1></div>
+  <a class="btn btn-ghost" href="{% url 'manage_products' %}">← Back to products</a>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="form-card panel">
+  {% csrf_token %}
+  {% for field in form %}
+  {% if field.name != 'images' %}
+  <div class="form-row">
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.name == 'image' %} <b class="required-mark" title="Required">*</b>{% endif %}</label>
+    {{ field }}
+    {% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}
+    {% if field.name == 'image' %}<small class="muted">Required — upload a photo or fill in Image URL below.</small>{% endif %}
+    {% for e in field.errors %}<p class="form-errors">{{ e }}</p>{% endfor %}
+  </div>
+  {% endif %}
+  {% endfor %}
+  {% for e in form.non_field_errors %}<p class="form-errors">{{ e }}</p>{% endfor %}
+
+  {% if product %}
+  <div class="form-row">
+    <label>Main image preview</label>
+    <div class="img-list">
+      {% if product.image_src %}
+      <img class="thumb-img main-thumb" src="{{ product.image_src }}" alt="Main image">
+      {% else %}<span class="placeholder-sm">No main image yet</span>{% endif %}
+    </div>
+  </div>
+  <div class="form-row">
+    <label>Gallery images</label>
+    <div class="img-list">
+      {% for img in product.images.all %}
+      <label class="img-item">
+        {% if img.image %}<img src="{{ img.image.url }}" alt="">{% else %}<span class="placeholder-sm">{{ img.product.name|slice:":2" }}</span>{% endif %}
+        <span><input type="checkbox" name="remove_image" value="{{ img.id }}"> Remove</span>
+      </label>
+      {% empty %}<span class="muted">No gallery images.</span>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="form-row">
+    <label for="images">Add gallery images</label>
+    <input type="file" name="images" id="images" multiple accept="image/*">
+    <small class="muted">You can select several at once.</small>
+  </div>
+
+  <div class="form-row">
+    <button class="btn" type="submit">Save product</button>
+    <a class="btn btn-ghost" href="{% url 'manage_products' %}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

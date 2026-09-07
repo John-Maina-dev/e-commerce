@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Page not found · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div class="error-icon">
+    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3M11 8v3M11 15h.01"/></svg>
+  </div>
+  <h1 class="error-code">404</h1>
+  <h2>Page not found</h2>
+  <p class="muted">We couldn't find that page. It may have moved or no longer exists.</p>
+  <a class="btn" href="{% url 'home' %}">Back to store</a>
+</div>
+{% endblock %}

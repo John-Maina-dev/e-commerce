@@ -1,0 +1,47 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Inventory history · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">INVENTORY INTELLIGENCE</span><h1>Inventory history</h1></div>
+  <div class="head-actions"><a class="btn btn-ghost" href="{% url 'inventory' %}">← Back to stock control</a></div>
+</div>
+
+<form method="get" class="filter-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search product, SKU, note…">
+  <select name="action" onchange="this.form.submit()">
+    <option value="">All change types</option>
+    {% for value, label in action_choices %}
+    <option value="{{ value }}" {% if action == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn" type="submit">Filter</button>
+  <a class="btn btn-ghost" href="{% url 'inventory_history' %}">Clear</a>
+</form>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>When</th><th>Product</th><th>Change</th><th>Old → New</th><th>Δ</th><th>By</th><th>Note</th></tr></thead>
+    <tbody>
+      {% for c in page.object_list %}
+      <tr>
+        <td class="muted">{{ c.created_at|date:'d M Y H:i' }}</td>
+        <td><a href="{% url 'product_edit' c.product.id %}">{{ c.product.name }}</a><div class="muted small">{{ c.product.sku }}</div></td>
+        <td><span class="status-badge {{ c.action|status_class }}">{{ c.get_action_display }}</span></td>
+        <td class="mono">{% if c.old_qty is not None %}{{ c.old_qty }} → {{ c.new_qty }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td class="mono">
+          {% if c.change %}
+            {% if c.change > 0 %}<span class="good">+{{ c.change }}</span>{% else %}<span class="danger-text">{{ c.change }}</span>{% endif %}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td class="muted">{{ c.user.username|default:'system' }}</td>
+        <td class="muted small">{{ c.note|default:'—' }}</td>
+      </tr>
+      {% empty %}<tr><td colspan="7">No inventory changes recorded yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% include 'partials/manage_pagination.html' %}
+{% endblock %}

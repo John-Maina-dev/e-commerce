@@ -1,0 +1,66 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}M-Pesa settings · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CONFIGURATION</span><h1>M-Pesa (Daraja)</h1></div>
+</div>
+
+<div class="manage-grid">
+  <form method="post" class="form-card panel">
+    {% csrf_token %}
+    <h2>API credentials</h2>
+    <label class="check"><input type="checkbox" name="mpesa_enabled" {% if s.mpesa_enabled %}checked{% endif %}> Enable M-Pesa payments</label>
+    <div class="form-row">
+      <label for="mpesa_environment">Environment</label>
+      <select name="mpesa_environment" id="mpesa_environment">
+        <option value="sandbox" {% if s.mpesa_environment == 'sandbox' %}selected{% endif %}>Sandbox (test)</option>
+        <option value="production" {% if s.mpesa_environment == 'production' %}selected{% endif %}>Production</option>
+      </select>
+    </div>
+    <div class="form-grid">
+      <div class="form-row"><label for="mpesa_shortcode">Shortcode / Paybill</label><input type="text" name="mpesa_shortcode" id="mpesa_shortcode" value="{{ s.mpesa_shortcode }}"></div>
+      <div class="form-row form-wide"><label for="mpesa_callback_url">Callback URL</label><input type="url" name="mpesa_callback_url" id="mpesa_callback_url" value="{{ s.mpesa_callback_url }}" placeholder="https://your-domain.com/payments/mpesa/callback/"></div>
+      <div class="form-row"><label for="mpesa_account_reference">Account reference</label><input type="text" name="mpesa_account_reference" id="mpesa_account_reference" value="{{ s.mpesa_account_reference }}"></div>
+      <div class="form-row form-wide"><label for="mpesa_transaction_desc">Transaction description</label><input type="text" name="mpesa_transaction_desc" id="mpesa_transaction_desc" value="{{ s.mpesa_transaction_desc }}"></div>
+      <div class="form-row form-wide"><label for="mpesa_consumer_key">Consumer key</label>
+        <input type="password" name="mpesa_consumer_key" id="mpesa_consumer_key" value="{% if s.mpesa_consumer_key %}********{% endif %}" placeholder="{% if s.mpesa_consumer_key %}Saved — leave blank to keep, type a new value to replace{% endif %}" autocomplete="off">
+      </div>
+      <div class="form-row form-wide"><label for="mpesa_consumer_secret">Consumer secret</label>
+        <input type="password" name="mpesa_consumer_secret" id="mpesa_consumer_secret" value="{% if s.mpesa_consumer_secret %}********{% endif %}" placeholder="{% if s.mpesa_consumer_secret %}Saved — leave blank to keep{% endif %}" autocomplete="off">
+      </div>
+      <div class="form-row form-wide"><label for="mpesa_passkey">Passkey</label>
+        <input type="password" name="mpesa_passkey" id="mpesa_passkey" value="{% if s.mpesa_passkey %}********{% endif %}" placeholder="{% if s.mpesa_passkey %}Saved — leave blank to keep{% endif %}" autocomplete="off">
+      </div>
+    </div>
+    <hr>
+    <h2>Inventory strategy</h2>
+    <p class="muted small">Controls when product stock is deducted for a sale. Gateway callbacks always decide whether an order is actually paid.</p>
+    <div class="form-row"><label for="inventory_strategy">Deduct stock…</label>
+      <select name="inventory_strategy" id="inventory_strategy">
+        {% for value, label in s.INVENTORY_STRATEGY_CHOICES %}
+        <option value="{{ value }}" {% if s.inventory_strategy == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn" type="submit">Save M-Pesa settings</button>
+  </form>
+
+  <div class="panel">
+    <h2>Connection test</h2>
+    <p class="muted">Fetches a Daraja OAuth token to confirm your consumer key and secret work. Secrets are never shown in this page.</p>
+    <form method="post" action="{% url 'test_mpesa' %}">
+      {% csrf_token %}
+      <button class="btn btn-ghost" type="submit">Test connection</button>
+    </form>
+    <hr>
+    <h2>Status</h2>
+    <p>Environment: <b>{{ s.mpesa_environment|upper }}</b> · Enabled: <b>{% if s.mpesa_enabled %}Yes{% else %}No{% endif %}</b></p>
+    <p class="muted small">
+      Consumer key: <b>{% if s.mpesa_consumer_key %}configured{% else %}missing{% endif %}</b> ·
+      Consumer secret: <b>{% if s.mpesa_consumer_secret %}configured{% else %}missing{% endif %}</b> ·
+      Passkey: <b>{% if s.mpesa_passkey %}configured{% else %}missing{% endif %}</b>
+    </p>
+    <p class="muted small">Sandbox credentials from the Daraja developer portal work without a registered paybill.</p>
+  </div>
+</div>
+{% endblock %}

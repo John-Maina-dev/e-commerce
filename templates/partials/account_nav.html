@@ -1,0 +1,16 @@
+<aside class="account-nav panel">
+  <div class="account-user">
+    <div class="avatar">{{ user.username|first|upper }}</div>
+    <div><b>{{ user.get_full_name|default:user.username }}</b><span class="muted">{{ user.email }}</span></div>
+  </div>
+  <nav aria-label="Account">
+    <a href="{% url 'account' %}" class="{% if request.resolver_match.url_name == 'account' %}active{% endif %}">Overview</a>
+    <a href="{% url 'account_orders' %}" class="{% if request.resolver_match.url_name == 'account_orders' %}active{% endif %}">Orders</a>
+    <a href="{% url 'account_notifications' %}" class="{% if request.resolver_match.url_name == 'account_notifications' %}active{% endif %}">Notifications{% if customer_unread_count %}<span class="badge-count">{{ customer_unread_count }}</span>{% endif %}</a>
+    <a href="{% url 'account_addresses' %}" class="{% if request.resolver_match.url_name == 'account_addresses' %}active{% endif %}">Addresses</a>
+    <a href="{% url 'account_profile' %}" class="{% if request.resolver_match.url_name == 'account_profile' %}active{% endif %}">Profile</a>
+    <a href="{% url 'password_change' %}">Change password</a>
+    {% if user.is_staff %}<a href="{% url 'dashboard' %}" class="manage-link">Manage store →</a>{% endif %}
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link-btn">Log out</button></form>
+  </nav>
+</aside>

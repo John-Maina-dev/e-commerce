@@ -1,0 +1,10 @@
+Hello {{ order.customer_name }},
+
+Thank you for shopping with {{ site.store_name }}.
+
+Your order {{ order.number }} ({{ site.currency }} {{ order.total }}) has been received and is being prepared.
+
+Track it here: {{ protocol }}://{{ domain }}{{ order_url }}
+
+Thanks,
+The {{ site.store_name }} team

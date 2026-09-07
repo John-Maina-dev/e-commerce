@@ -1,0 +1,83 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Analytics · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head"><div><span class="muted">INSIGHTS</span><h1>Sales analytics</h1></div></div>
+
+{% if not has_data %}
+<div class="empty-state">
+  <h2>No sales data yet</h2>
+  <p>Charts populate as soon as an order is marked as paid, confirmed, shipped or delivered.</p>
+</div>
+{% endif %}
+
+<div class="chart-grid">
+  <div class="panel chart-card">
+    <h2>Daily revenue · last 7 days</h2>
+    <div class="bar-chart" data-chart>
+      {% for d in daily %}
+      <div class="bar-col">
+        <div class="bar" data-val="{{ d.revenue }}"></div>
+        <small>{{ d.label }}</small>
+        <small class="muted">{{ d.revenue|money:currency }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel chart-card">
+    <h2>Weekly revenue · last 8 weeks</h2>
+    <div class="bar-chart" data-chart>
+      {% for w in weekly %}
+      <div class="bar-col">
+        <div class="bar" data-val="{{ w.revenue }}"></div>
+        <small>{{ w.label }}</small>
+        <small class="muted">{{ w.revenue|money:currency }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="panel chart-card">
+    <h2>Monthly revenue · last 12 months</h2>
+    <div class="bar-chart" data-chart>
+      {% for m in monthly %}
+      <div class="bar-col">
+        <div class="bar" data-val="{{ m.revenue }}"></div>
+        <small>{{ m.label }}</small>
+        <small class="muted">{{ m.revenue|money:currency }}</small>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="manage-grid">
+  <div class="panel">
+    <h2>Top products</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Product</th><th>Units</th><th>Revenue</th></tr></thead>
+      <tbody>
+        {% for p in top_products %}
+        <tr><td>{{ p.product_name }}</td><td>{{ p.units }}</td><td>{{ p.revenue|money:currency }}</td></tr>
+        {% empty %}<tr><td colspan="3">No sales yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Orders by status</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Status</th><th>Count</th></tr></thead>
+      <tbody>
+        {% for s in orders_by_status %}
+        <tr><td>{{ s.status|title }}</td><td>{{ s.n }}</td></tr>
+        {% empty %}<tr><td colspan="2">No orders yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

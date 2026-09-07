@@ -1,0 +1,19 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>Inventory alert</h2>
+<p><b>{{ product.name }}</b> has reached a stock threshold that needs your attention.</p>
+<div class="card">
+  <table>
+    <tr><td>Product</td><td align="right"><b>{{ product.name }}</b></td></tr>
+    <tr><td>SKU</td><td align="right">{{ product.sku }}</td></tr>
+    <tr><td>Status</td><td align="right"><span class="badge">{{ alert.get_alert_type_display }}</span></td></tr>
+    <tr><td>Units in stock</td><td align="right"><b>{{ stock }}</b></td></tr>
+    <tr><td>Low-stock alert at</td><td align="right">{{ low_stock_threshold }}</td></tr>
+    <tr><td>Desired stock level</td><td align="right">{{ desired_stock_level }}</td></tr>
+    <tr><td>Suggested restock</td><td align="right"><b>{{ recommended_restock_qty }}</b></td></tr>
+  </table>
+</div>
+<p>{{ alert.message }}</p>
+<p><a class="btn" href="{{ protocol }}://{{ domain }}/manage/inventory/">Open inventory control</a></p>
+<p>This is an automated inventory alert from {{ site.store_name }}.</p>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>Payment not received</h2>
+<p>Unfortunately we couldn't confirm payment for order <b>{{ order.number }}</b>.</p>
+{% if reason %}<p class="muted">{{ reason }}</p>{% endif %}
+<p>Your order is still being held. You can try the payment again from your order page, or contact us on <b>{{ site.phone }}</b> if you need help.</p>
+<p><a class="btn" href="{{ protocol }}://{{ domain }}{{ order_url }}">View your order</a></p>
+{% endblock %}

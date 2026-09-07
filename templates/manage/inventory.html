@@ -1,0 +1,142 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Inventory · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">INVENTORY INTELLIGENCE</span><h1>Stock control</h1></div>
+  <div class="head-actions">
+    <a class="btn btn-ghost" href="{% url 'inventory_history' %}">📜 History</a>
+    <a class="btn btn-ghost" href="{% url 'manage_settings' %}#inventory">⚙️ Alert settings</a>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card"><small>Total products</small><b>{{ summary.total }}</b></div>
+  <div class="stat-card"><small>In stock</small><b>{{ summary.healthy }}</b></div>
+  <div class="stat-card warn"><small>Low stock</small><b>{{ summary.low }}</b></div>
+  <div class="stat-card danger"><small>Out of stock</small><b>{{ summary.out }}</b></div>
+  <div class="stat-card warn"><small>Restock required</small><b>{{ summary.restock }}</b></div>
+</div>
+
+{% if open_alerts %}
+<div class="alert-panel">
+  <div>
+    <h2>⚠ {{ open_alerts|length }} product{{ open_alerts|length|pluralize }} {% if open_alerts|length == 1 %}requires{% else %}require{% endif %} attention</h2>
+    <ul class="notification-list">
+      {% for a in open_alerts %}
+      <li>
+        <b>{% if a.alert_type == 'out' %}OUT OF STOCK{% else %}LOW STOCK{% endif %}</b>
+        — <a href="{% url 'product_edit' a.product.id %}">{{ a.product.name }}</a>
+        <span class="muted">({{ a.product.stock }} left · alert at {{ a.product.low_stock_threshold }})</span>
+        <form method="post" action="{% url 'inventory_alert_resolve' a.id %}" class="inline-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'inventory' %}">
+          <button class="link-btn" type="submit">Resolve</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <a class="btn btn-ghost" href="{% url 'manage_settings' %}">Configure alert email →</a>
+</div>
+{% endif %}
+
+<form method="get" class="filter-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search product, SKU, brand…">
+  <select name="status" onchange="this.form.submit()">
+    <option value="">All statuses</option>
+    <option value="low" {% if status == 'low' %}selected{% endif %}>Low stock</option>
+    <option value="out" {% if status == 'out' %}selected{% endif %}>Out of stock</option>
+    <option value="healthy" {% if status == 'healthy' %}selected{% endif %}>In stock</option>
+  </select>
+  <select name="sort" onchange="this.form.submit()">
+    <option value="stock" {% if sort == 'stock' %}selected{% endif %}>Sort: stock (low first)</option>
+    <option value="-stock" {% if sort == '-stock' %}selected{% endif %}>Sort: stock (high first)</option>
+    <option value="name" {% if sort == 'name' %}selected{% endif %}>Sort: name A–Z</option>
+    <option value="-name" {% if sort == '-name' %}selected{% endif %}>Sort: name Z–A</option>
+    <option value="updated" {% if sort == 'updated' %}selected{% endif %}>Sort: recently updated</option>
+  </select>
+  <button class="btn" type="submit">Filter</button>
+  <a class="btn btn-ghost" href="{% url 'inventory' %}">Clear</a>
+</form>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Product</th>
+        <th><a class="sort-link {% if sort == 'stock' or sort == '-stock' %}is-sorted{% endif %}" href="?{% if q %}q={{ q }}&{% endif %}{% if status %}status={{ status }}&{% endif %}sort={% if sort == 'stock' %}-stock{% else %}stock{% endif %}">In stock{% if sort == 'stock' %} ↑{% elif sort == '-stock' %} ↓{% endif %}</a></th>
+        <th>Low-stock alert at</th>
+        <th>Desired level</th>
+        <th>Suggested restock</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in page.object_list %}
+      <tr class="{% if p.out_of_stock %}row-danger{% elif p.low_stock %}row-warn{% endif %}">
+        <td>
+          <b>{{ p.name }}</b>
+          {% if p.out_of_stock %}<span class="badge badge-danger">Out of stock</span>
+          {% elif p.low_stock %}<span class="badge badge-warn">Low stock</span>{% endif %}
+          <div class="muted small">{{ p.sku }}</div>
+        </td>
+        <form method="post" action="{% url 'inventory_update' %}">
+          {% csrf_token %}
+          <input type="hidden" name="product_id" value="{{ p.id }}">
+          <input type="hidden" name="next" value="{% url 'inventory' %}?{% if q %}q={{ q }}&{% endif %}{% if status %}status={{ status }}&{% endif %}{% if sort %}sort={{ sort }}&{% endif %}">
+          <td><input class="num-input" type="number" name="stock" value="{{ p.stock }}" min="0"></td>
+          <td><input class="num-input" type="number" name="low_stock_threshold" value="{{ p.low_stock_threshold }}" min="0"></td>
+          <td><input class="num-input" type="number" name="desired_stock_level" value="{{ p.desired_stock_level }}" min="0"></td>
+          <td>
+            {% if p.restock_recommendation_source == 'sales' %}
+              <b class="good">{{ p.recommended_restock_qty }}</b>
+              <div class="muted small" title="Based on the last {{ site_settings.restock_lookback_days }} days of paid orders and a {{ site_settings.restock_lead_time_days }}-day lead time">by sales history</div>
+            {% elif p.recommended_restock_qty %}
+              <b class="good">{{ p.recommended_restock_qty }}</b>
+              <div class="muted small" title="Based on your desired stock level">target level</div>
+            {% else %}
+              <span class="muted">—</span>
+            {% endif %}
+          </td>
+          <td><button class="btn btn-sm" type="submit">Update</button></td>
+        </form>
+      </tr>
+      {% empty %}<tr><td colspan="6">No products found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% include 'partials/manage_pagination.html' %}
+
+{% if recent_changes %}
+<div class="panel">
+  <div class="section-head">
+    <h2>Recent inventory activity</h2>
+    <a class="btn btn-ghost btn-sm" href="{% url 'inventory_history' %}">View full history →</a>
+  </div>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>When</th><th>Product</th><th>Change</th><th>Qty</th><th>By</th></tr></thead>
+    <tbody>
+      {% for c in recent_changes %}
+      <tr>
+        <td class="muted">{{ c.created_at|timesince }} ago</td>
+        <td>{{ c.product.name }}</td>
+        <td>{{ c.get_action_display }}{% if c.note %}<span class="muted small"> · {{ c.note }}</span>{% endif %}</td>
+        <td class="mono">
+          {% if c.change %}
+            {% if c.change > 0 %}<span class="good">+{{ c.change }}</span>{% else %}<span class="danger-text">{{ c.change }}</span>{% endif %}
+            <span class="muted">({{ c.new_qty }})</span>
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+        <td class="muted">{{ c.user.username|default:'system' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

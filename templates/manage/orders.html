@@ -1,0 +1,73 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Orders · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">SALES</span><h1>Sales history</h1></div>
+</div>
+
+<form method="get" class="filter-bar">
+  <input type="text" name="q" value="{{ q }}" placeholder="Order number, name, phone, email…">
+  <select name="range" onchange="this.form.submit()">
+    <option value="">Any period</option>
+    <option value="today" {% if preset == 'today' %}selected{% endif %}>Today</option>
+    <option value="yesterday" {% if preset == 'yesterday' %}selected{% endif %}>Yesterday</option>
+    <option value="week" {% if preset == 'week' %}selected{% endif %}>This week</option>
+    <option value="month" {% if preset == 'month' %}selected{% endif %}>This month</option>
+  </select>
+  <input type="date" name="from" value="{{ date_from }}" title="From date">
+  <input type="date" name="to" value="{{ date_to }}" title="To date">
+  <select name="channel" onchange="this.form.submit()">
+    <option value="">All channels</option>
+    <option value="online" {% if channel == 'online' %}selected{% endif %}>Online store</option>
+    <option value="pos" {% if channel == 'pos' %}selected{% endif %}>POS / in-store</option>
+  </select>
+  <select name="method" onchange="this.form.submit()">
+    <option value="">All payment methods</option>
+    {% for v, l in method_choices %}<option value="{{ v }}" {% if method == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+  </select>
+  <select name="seller" onchange="this.form.submit()">
+    <option value="">All sellers</option>
+    {% for s in sellers %}<option value="{{ s.pk }}" {% if seller == s.pk|stringformat:'s' %}selected{% endif %}>{{ s.get_full_name|default:s.username }}</option>{% endfor %}
+  </select>
+  <select name="status" onchange="this.form.submit()">
+    <option value="">All order statuses</option>
+    {% for value, label in order_statuses %}
+    <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="payment" onchange="this.form.submit()">
+    <option value="">All payment statuses</option>
+    {% for value, label in payment_statuses %}
+    <option value="{{ value }}" {% if payment == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn" type="submit">Filter</button>
+  <a class="btn btn-ghost" href="{% url 'manage_orders' %}">Clear</a>
+</form>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Receipt</th><th>Date</th><th>Customer</th><th>Channel</th><th>Items</th><th>Total</th><th>Status</th><th>Payment</th></tr></thead>
+    <tbody>
+      {% for o in page.object_list %}
+      <tr>
+        <td><a href="{% url 'manage_order_detail' o.number %}">{{ o.number }}</a>
+          {% if o.sales_channel == 'pos' %}<span class="status-badge is-processing">POS</span>{% endif %}</td>
+        <td>{{ o.created_at|date:'d M Y H:i' }}</td>
+        <td>{{ o.customer_name }}<div class="muted small">{{ o.phone }}</div></td>
+        <td>{{ o.get_sales_channel_display }}</td>
+        <td>{{ o.items.count }}</td>
+        <td>{{ o.total|money:currency }}</td>
+        <td><span class="status-badge {{ o.status|status_class }}">{{ o.get_status_display }}</span></td>
+        <td><span class="status-badge {{ o.payment_status|status_class }}">{{ o.get_payment_status_display }}</span>
+          <div class="muted small">{{ o.get_payment_method_display }}</div></td>
+      </tr>
+      {% empty %}<tr><td colspan="8">No orders found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% include 'partials/pagination.html' %}
+{% endblock %}

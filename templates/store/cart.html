@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Cart · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Your cart</h1><p>{{ items|length }} item{{ items|length|pluralize }}</p></div>
+
+{% if items %}
+<div class="cart-layout">
+  <div class="cart-items">
+    {% for i in items %}
+    <div class="cart-row">
+      <a class="cart-thumb" href="{% url 'product_detail' i.product.slug %}">
+        {% if i.product.image_src %}<img src="{{ i.product.image_src }}" alt="{{ i.product.name }}">{% else %}<div class="placeholder">RB</div>{% endif %}
+      </a>
+      <div class="cart-info">
+        <h3><a href="{% url 'product_detail' i.product.slug %}">{{ i.product.name }}</a></h3>
+        <span class="muted">{{ i.product.sku }}</span>
+        <p class="muted">{% if i.product.out_of_stock %}<span class="bad">Out of stock</span>{% elif i.product.low_stock %}<span class="warn">Low stock: {{ i.product.stock }} left</span>{% endif %}</p>
+        <form method="post" action="{% url 'cart_update' i.product.id %}" class="inline-form">
+          {% csrf_token %}
+          <div class="qty-wrap">
+            <button type="submit" name="quantity" value="{{ i.quantity|add:'-1' }}" class="qty-btn" {% if i.quantity <= 1 %}disabled{% endif %} aria-label="Decrease quantity">−</button>
+            <span class="qty-static">{{ i.quantity }}</span>
+            <button type="submit" name="quantity" value="{{ i.quantity|add:'1' }}" class="qty-btn" {% if i.quantity >= i.product.stock %}disabled{% endif %} aria-label="Increase quantity">+</button>
+          </div>
+        </form>
+        <form method="post" action="{% url 'cart_remove' i.product.id %}">{% csrf_token %}<button type="submit" class="link-btn muted">Remove</button></form>
+      </div>
+      <strong class="cart-line">{{ i.line|money:currency }}</strong>
+    </div>
+    {% endfor %}
+  </div>
+
+  <aside class="summary panel summary-card">
+    <h2>Order summary</h2>
+    <div class="summary-row"><span>Subtotal</span><strong>{{ subtotal|money:currency }}</strong></div>
+    {% if coupon %}
+    <div class="summary-row">
+      <span>Discount ({{ coupon.code }}) <form method="post" action="{% url 'cart_remove_coupon' %}" class="inline-form">{% csrf_token %}<button class="link-btn">remove</button></form></span>
+      <strong class="good">-{{ discount|money:currency }}</strong>
+    </div>
+    {% endif %}
+    <div class="summary-row"><span>Shipping</span><strong>{% if shipping %}{{ shipping|money:currency }}{% else %}Free{% endif %}</strong></div>
+    {% if tax %}<div class="summary-row"><span>Tax</span><strong>{{ tax|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row total"><span>Total</span><strong>{{ total|money:currency }}</strong></div>
+
+    <form method="post" action="{% url 'cart_apply_coupon' %}" class="coupon-form">
+      {% csrf_token %}
+      <label for="coupon-code" class="sr-only">Coupon code</label>
+      <input id="coupon-code" type="text" name="code" placeholder="Coupon code" value="{{ coupon.code|default:'' }}">
+      <button class="btn btn-ghost" type="submit">Apply</button>
+    </form>
+    {% if not coupon and subtotal < site_settings.free_shipping_threshold %}
+    <p class="hint">Free shipping on orders over {{ site_settings.free_shipping_threshold|money:currency }}.</p>
+    {% endif %}
+
+    <a class="btn btn-full btn-lg" href="{% url 'checkout' %}">Checkout</a>
+    <a class="btn btn-ghost btn-full" href="{% url 'catalogue' %}">Continue shopping</a>
+  </aside>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">
+    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+  </div>
+  <h2>Your cart is empty</h2>
+  <p>Browse the collection and find something you love.</p>
+  <a class="btn" href="{% url 'catalogue' %}">Browse products</a>
+</div>
+{% endif %}
+{% endblock %}

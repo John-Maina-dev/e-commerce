@@ -1,0 +1,10 @@
+Hello {{ order.customer_name }},
+
+Your payment for order {{ order.number }} was confirmed successfully.
+
+Order total: {{ site.currency }} {{ order.total }}
+
+Track your order: {{ protocol }}://{{ domain }}{{ order_url }}
+
+Thanks,
+The {{ site.store_name }} team
