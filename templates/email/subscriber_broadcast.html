@@ -1,0 +1,19 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>{{ broadcast_title }}</h2>
+<div class="card">
+  <div style="font-size: 15px; line-height: 1.6; white-space: pre-line;">
+    {{ broadcast_message }}
+  </div>
+</div>
+
+<p style="text-align: center; margin: 24px 0;">
+  <a class="btn" href="{{ site_url }}">Visit {{ site.store_name }}</a>
+</p>
+
+<p class="muted" style="font-size: 12px; margin-top: 32px; border-top: 1px solid #e7e1d8; padding-top: 12px;">
+  You are receiving this announcement as a subscriber of {{ site.store_name }}.
+  <br>
+  <a href="{{ unsubscribe_url }}" style="color: #8a7f70;">Unsubscribe from these emails</a>
+</p>
+{% endblock %}

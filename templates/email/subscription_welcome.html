@@ -1,0 +1,19 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>Welcome to {{ site.store_name }} Updates!</h2>
+<p>Thank you for subscribing to our updates. You are now first in line to receive notifications whenever exciting new items, exclusive collections, and new fashion arrivals are added to our store.</p>
+
+<div class="card">
+  <p style="margin: 0;"><b>Subscribed Email:</b> {{ subscriber.email }}</p>
+  <p class="muted" style="margin: 6px 0 0;">You can customize your category alert preferences or unsubscribe at any time.</p>
+</div>
+
+<p style="text-align: center; margin: 24px 0;">
+  <a class="btn" href="{{ site_url|default:protocol|add:'://'|add:domain }}">Explore Reeves Boutique</a>
+</p>
+
+<p class="muted" style="font-size: 12px; margin-top: 32px; border-top: 1px solid #e7e1d8; padding-top: 12px;">
+  If you did not request this subscription or wish to stop receiving updates, you can
+  <a href="{{ unsubscribe_url }}" style="color: #8a7f70;">unsubscribe with one click here</a>.
+</p>
+{% endblock %}

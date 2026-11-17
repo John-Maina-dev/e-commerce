@@ -1,0 +1,42 @@
+{% extends 'manage/base_manage.html' %}
+{% load store_extras %}
+{% block title %}Close shift · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">POINT OF SALE</span><h1>Close shift</h1>
+    <p class="muted">Opened {{ session.opened_at|date:'d M Y H:i' }} by {{ session.user.get_full_name|default:session.user.username }}</p>
+  </div>
+</div>
+
+<div class="manage-grid">
+  <div class="panel">
+    <h2>Cash-up summary</h2>
+    <div class="summary-row"><span>Sales recorded</span><b>{{ report.orders }}</b></div>
+    <div class="summary-row"><span>Total taken</span><b>{{ report.total|money:currency }}</b></div>
+    <hr>
+    <div class="summary-row"><span>Cash sales</span><b>{{ report.by_method.cash.total|money:currency }} <small class="muted">({{ report.by_method.cash.count }})</small></b></div>
+    <div class="summary-row"><span>M-Pesa</span><b>{{ report.by_method.mpesa.total|money:currency }} <small class="muted">({{ report.by_method.mpesa.count }})</small></b></div>
+    <div class="summary-row"><span>Card</span><b>{{ report.by_method.card.total|money:currency }} <small class="muted">({{ report.by_method.card.count }})</small></b></div>
+    {% if report.open_orders %}<p class="alert-warning">{{ report.open_orders }} order(s) still awaiting payment (e.g. M-Pesa pending). They stay open until confirmed or failed.</p>{% endif %}
+  </div>
+
+  <div class="panel">
+    <h2>Reconcile cash</h2>
+    <p class="muted">Expected in drawer: opening float {{ session.opening_cash|money:currency }} + cash sales = <b>{{ report.expected_cash|money:currency }}</b></p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row">
+        <label for="closing_cash">Cash actually counted ({{ currency }})</label>
+        <input type="number" id="closing_cash" name="closing_cash" min="0" step="0.01"
+               value="{{ report.expected_cash|stringformat:'s' }}" required>
+      </div>
+      <div class="form-row">
+        <label for="notes">Notes (variances, issues)</label>
+        <textarea id="notes" name="notes" rows="3"></textarea>
+      </div>
+      <button class="btn btn-lg" type="submit" name="confirm" value="1">Confirm &amp; close shift</button>
+      <a class="btn btn-ghost btn-lg" href="{% url 'pos_terminal' %}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

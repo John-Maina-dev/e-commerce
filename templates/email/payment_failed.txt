@@ -1,0 +1,12 @@
+Hello {{ order.customer_name }},
+
+We couldn't confirm payment for order {{ order.number }}.
+
+{% if reason %}{{ reason }}{% endif %}
+
+You can retry payment or contact us at {{ site.phone }}.
+
+View your order: {{ protocol }}://{{ domain }}{{ order_url }}
+
+Thanks,
+The {{ site.store_name }} team

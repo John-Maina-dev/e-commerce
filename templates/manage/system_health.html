@@ -1,0 +1,36 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}System health · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head"><div><span class="muted">OPS</span><h1>System health</h1></div></div>
+
+<div class="manage-grid">
+  <div class="panel">
+    <h2>Runtime</h2>
+    <table>
+      <tbody>
+        <tr><td>Environment</td><td><span class="status-badge {% if info.environment == 'production' %}is-healthy{% else %}is-low{% endif %}">{{ info.environment }}</span></td></tr>
+        <tr><td>Django</td><td>{{ info.django }}</td></tr>
+        <tr><td>Python</td><td>{{ info.python }}</td></tr>
+        <tr><td>Timezone</td><td>{{ info.timezone }}</td></tr>
+        <tr><td>Products</td><td>{{ info.products }}</td></tr>
+        <tr><td>Orders</td><td>{{ info.orders }}</td></tr>
+        <tr><td>Customers</td><td>{{ info.customers }}</td></tr>
+        <tr><td>Reviews</td><td>{{ info.reviews }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Checks</h2>
+    {% for c in checks %}
+    <div class="health-row">
+      <span class="status-badge {% if c.ok %}is-healthy{% else %}is-out{% endif %}">{% if c.ok %}OK{% else %}FAIL{% endif %}</span>
+      <div>
+        <b>{{ c.name }}</b>
+        <span class="muted small">{{ c.detail }}{% if c.sub %} · {{ c.sub }}{% endif %}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'manage/base_manage.html' %}
+{% load static store_extras %}
+{% block title %}POS Dashboard · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div>
+    <span class="pos-eyebrow">OPERATIONS &amp; SHIFT AUDIT</span>
+    <h1>POS Dashboard</h1>
+    <p class="muted">Live store checkout metrics, payment tenders reconciliation, and shift tracking for {{ today|date:'l, F j, Y' }}.</p>
+  </div>
+  <div class="head-actions">
+    <a class="btn btn-outline" href="{% url 'pos_customer_display' %}" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+      Customer Screen
+    </a>
+    <a class="btn" href="{% url 'pos_terminal' %}">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 9h4M7 12h7"/></svg>
+      Open Till
+    </a>
+  </div>
+</div>
+
+<!-- Shift Status Banner -->
+<div class="panel" style="margin-bottom: 24px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; gap: 16px; border-left: 4px solid {% if active_session %}#10b981{% else %}#f59e0b{% endif %};">
+  <div style="display: flex; align-items: center; gap: 14px;">
+    <div style="width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: {% if active_session %}rgba(16,185,129,0.12){% else %}rgba(245,158,11,0.12){% endif %}; color: {% if active_session %}#10b981{% else %}#f59e0b{% endif %};">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div>
+      <h3 style="margin: 0; font-size: 16px;">
+        {% if active_session %}
+          Active Shift: Opened at {{ active_session.opened_at|date:'H:i' }} by {{ active_session.user.get_full_name|default:active_session.user.username }}
+        {% else %}
+          Till Currently Inactive: No Shift Open
+        {% endif %}
+      </h3>
+      <p class="muted small" style="margin: 2px 0 0;">
+        {% if active_session %}
+          Opening cash float: <b>{{ active_session.opening_cash|money:currency }}</b> · Shift sales: <b>{{ active_session.sales_total|money:currency }}</b>
+        {% else %}
+          Open a shift on the POS terminal to start taking payments.
+        {% endif %}
+      </p>
+    </div>
+  </div>
+  <div>
+    {% if active_session %}
+      <a href="{% url 'pos_session_close' %}" class="btn btn-outline btn-sm">Close Shift &amp; Cash-up</a>
+    {% else %}
+      <a href="{% url 'pos_terminal' %}" class="btn btn-sm">Open Shift</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Primary KPIs -->
+<div class="metric-grid">
+  <div class="metric-card">
+    <div class="metric-head"><span class="metric-label">Today's POS Sales</span></div>
+    <div class="metric-value">{{ today_sales|money:currency }}</div>
+    <div class="metric-foot"><span class="muted">{{ today_count }} paid transaction{{ today_count|pluralize }}</span></div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-head"><span class="metric-label">Average Basket Size</span></div>
+    <div class="metric-value">{{ avg_basket|money:currency }}</div>
+    <div class="metric-foot"><span class="muted">Per in-store customer</span></div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-head"><span class="metric-label">Cash Collected</span></div>
+    <div class="metric-value" style="color: #10b981;">{{ cash_today|money:currency }}</div>
+    <div class="metric-foot"><span class="muted">Physical cash in drawer</span></div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-head"><span class="metric-label">Digital Tenders</span></div>
+    <div class="metric-value" style="color: #6366f1;">
+      {{ mpesa_today|add:card_today|add:bank_today|money:currency }}
+    </div>
+    <div class="metric-foot"><span class="muted">M-Pesa, Card &amp; Bank</span></div>
+  </div>
+</div>
+
+<!-- Tender Breakdown & Top Items -->
+<div class="analytics-grid" style="margin-top: 24px;">
+  <!-- Tender Distribution -->
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Tender Breakdown (Today)</h2>
+        <p class="muted small">Reconciliation across all payment methods taken at the till.</p>
+      </div>
+    </div>
+    <table class="table" style="margin-top: 10px;">
+      <thead>
+        <tr>
+          <th>Payment Method</th>
+          <th style="text-align: right;">Amount Collected</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981;"></span>
+              <b>Cash (Drawer)</b>
+            </span>
+          </td>
+          <td style="text-align: right; font-weight: 700;">{{ cash_today|money:currency }}</td>
+        </tr>
+        <tr>
+          <td>
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #059669;"></span>
+              <b>M-Pesa STK Push</b>
+            </span>
+          </td>
+          <td style="text-align: right; font-weight: 700;">{{ mpesa_today|money:currency }}</td>
+        </tr>
+        <tr>
+          <td>
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6;"></span>
+              <b>Card Terminal</b>
+            </span>
+          </td>
+          <td style="text-align: right; font-weight: 700;">{{ card_today|money:currency }}</td>
+        </tr>
+        <tr>
+          <td>
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+              <span style="width: 10px; height: 10px; border-radius: 50%; background: #8b5cf6;"></span>
+              <b>Bank Transfer</b>
+            </span>
+          </td>
+          <td style="text-align: right; font-weight: 700;">{{ bank_today|money:currency }}</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr style="border-top: 2px solid var(--border); font-size: 15px;">
+          <th>Total Collected</th>
+          <th style="text-align: right; font-size: 17px; color: var(--accent);">{{ today_sales|money:currency }}</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Top In-Store Products Today -->
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Top Selling Products (Till)</h2>
+        <p class="muted small">High velocity items sold across POS registers today.</p>
+      </div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table class="table" style="margin-top: 10px;">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th style="text-align: center;">Units</th>
+            <th style="text-align: right;">Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in top_items %}
+          <tr>
+            <td>
+              <b>{{ item.product_name }}</b>
+              {% if item.product_sku %}<br><small class="muted">SKU: {{ item.product_sku }}</small>{% endif %}
+            </td>
+            <td style="text-align: center; font-weight: 700;">{{ item.units_sold }}</td>
+            <td style="text-align: right; font-weight: 700;">{{ item.revenue|money:currency }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3" class="muted center" style="padding: 24px 0;">No in-store products sold yet today.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Recent POS Shifts History -->
+<div class="panel" style="margin-top: 24px;">
+  <div class="panel-head">
+    <div>
+      <h2>Recent Shift Reconciliations</h2>
+      <p class="muted small">History of cashier shifts, opening floats, closing cash counts, and recorded sales.</p>
+    </div>
+  </div>
+  <div style="overflow-x: auto;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Shift ID</th>
+          <th>Cashier</th>
+          <th>Status</th>
+          <th>Opened At</th>
+          <th>Closed At</th>
+          <th style="text-align: right;">Opening Float</th>
+          <th style="text-align: right;">Sales Total</th>
+          <th style="text-align: right;">Counted Cash</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in recent_sessions %}
+        <tr>
+          <td><b>#{{ s.pk }}</b></td>
+          <td>{{ s.user.get_full_name|default:s.user.username }}</td>
+          <td>
+            {% if s.is_open %}
+              <span class="status-badge is-approved">OPEN</span>
+            {% else %}
+              <span class="status-badge is-muted">CLOSED</span>
+            {% endif %}
+          </td>
+          <td>{{ s.opened_at|date:'d M H:i' }}</td>
+          <td>{{ s.closed_at|date:'d M H:i'|default:'—' }}</td>
+          <td style="text-align: right;">{{ s.opening_cash|money:currency }}</td>
+          <td style="text-align: right; font-weight: 700;">{{ s.sales_total|money:currency }}</td>
+          <td style="text-align: right;">
+            {% if s.closing_cash is not None %}
+              <b>{{ s.closing_cash|money:currency }}</b>
+            {% else %}
+              <span class="muted">—</span>
+            {% endif %}
+          </td>
+          <td class="muted small">{{ s.notes|truncatewords:6|default:'—' }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="muted center" style="padding: 24px 0;">No shift history recorded yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

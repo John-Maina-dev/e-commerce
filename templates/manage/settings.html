@@ -1,0 +1,70 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Store settings · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CONFIGURATION</span><h1>Store settings</h1></div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="form-card panel">
+  {% csrf_token %}
+  <h2>Branding</h2>
+  <div class="form-grid">
+    <div class="form-row"><label for="store_name">Store name</label><input type="text" name="store_name" id="store_name" value="{{ s.store_name }}"></div>
+    <div class="form-row"><label for="tagline">Tagline</label><input type="text" name="tagline" id="tagline" value="{{ s.tagline }}"></div>
+    <div class="form-row form-wide"><label for="description">Description</label><textarea name="description" id="description" rows="2">{{ s.description }}</textarea></div>
+    <div class="form-row form-wide"><label for="announcement">Announcement bar</label><input type="text" name="announcement" id="announcement" value="{{ s.announcement }}" placeholder="e.g. Free delivery over KSh 5,000"></div>
+    <div class="form-row form-wide"><label for="hero_title">Hero title</label><input type="text" name="hero_title" id="hero_title" value="{{ s.hero_title }}"></div>
+    <div class="form-row form-wide"><label for="hero_subtitle">Hero subtitle</label><textarea name="hero_subtitle" id="hero_subtitle" rows="2">{{ s.hero_subtitle }}</textarea></div>
+    <div class="form-row"><label for="primary_color">Primary color</label><input type="color" name="primary_color" id="primary_color" value="{{ s.primary_color }}"></div>
+    <div class="form-row"><label for="currency">Currency</label><input type="text" name="currency" id="currency" value="{{ s.currency }}" maxlength="3"></div>
+  </div>
+
+  <h2>Contact details</h2>
+  <div class="form-grid">
+    <div class="form-row"><label for="phone">Phone</label><input type="text" name="phone" id="phone" value="{{ s.phone }}"></div>
+    <div class="form-row"><label for="contact_email">Contact email</label><input type="email" name="contact_email" id="contact_email" value="{{ s.contact_email }}"></div>
+    <div class="form-row form-wide"><label for="address">Address</label><input type="text" name="address" id="address" value="{{ s.address }}"></div>
+    <div class="form-row form-wide"><label for="footer_text">Footer text</label><textarea name="footer_text" id="footer_text" rows="2">{{ s.footer_text }}</textarea></div>
+  </div>
+
+  <h2>Social links</h2>
+  <div class="form-grid">
+    <div class="form-row"><label for="social_facebook">Facebook</label><input type="url" name="social_facebook" id="social_facebook" value="{{ s.social_facebook }}"></div>
+    <div class="form-row"><label for="social_instagram">Instagram</label><input type="url" name="social_instagram" id="social_instagram" value="{{ s.social_instagram }}"></div>
+    <div class="form-row"><label for="social_twitter">Twitter / X</label><input type="url" name="social_twitter" id="social_twitter" value="{{ s.social_twitter }}"></div>
+    <div class="form-row"><label for="social_whatsapp">WhatsApp</label><input type="tel" name="social_whatsapp" id="social_whatsapp" value="{{ s.social_whatsapp }}" placeholder="e.g. 0712345678"></div>
+  </div>
+
+  <h2>Shipping &amp; tax</h2>
+  <div class="form-grid">
+    <label class="check"><input type="checkbox" name="shipping_enabled" {% if s.shipping_enabled %}checked{% endif %}> Enable shipping</label>
+    <label class="check"><input type="checkbox" name="tax_enabled" {% if s.tax_enabled %}checked{% endif %}> Enable tax</label>
+    <div class="form-row"><label for="flat_rate">Flat shipping rate</label><input type="number" name="flat_rate" id="flat_rate" step="0.01" value="{{ s.flat_rate }}"></div>
+    <div class="form-row"><label for="free_shipping_threshold">Free shipping over</label><input type="number" name="free_shipping_threshold" id="free_shipping_threshold" step="0.01" value="{{ s.free_shipping_threshold }}"></div>
+    <div class="form-row"><label for="tax_rate">Tax rate (%)</label><input type="number" name="tax_rate" id="tax_rate" step="0.01" value="{{ s.tax_rate }}"></div>
+  </div>
+
+  <h2 id="inventory">Inventory defaults</h2>
+  <div class="form-grid">
+    <div class="form-row"><label for="low_stock_default">Low-stock alert threshold</label><input type="number" name="low_stock_default" id="low_stock_default" value="{{ s.low_stock_default }}"></div>
+    <div class="form-row"><label for="desired_stock_level">Desired stock level</label><input type="number" name="desired_stock_level" id="desired_stock_level" value="{{ s.desired_stock_level }}"></div>
+    <div class="form-row form-wide"><label for="inventory_alert_email">Inventory alert email</label><input type="email" name="inventory_alert_email" id="inventory_alert_email" value="{{ s.inventory_alert_email }}" placeholder="Leave blank to disable alert emails"><small class="muted">Low-stock and out-of-stock alerts are emailed here when a product crosses its threshold.</small></div>
+    <div class="form-row form-wide"><label for="staff_notifications_email">Admin notification email</label><input type="email" name="staff_notifications_email" id="staff_notifications_email" value="{{ s.staff_notifications_email }}" placeholder="Leave blank to disable admin emails"><small class="muted">New orders, payment received/failed, new customers, new reviews and system errors are emailed here.</small></div>
+    <div class="form-row"><label for="restock_lookback_days">Sales history window (days)</label><input type="number" name="restock_lookback_days" id="restock_lookback_days" min="1" value="{{ s.restock_lookback_days }}"></div>
+    <div class="form-row"><label for="restock_lead_time_days">Restock lead time (days)</label><input type="number" name="restock_lead_time_days" id="restock_lead_time_days" min="1" value="{{ s.restock_lead_time_days }}"></div>
+    <div class="form-row"><label for="restock_min_sales_orders">Min sales orders to predict</label><input type="number" name="restock_min_sales_orders" id="restock_min_sales_orders" min="1" value="{{ s.restock_min_sales_orders }}"><small class="muted">Below this many paid orders in the window, the target stock level is used instead of a sales forecast.</small></div>
+  </div>
+
+  <h2>Logo &amp; media</h2>
+  <div class="form-grid">
+    <div class="form-row"><label for="logo">Logo</label><input type="file" name="logo" id="logo" accept="image/*">
+      {% if s.logo %}<small class="muted">Current: {{ s.logo.name }}</small>{% endif %}</div>
+    <div class="form-row"><label for="favicon">Favicon</label><input type="file" name="favicon" id="favicon" accept="image/*">
+      {% if s.favicon %}<small class="muted">Current: {{ s.favicon.name }}</small>{% endif %}</div>
+    <div class="form-row form-wide"><label for="banner">Homepage banner</label><input type="file" name="banner" id="banner" accept="image/*">
+      {% if s.banner %}<small class="muted">Current: {{ s.banner.name }}</small>{% endif %}</div>
+  </div>
+
+  <button class="btn" type="submit">Save settings</button>
+</form>
+{% endblock %}

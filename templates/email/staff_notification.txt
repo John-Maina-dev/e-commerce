@@ -1,0 +1,8 @@
+{{ site.store_name }} - {{ title }}
+
+{% if message %}{{ message }}{% endif %}
+
+Open in the management console:
+{% if link %}{{ protocol }}://{{ domain }}{{ link }}{% else %}{{ protocol }}://{{ domain }}/manage/{% endif %}
+
+This is an automated notification from {{ site.store_name }}.

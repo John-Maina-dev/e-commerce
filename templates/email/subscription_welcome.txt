@@ -1,0 +1,10 @@
+Welcome to {{ site.store_name }} Updates!
+
+Thank you for subscribing. You are now first in line to receive notifications whenever exciting new items and arrivals are added to our store.
+
+Subscribed Email: {{ subscriber.email }}
+
+Explore our store: {{ site_url|default:protocol|add:'://'|add:domain }}
+
+To unsubscribe, click the link below:
+{{ unsubscribe_url }}

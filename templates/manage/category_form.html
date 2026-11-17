@@ -1,0 +1,18 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}{% if category %}Edit{% else %}Add{% endif %} category · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CATALOGUE</span><h1>{% if category %}Edit category{% else %}Add category{% endif %}</h1></div>
+  <a class="btn btn-ghost" href="{% url 'manage_categories' %}">← Back to categories</a>
+</div>
+
+<div class="auth-wrap"><div class="auth-card panel">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-row"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}</div>
+    {% endfor %}
+    <button class="btn btn-full" type="submit">Save category</button>
+  </form>
+</div></div>
+{% endblock %}

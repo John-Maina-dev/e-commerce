@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Pay with M-Pesa · Order {{ order.number }} · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="order-hero panel">
+  <span class="muted">M-Pesa payment</span>
+  <h1>Pay for order {{ order.number }}</h1>
+  <p>We could not send the automatic M-Pesa prompt to your phone, but you can still pay directly.</p>
+  <div class="order-badges">
+    <span class="status-badge {{ order.payment_status|status_class }}">Payment: {{ order.get_payment_status_display }}</span>
+  </div>
+</div>
+
+<div class="order-layout">
+  <div class="panel">
+    <h2>1 · Send the money</h2>
+    {% if account_type == 'till' %}
+    <p>Use <b>M-Pesa &rarr; Lipa na M-Pesa &rarr; Buy Goods and Services</b> and enter:</p>
+    <div class="meta-list">
+      <div><span>Till number</span><b class="mono">{{ pay_shortcode }}</b></div>
+      <div><span>Amount</span><b>{{ pay_amount|money:currency }}</b></div>
+    </div>
+    {% else %}
+    <p>Use <b>M-Pesa &rarr; Lipa na M-Pesa &rarr; Pay Bill</b> and enter:</p>
+    <div class="meta-list">
+      <div><span>PayBill number</span><b class="mono">{{ pay_shortcode }}</b></div>
+      <div><span>Account number</span><b class="mono">{{ order.number }}</b></div>
+      <div><span>Amount</span><b>{{ pay_amount|money:currency }}</b></div>
+    </div>
+    {% endif %}
+    <p class="hint">Pay exactly <b>{{ pay_amount|money:currency }}</b> so we can match your payment to this order.</p>
+    {% if pay_amount != order.total %}<p class="hint">M-Pesa only accepts whole shillings, so the amount is rounded from {{ order.total|money:currency }}.</p>{% endif %}
+
+    <h2>2 · Enter the confirmation code</h2>
+    <p>After paying, Safaricom sends an SMS with a 10-character confirmation code. Enter it below so the store can verify your payment.</p>
+    <form method="post" action="{% url 'mpesa_manual_submit' order.number %}">
+      {% csrf_token %}
+      <div class="form-row">
+        <label for="manual-code">M-Pesa confirmation code</label>
+        <input id="manual-code" name="code" type="text" inputmode="text" autocomplete="one-time-code"
+               autocapitalize="characters" maxlength="10" placeholder="e.g. QGH4X8Y2Z1" required>
+        <p class="form-hint">Find it in the M-Pesa SMS, e.g. “QGH4X8Y2Z1 Confirmed. Ksh{{ pay_amount }} sent to {{ business_name }}”.</p>
+      </div>
+      <button class="btn btn-lg" type="submit" data-loading-text="Submitting code…">Submit payment code</button>
+    </form>
+    <p class="hint">Your order stays saved while we verify. You will see the confirmation on your order page.</p>
+  </div>
+
+  <aside class="panel">
+    <h2>Order summary</h2>
+    {% for i in order.items.all %}
+    <div class="summary-row"><span>{{ i.product_name }} × {{ i.quantity }}</span><strong>{{ i.subtotal|money:currency }}</strong></div>
+    {% endfor %}
+    <hr>
+    <div class="summary-row total"><span>Total</span><strong>{{ order.total|money:currency }}</strong></div>
+    <p class="hint">Paying for <b>{{ order.customer_name }}</b> · {{ order.phone }}</p>
+    {% if store_phone %}<p class="hint">Need help? Call the store on <b>{{ store_phone }}</b>.</p>{% endif %}
+    <p><a class="btn btn-outline btn-sm" href="{% url 'order_detail' order.number %}">Back to order</a></p>
+  </aside>
+</div>
+{% endblock %}

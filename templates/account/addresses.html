@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}My addresses · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>My addresses</h1><a class="btn" href="{% url 'address_add' %}">+ Add address</a></div>
+<div class="account-layout">
+  {% include 'partials/account_nav.html' %}
+  <div class="address-grid">
+    {% for a in addresses %}
+    <div class="panel address-card">
+      {% if a.is_default %}<span class="badge badge-default">Default</span>{% endif %}
+      <h3>{{ a.full_name }}</h3>
+      <p>{{ a.line1 }}<br>{% if a.line2 %}{{ a.line2 }}<br>{% endif %}{{ a.city }}{% if a.county %}, {{ a.county }}{% endif %}{% if a.postal_code %} {{ a.postal_code }}{% endif %}</p>
+      <p class="muted">{{ a.phone }}</p>
+      <div class="card-actions">
+        <a class="btn btn-ghost btn-sm" href="{% url 'address_edit' a.id %}">Edit</a>
+        <form method="post" action="{% url 'address_delete' a.id %}">{% csrf_token %}<button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="panel"><p class="muted">No saved addresses yet.</p><a class="btn" href="{% url 'address_add' %}">Add your first address</a></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

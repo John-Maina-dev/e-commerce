@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /account/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /django-admin/
+Disallow: /manage/
+Disallow: /payments/
+
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml

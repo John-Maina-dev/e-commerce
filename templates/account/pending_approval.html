@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Account Pending Approval · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card panel" style="text-align: center;">
+    <div style="margin: 0 auto 16px; width: 64px; height: 64px; border-radius: 50%; background: rgba(217, 119, 6, 0.12); display: flex; align-items: center; justify-content: center; color: var(--primary, #d97706);">
+      <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+
+    <h1>Registration Pending Approval</h1>
+    <p class="muted" style="margin-bottom: 20px; font-size: 15px; line-height: 1.6;">
+      Thank you for registering{% if registered_username %} as <b>{{ registered_username }}</b>{% endif %}.
+      Your account has been created and is currently awaiting administrator review and approval.
+    </p>
+
+    <div style="background: var(--bg-surface-alt, #f8fafc); border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 16px; margin-bottom: 24px; text-align: left; font-size: 14px;">
+      <p style="margin: 0 0 8px; font-weight: 600;">What happens next?</p>
+      <ul style="margin: 0; padding-left: 20px; color: var(--text-muted, #64748b);">
+        <li>A Super Administrator will review your account registration.</li>
+        <li>Once approved, you will be able to log in immediately with your username and password.</li>
+        <li>If you have any questions or require expedited access, please contact our support team.</li>
+      </ul>
+    </div>
+
+    <div style="display: flex; gap: 12px; justify-content: center;">
+      <a class="btn btn-outline" href="{% url 'home' %}">Return to Store</a>
+      <a class="btn btn-ghost" href="{% url 'contact' %}">Contact Support</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

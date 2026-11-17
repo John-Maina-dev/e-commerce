@@ -1,0 +1,8 @@
+{{ broadcast_title }}
+
+{{ broadcast_message }}
+
+Visit {{ site.store_name }}: {{ site_url }}
+
+To unsubscribe, click the link below:
+{{ unsubscribe_url }}

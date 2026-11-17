@@ -1,0 +1,526 @@
+{% load static store_extras %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customer Display · {{ store_name }}</title>
+  <link rel="stylesheet" href="{% static 'style.css' %}">
+  <style>
+    :root {
+      --cd-bg: #0f172a;
+      --cd-card-bg: #1e293b;
+      --cd-text: #f8fafc;
+      --cd-muted: #94a3b8;
+      --cd-accent: #f59e0b;
+      --cd-success: #10b981;
+      --cd-border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--cd-bg);
+      color: var(--cd-text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    .cd-header {
+      padding: 18px 32px;
+      background: #090d16;
+      border-bottom: 1px solid var(--cd-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cd-branding {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .cd-logo {
+      height: 48px;
+      max-width: 140px;
+      object-fit: contain;
+    }
+    .cd-store-name {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #fff;
+    }
+    .cd-tagline {
+      font-size: 13px;
+      color: var(--cd-muted);
+    }
+    .cd-clock {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--cd-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 24px;
+      padding: 24px 32px;
+    }
+    @media (max-width: 900px) {
+      .cd-body { grid-template-columns: 1fr; }
+    }
+    .cd-cart-card {
+      background: var(--cd-card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--cd-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .cd-card-header {
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid var(--cd-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cd-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--cd-muted);
+    }
+    .cd-items-list {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(100vh - 280px);
+      padding: 12px 24px;
+    }
+    .cd-item-row {
+      display: grid;
+      grid-template-columns: 50px 1fr 140px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .cd-item-qty {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cd-accent);
+    }
+    .cd-item-details b {
+      display: block;
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .cd-item-details small {
+      font-size: 13px;
+      color: var(--cd-muted);
+    }
+    .cd-item-total {
+      text-align: right;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-empty-cart {
+      height: 100%;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--cd-muted);
+    }
+    .cd-empty-cart svg {
+      width: 72px;
+      height: 72px;
+      stroke: var(--cd-muted);
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    .cd-empty-cart h3 {
+      font-size: 22px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .cd-status-card {
+      background: var(--cd-card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--cd-border);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+    .cd-customer-banner {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #fde68a;
+    }
+    .cd-prompt-box {
+      text-align: center;
+      padding: 24px 16px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.25);
+      margin-bottom: 24px;
+    }
+    .cd-prompt-title {
+      font-size: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--cd-muted);
+      margin-bottom: 8px;
+    }
+    .cd-prompt-headline {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .cd-prompt-note {
+      font-size: 15px;
+      color: var(--cd-muted);
+      line-height: 1.4;
+    }
+    .cd-prompt-box.is-paying {
+      border: 2px solid var(--cd-accent);
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .cd-prompt-box.is-paid {
+      border: 2px solid var(--cd-success);
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .cd-prompt-box.is-paid .cd-prompt-headline {
+      color: var(--cd-success);
+    }
+    .cd-totals-breakdown {
+      border-top: 1px solid var(--cd-border);
+      padding-top: 16px;
+    }
+    .cd-t-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      color: var(--cd-muted);
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-t-row.discount {
+      color: #ef4444;
+    }
+    .cd-t-row.grand-total {
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 2px solid rgba(255,255,255,0.15);
+    }
+    .cd-t-row.grand-total span:last-child {
+      color: var(--cd-accent);
+    }
+    .cd-t-row.change-due {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--cd-success);
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255,255,255,0.1);
+    }
+    .cd-footer {
+      padding: 14px 32px;
+      background: #090d16;
+      border-top: 1px solid var(--cd-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      color: var(--cd-muted);
+    }
+    .cd-fs-btn {
+      background: transparent;
+      border: 1px solid var(--cd-border);
+      color: var(--cd-muted);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .cd-fs-btn:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="cd-header">
+    <div class="cd-branding">
+      {% if site_settings.logo %}
+        <img src="{{ site_settings.logo.url }}" alt="{{ store_name }}" class="cd-logo">
+      {% endif %}
+      <div>
+        <div class="cd-store-name">{{ store_name }}</div>
+        {% if tagline %}<div class="cd-tagline">{{ tagline }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="cd-clock" id="cdClock">--:--:--</div>
+  </header>
+
+  <main class="cd-body">
+    <!-- Items scanned in cart -->
+    <section class="cd-cart-card">
+      <div class="cd-card-header">
+        <span class="cd-card-title">Scanned Items</span>
+        <span id="cdItemCount" style="color: var(--cd-accent); font-weight: 700;">0 items</span>
+      </div>
+      <div class="cd-items-list" id="cdItemsList">
+        <div class="cd-empty-cart" id="cdEmpty">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2h12l-1.5 4H7.5L6 2z"/><path d="M5 6h14l-1 14H6L5 6z"/><path d="M9 10h6M9 14h6"/>
+          </svg>
+          <h3>Welcome!</h3>
+          <p>Your items will appear here as the cashier scans them.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment & Total Breakdown -->
+    <aside class="cd-status-card">
+      <div>
+        <div class="cd-customer-banner" id="cdCustomerBanner" hidden>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Customer: <b id="cdCustomerName">Walk-in</b></span>
+        </div>
+
+        <div class="cd-prompt-box" id="cdPromptBox">
+          <div class="cd-prompt-title" id="cdPromptTitle">STATUS</div>
+          <div class="cd-prompt-headline" id="cdPromptHeadline">Ready to serve</div>
+          <div class="cd-prompt-note" id="cdPromptNote">Scan items to begin sale.</div>
+        </div>
+      </div>
+
+      <div class="cd-totals-breakdown">
+        <div class="cd-t-row">
+          <span>Subtotal</span>
+          <span id="cdSubtotal">{{ currency }} 0.00</span>
+        </div>
+        <div class="cd-t-row discount" id="cdDiscountRow" hidden>
+          <span>Discount</span>
+          <span id="cdDiscount">-{{ currency }} 0.00</span>
+        </div>
+        <div class="cd-t-row" id="cdTaxRow" hidden>
+          <span id="cdTaxLabel">VAT / Tax</span>
+          <span id="cdTax">{{ currency }} 0.00</span>
+        </div>
+        <div class="cd-t-row grand-total">
+          <span>TOTAL</span>
+          <span id="cdGrandTotal">{{ currency }} 0.00</span>
+        </div>
+        <div class="cd-t-row change-due" id="cdChangeRow" hidden>
+          <span>Change Due</span>
+          <span id="cdChange">{{ currency }} 0.00</span>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="cd-footer">
+    <span>Reeves Boutique POS Checkout Terminal</span>
+    <div>
+      <button type="button" class="cd-fs-btn" id="cdFsBtn">Toggle Fullscreen</button>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+      var CURRENCY = '{{ currency }}';
+
+      function money(v) {
+        return CURRENCY + ' ' + Number(v || 0).toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      // Live clock
+      function updateClock() {
+        var el = document.getElementById('cdClock');
+        if (el) el.textContent = new Date().toLocaleTimeString();
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // Fullscreen toggle
+      document.getElementById('cdFsBtn').addEventListener('click', function () {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(function(){});
+        } else {
+          document.exitFullscreen().catch(function(){});
+        }
+      });
+
+      // UI elements
+      var itemsList = document.getElementById('cdItemsList');
+      var emptyEl = document.getElementById('cdEmpty');
+      var itemCountEl = document.getElementById('cdItemCount');
+      var customerBanner = document.getElementById('cdCustomerBanner');
+      var customerNameEl = document.getElementById('cdCustomerName');
+      var promptBox = document.getElementById('cdPromptBox');
+      var promptTitle = document.getElementById('cdPromptTitle');
+      var promptHeadline = document.getElementById('cdPromptHeadline');
+      var promptNote = document.getElementById('cdPromptNote');
+      var subtotalEl = document.getElementById('cdSubtotal');
+      var discountRow = document.getElementById('cdDiscountRow');
+      var discountEl = document.getElementById('cdDiscount');
+      var taxRow = document.getElementById('cdTaxRow');
+      var taxLabel = document.getElementById('cdTaxLabel');
+      var taxEl = document.getElementById('cdTax');
+      var grandTotalEl = document.getElementById('cdGrandTotal');
+      var changeRow = document.getElementById('cdChangeRow');
+      var changeEl = document.getElementById('cdChange');
+
+      function renderState(state) {
+        if (!state) return;
+
+        // Items
+        var items = state.items || [];
+        var totalQty = 0;
+        itemsList.innerHTML = '';
+
+        if (!items.length) {
+          itemsList.appendChild(emptyEl);
+          itemCountEl.textContent = '0 items';
+        } else {
+          items.forEach(function (it) {
+            totalQty += it.quantity;
+            var row = document.createElement('div');
+            row.className = 'cd-item-row';
+            row.innerHTML =
+              '<div class="cd-item-qty">' + it.quantity + '×</div>' +
+              '<div class="cd-item-details">' +
+                '<b>' + escapeHtml(it.name) + '</b>' +
+                '<small>' + (it.sku ? 'SKU: ' + escapeHtml(it.sku) + ' · ' : '') + money(it.price) + ' each</small>' +
+              '</div>' +
+              '<div class="cd-item-total">' + money(it.line_total || (it.price * it.quantity)) + '</div>';
+            itemsList.appendChild(row);
+          });
+          itemCountEl.textContent = totalQty + (totalQty === 1 ? ' item' : ' items');
+        }
+
+        // Totals
+        subtotalEl.textContent = money(state.subtotal || 0);
+
+        var disc = parseFloat(state.discount || 0);
+        if (disc > 0) {
+          discountRow.hidden = false;
+          discountEl.textContent = '-' + money(disc);
+        } else {
+          discountRow.hidden = true;
+        }
+
+        var taxVal = parseFloat(state.tax || 0);
+        if (taxVal > 0) {
+          taxRow.hidden = false;
+          if (state.tax_rate) taxLabel.textContent = 'VAT / Tax (' + state.tax_rate + '%)';
+          taxEl.textContent = money(taxVal);
+        } else {
+          taxRow.hidden = true;
+        }
+
+        grandTotalEl.textContent = money(state.total || 0);
+
+        var chg = parseFloat(state.change || 0);
+        if (chg > 0) {
+          changeRow.hidden = false;
+          changeEl.textContent = money(chg);
+        } else {
+          changeRow.hidden = true;
+        }
+
+        // Customer
+        if (state.customer && state.customer.name && state.customer.name !== 'Walk-in customer') {
+          customerBanner.hidden = false;
+          customerNameEl.textContent = state.customer.name + (state.customer.phone ? ' (' + state.customer.phone + ')' : '');
+        } else {
+          customerBanner.hidden = true;
+        }
+
+        // Status Prompt
+        promptBox.className = 'cd-prompt-box';
+        if (state.status === 'paying') {
+          promptBox.classList.add('is-paying');
+          promptTitle.textContent = 'AMOUNT DUE';
+          promptHeadline.textContent = money(state.total);
+          promptNote.textContent = state.prompt_message || 'Please proceed to pay with your selected method.';
+        } else if (state.status === 'paid') {
+          promptBox.classList.add('is-paid');
+          promptTitle.textContent = 'TRANSACTION COMPLETED';
+          promptHeadline.textContent = 'Payment Received!';
+          promptNote.textContent = (state.method ? state.method.toUpperCase() + ' · ' : '') +
+                                   'Receipt ' + (state.order_number || '') + '. Thank you!';
+        } else if (items.length > 0) {
+          promptTitle.textContent = 'ACTIVE SALE';
+          promptHeadline.textContent = money(state.total);
+          promptNote.textContent = 'Total due for ' + totalQty + ' item' + (totalQty === 1 ? '' : 's') + '.';
+        } else {
+          promptTitle.textContent = 'STATUS';
+          promptHeadline.textContent = 'Ready to serve';
+          promptNote.textContent = 'Scan items to begin sale.';
+        }
+      }
+
+      function escapeHtml(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+
+      // 1. Listen via BroadcastChannel (modern zero-latency sync)
+      try {
+        if ('BroadcastChannel' in window) {
+          var bc = new BroadcastChannel('pos_display_channel');
+          bc.onmessage = function (ev) {
+            if (ev && ev.data) renderState(ev.data);
+          };
+        }
+      } catch (e) {}
+
+      // 2. Fallback listener via localStorage
+      window.addEventListener('storage', function (e) {
+        if (e.key === 'pos_customer_state' && e.newValue) {
+          try {
+            renderState(JSON.parse(e.newValue));
+          } catch(err){}
+        }
+      });
+
+      // Initial check from localStorage if present
+      try {
+        var saved = localStorage.getItem('pos_customer_state');
+        if (saved) renderState(JSON.parse(saved));
+      } catch(e){}
+    })();
+  </script>
+</body>
+</html>

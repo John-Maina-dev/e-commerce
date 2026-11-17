@@ -1,0 +1,13 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>Payment confirmed</h2>
+<p>Great news! Your payment for order <b>{{ order.number }}</b> went through{% if reference %} (reference <span class="badge">{{ reference }}</span>){% endif %}.</p>
+<div class="card">
+  <table>
+    <tr><td>Order total</td><td align="right"><b>{{ site.currency }} {{ order.total }}</b></td></tr>
+    <tr><td>Payment status</td><td align="right"><span class="badge">{{ order.get_payment_status_display }}</span></td></tr>
+  </table>
+</div>
+<p>We're packing your items now. You'll receive another email when your order ships.</p>
+<p><a class="btn" href="{{ protocol }}://{{ domain }}{{ order_url }}">Track your order</a></p>
+{% endblock %}

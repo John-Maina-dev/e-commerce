@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}New Arrival Alerts &amp; Subscriptions · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>New Arrival Alerts &amp; Subscriptions</h1>
+  <p>Manage how you receive alerts when new pieces and collections land in our boutique.</p>
+</div>
+
+<div class="account-layout">
+  {% include 'partials/account_nav.html' %}
+  <div>
+    <div class="panel form-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0;">Subscription status</h2>
+          <p class="muted" style="margin:4px 0 0;">
+            Currently <b>{% if sub.active %}<span style="color:#059669;">Active</span>{% else %}<span style="color:#dc2626;">Paused</span>{% endif %}</b>
+            for <b>{{ sub.email }}</b>
+          </p>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="toggle">
+          {% if sub.active %}
+          <button type="submit" class="btn btn-ghost" style="color:#dc2626; border-color:#fca5a5;">Pause alerts</button>
+          {% else %}
+          <button type="submit" class="btn">Resume alerts</button>
+          {% endif %}
+        </form>
+      </div>
+
+      <hr style="margin:20px 0; border:0; border-top:1px solid var(--border, #e5e7eb);">
+
+      <h2>Category preferences</h2>
+      <p class="muted">Choose which categories you would like to be notified about when new items arrive.</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="categories">
+        <div style="margin:16px 0; display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px;">
+          <label class="check" style="font-weight:600;">
+            <input type="checkbox" name="categories" value="all" id="cat-all" {% if sub.all_categories %}checked{% endif %}>
+            All Categories (Everything)
+          </label>
+          {% for c in categories %}
+          <label class="check">
+            <input type="checkbox" name="categories" value="{{ c.id }}" class="cat-item" {% if not sub.all_categories and c in sub.categories.all %}checked{% endif %}>
+            {{ c.name }}
+          </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn">Save preferences</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var catAll = document.getElementById('cat-all');
+  var catItems = document.querySelectorAll('.cat-item');
+
+  if (catAll) {
+    catAll.addEventListener('change', function() {
+      if (this.checked) {
+        catItems.forEach(function(i) { i.checked = false; });
+      }
+    });
+    catItems.forEach(function(i) {
+      i.addEventListener('change', function() {
+        if (this.checked && catAll) {
+          catAll.checked = false;
+        }
+      });
+    });
+  }
+});
+</script>
+{% endblock %}

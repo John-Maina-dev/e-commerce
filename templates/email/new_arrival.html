@@ -1,0 +1,30 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<span class="badge" style="background:#fef3c7; color:#b45309; margin-bottom:12px;">★ NEW ARRIVAL</span>
+<h2>Just In: {{ product.name }}</h2>
+<p>A stylish new piece has arrived at {{ site.store_name }} in <b>{{ product.category.name }}</b>.</p>
+
+<div class="card" style="text-align: center;">
+  {% if product_image_url %}
+  <img src="{{ product_image_url }}" alt="{{ product.name }}" style="max-width: 100%; max-height: 280px; object-fit: cover; border-radius: 8px; margin-bottom: 16px;">
+  {% endif %}
+  <h3 style="margin: 8px 0; font-size: 19px;">{{ product.name }}</h3>
+  {% if product.brand %}<p class="muted" style="margin: 0 0 8px;">Brand: {{ product.brand }}</p>{% endif %}
+  <p style="font-size: 20px; font-weight: 700; color: {{ site.primary_color|default:'#7c3aed' }}; margin: 8px 0;">
+    {{ product.effective_price }} {{ currency }}
+    {% if product.has_discount %}
+    <span class="muted" style="text-decoration: line-through; font-size: 14px; font-weight: normal; margin-left: 8px;">{{ product.price }} {{ currency }}</span>
+    {% endif %}
+  </p>
+  {% if product.short_description %}
+  <p class="muted" style="margin: 10px 0 16px;">{{ product.short_description }}</p>
+  {% endif %}
+  <a class="btn" href="{{ product_url }}">View Product &amp; Order</a>
+</div>
+
+<p class="muted" style="font-size: 12px; margin-top: 32px; border-top: 1px solid #e7e1d8; padding-top: 12px;">
+  You are receiving this because you subscribed to new arrival alerts at {{ site.store_name }}.
+  <br>
+  <a href="{{ unsubscribe_url }}" style="color: #8a7f70;">Unsubscribe from new arrival alerts</a>
+</p>
+{% endblock %}

@@ -1,0 +1,879 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Data Management &amp; Deletion Controls · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="dm-header">
+  <span class="dm-badge-danger">SUPER ADMIN ONLY</span>
+  <h1>Data Management &amp; Deletion Controls</h1>
+  <p class="muted">Permanently prune historical logs, transactions, orders, and records. All deletions are atomic and logged immutably.</p>
+</div>
+
+<!-- ========================================================================= -->
+<!-- SECTION 1: LOGS & NOTIFICATIONS                                          -->
+<!-- ========================================================================= -->
+<div class="dm-section">
+  <div class="dm-section-head">
+    <h2>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Logs &amp; Notifications
+    </h2>
+    <span class="dm-section-desc">Audit histories, alert records, payment gateway logs and inquiries</span>
+  </div>
+  <div class="dm-grid">
+
+    <!-- Card 1: Notifications -->
+    <div class="dm-card {% if tab == 'notifications' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            </div>
+            <span class="dm-card-name">Notifications</span>
+          </div>
+          {% if tab == 'notifications' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.notifications.total }}</span>
+            <span class="dm-count-label">records</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.notifications.read }} read · {{ counts.notifications.older_30 }} older than 30d</div>
+          <div class="dm-chips">
+            <a href="?tab=notifications" class="dm-chip {% if tab == 'notifications' and not params.scope and not params.period %}active{% endif %}">All</a>
+            <a href="?tab=notifications&scope=read" class="dm-chip {% if tab == 'notifications' and params.scope == 'read' %}active{% endif %}">Read</a>
+            <a href="?tab=notifications&scope=unread" class="dm-chip {% if tab == 'notifications' and params.scope == 'unread' %}active{% endif %}">Unread</a>
+            <a href="?tab=notifications&period=older_30" class="dm-chip {% if tab == 'notifications' and params.period == 'older_30' %}active{% endif %}">&gt;30d</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=notifications#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('notifications', 'filtered', 'Notifications (>30d)', {{ counts.notifications.older_30 }}, {period: 'older_30'})" {% if counts.notifications.older_30 == 0 %}disabled{% endif %}>
+          Delete &gt;30d ({{ counts.notifications.older_30 }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('notifications', 'all', 'Notifications', {{ counts.notifications.total }})" {% if counts.notifications.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 2: Stock Movement Logs -->
+    <div class="dm-card {% if tab == 'inventory_history' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
+            </div>
+            <span class="dm-card-name">Stock Movement Logs</span>
+          </div>
+          {% if tab == 'inventory_history' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.inventory_history.total }}</span>
+            <span class="dm-count-label">logs</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.inventory_history.older_30 }} older than 30d · {{ counts.inventory_history.alerts }} resolved alerts</div>
+          <div class="dm-chips">
+            <a href="?tab=inventory_history" class="dm-chip {% if tab == 'inventory_history' and not params.status and not params.period %}active{% endif %}">All</a>
+            <a href="?tab=inventory_history&status=adjust" class="dm-chip {% if tab == 'inventory_history' and params.status == 'adjust' %}active{% endif %}">Adjust</a>
+            <a href="?tab=inventory_history&status=sale" class="dm-chip {% if tab == 'inventory_history' and params.status == 'sale' %}active{% endif %}">Sales</a>
+            <a href="?tab=inventory_history&period=older_30" class="dm-chip {% if tab == 'inventory_history' and params.period == 'older_30' %}active{% endif %}">&gt;30d</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=inventory_history#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('inventory_history', 'filtered', 'Stock Movement Logs (>30d)', {{ counts.inventory_history.older_30 }}, {period: 'older_30'})" {% if counts.inventory_history.older_30 == 0 %}disabled{% endif %}>
+          Delete &gt;30d ({{ counts.inventory_history.older_30 }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('inventory_history', 'all', 'Stock Movement Logs', {{ counts.inventory_history.total }})" {% if counts.inventory_history.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 3: M-Pesa Logs -->
+    <div class="dm-card {% if tab == 'mpesa_transactions' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            </div>
+            <span class="dm-card-name">M-Pesa Logs</span>
+          </div>
+          {% if tab == 'mpesa_transactions' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.mpesa_transactions.total }}</span>
+            <span class="dm-count-label">transactions</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.mpesa_transactions.failed }} failed/cancelled · {{ counts.mpesa_transactions.older_30 }} older than 30d</div>
+          <div class="dm-chips">
+            <a href="?tab=mpesa_transactions" class="dm-chip {% if tab == 'mpesa_transactions' and not params.status and not params.period %}active{% endif %}">All</a>
+            <a href="?tab=mpesa_transactions&status=failed" class="dm-chip {% if tab == 'mpesa_transactions' and params.status == 'failed' %}active{% endif %}">Failed</a>
+            <a href="?tab=mpesa_transactions&status=completed" class="dm-chip {% if tab == 'mpesa_transactions' and params.status == 'completed' %}active{% endif %}">Completed</a>
+            <a href="?tab=mpesa_transactions&period=older_30" class="dm-chip {% if tab == 'mpesa_transactions' and params.period == 'older_30' %}active{% endif %}">&gt;30d</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=mpesa_transactions#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('mpesa_transactions', 'filtered', 'Failed/Cancelled M-Pesa Logs', {{ counts.mpesa_transactions.failed }}, {status: 'failed'})" {% if counts.mpesa_transactions.failed == 0 %}disabled{% endif %}>
+          Delete Failed ({{ counts.mpesa_transactions.failed }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('mpesa_transactions', 'all', 'M-Pesa Transactions', {{ counts.mpesa_transactions.total }})" {% if counts.mpesa_transactions.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 4: Contact Inquiries -->
+    <div class="dm-card {% if tab == 'contact_messages' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <span class="dm-card-name">Contact Inquiries</span>
+          </div>
+          {% if tab == 'contact_messages' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.contact_messages.total }}</span>
+            <span class="dm-count-label">messages</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.contact_messages.handled }} handled inquiries</div>
+          <div class="dm-chips">
+            <a href="?tab=contact_messages" class="dm-chip {% if tab == 'contact_messages' and not params.status %}active{% endif %}">All</a>
+            <a href="?tab=contact_messages&status=handled" class="dm-chip {% if tab == 'contact_messages' and params.status == 'handled' %}active{% endif %}">Handled</a>
+            <a href="?tab=contact_messages&status=unhandled" class="dm-chip {% if tab == 'contact_messages' and params.status == 'unhandled' %}active{% endif %}">Pending</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=contact_messages#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('contact_messages', 'filtered', 'Handled Contact Messages', {{ counts.contact_messages.handled }}, {status: 'handled'})" {% if counts.contact_messages.handled == 0 %}disabled{% endif %}>
+          Delete Handled ({{ counts.contact_messages.handled }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('contact_messages', 'all', 'Contact Messages', {{ counts.contact_messages.total }})" {% if counts.contact_messages.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- SECTION 2: SALES & ORDERS                                                -->
+<!-- ========================================================================= -->
+<div class="dm-section">
+  <div class="dm-section-head">
+    <h2>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+      Sales &amp; Orders
+    </h2>
+    <span class="dm-section-desc">Store transactions, line items, and guest checkout details</span>
+  </div>
+  <div class="dm-grid">
+
+    <!-- Card 5: Orders (All) -->
+    <div class="dm-card {% if tab == 'orders' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <span class="dm-card-name">Orders (All)</span>
+          </div>
+          {% if tab == 'orders' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.orders.total }}</span>
+            <span class="dm-count-label">orders</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.orders.cancelled }} cancelled · {{ counts.orders.older_30 }} older than 30d</div>
+          <div class="dm-chips">
+            <a href="?tab=orders" class="dm-chip {% if tab == 'orders' and not params.status and not params.period %}active{% endif %}">All</a>
+            <a href="?tab=orders&status=cancelled" class="dm-chip {% if tab == 'orders' and params.status == 'cancelled' %}active{% endif %}">Cancelled</a>
+            <a href="?tab=orders&status=paid" class="dm-chip {% if tab == 'orders' and params.status == 'paid' %}active{% endif %}">Paid</a>
+            <a href="?tab=orders&period=older_90" class="dm-chip {% if tab == 'orders' and params.period == 'older_90' %}active{% endif %}">&gt;90d</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=orders#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('orders', 'filtered', 'Cancelled Orders', {{ counts.orders.cancelled }}, {status: 'cancelled'})" {% if counts.orders.cancelled == 0 %}disabled{% endif %}>
+          Delete Cancelled ({{ counts.orders.cancelled }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('orders', 'all', 'Orders (All)', {{ counts.orders.total }})" {% if counts.orders.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 6: Guest Checkouts -->
+    <div class="dm-card {% if tab == 'guest_checkouts' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>
+            </div>
+            <span class="dm-card-name">Guest Checkouts</span>
+          </div>
+          {% if tab == 'guest_checkouts' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.guest_checkouts.total }}</span>
+            <span class="dm-count-label">guest orders</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.guest_checkouts.cancelled }} cancelled · unauthenticated buyers</div>
+          <div class="dm-chips">
+            <a href="?tab=guest_checkouts" class="dm-chip {% if tab == 'guest_checkouts' and not params.status and not params.period %}active{% endif %}">All</a>
+            <a href="?tab=guest_checkouts&status=cancelled" class="dm-chip {% if tab == 'guest_checkouts' and params.status == 'cancelled' %}active{% endif %}">Cancelled</a>
+            <a href="?tab=guest_checkouts&period=older_30" class="dm-chip {% if tab == 'guest_checkouts' and params.period == 'older_30' %}active{% endif %}">&gt;30d</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=guest_checkouts#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('guest_checkouts', 'filtered', 'Cancelled Guest Checkouts', {{ counts.guest_checkouts.cancelled }}, {status: 'cancelled'})" {% if counts.guest_checkouts.cancelled == 0 %}disabled{% endif %}>
+          Delete Cancelled ({{ counts.guest_checkouts.cancelled }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('guest_checkouts', 'all', 'Guest Checkouts', {{ counts.guest_checkouts.total }})" {% if counts.guest_checkouts.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- SECTION 3: ACCOUNTS & SUBSCRIBERS                                        -->
+<!-- ========================================================================= -->
+<div class="dm-section">
+  <div class="dm-section-head">
+    <h2>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Accounts &amp; Subscribers
+    </h2>
+    <span class="dm-section-desc">Registered profiles, marketing lists, and customer product reviews</span>
+  </div>
+  <div class="dm-grid">
+
+    <!-- Card 7: Registered Accounts -->
+    <div class="dm-card {% if tab == 'users' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <span class="dm-card-name">Registered Accounts</span>
+          </div>
+          {% if tab == 'users' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.users.total }}</span>
+            <span class="dm-count-label">deletable</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.users.pending_or_suspended }} pending/suspended · {{ counts.users.customers }} customers</div>
+          <div class="dm-chips">
+            <a href="?tab=users" class="dm-chip {% if tab == 'users' and not params.status and not params.scope %}active{% endif %}">All</a>
+            <a href="?tab=users&status=pending" class="dm-chip {% if tab == 'users' and params.status == 'pending' %}active{% endif %}">Pending</a>
+            <a href="?tab=users&scope=customer" class="dm-chip {% if tab == 'users' and params.scope == 'customer' %}active{% endif %}">Customers</a>
+            <a href="?tab=users&scope=cashier" class="dm-chip {% if tab == 'users' and params.scope == 'cashier' %}active{% endif %}">Cashiers</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=users#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('users', 'filtered', 'Pending/Suspended User Accounts', {{ counts.users.pending_or_suspended }}, {status: 'pending'})" {% if counts.users.pending_or_suspended == 0 %}disabled{% endif %}>
+          Delete Inactive ({{ counts.users.pending_or_suspended }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('users', 'all', 'User Accounts (Non-Admin)', {{ counts.users.total }})" {% if counts.users.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 8: Subscribers -->
+    <div class="dm-card {% if tab == 'subscriptions' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
+            </div>
+            <span class="dm-card-name">Subscribers</span>
+          </div>
+          {% if tab == 'subscriptions' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.subscriptions.total }}</span>
+            <span class="dm-count-label">subscribers</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.subscriptions.inactive }} unsubscribed/inactive</div>
+          <div class="dm-chips">
+            <a href="?tab=subscriptions" class="dm-chip {% if tab == 'subscriptions' and not params.status %}active{% endif %}">All</a>
+            <a href="?tab=subscriptions&status=active" class="dm-chip {% if tab == 'subscriptions' and params.status == 'active' %}active{% endif %}">Active</a>
+            <a href="?tab=subscriptions&status=inactive" class="dm-chip {% if tab == 'subscriptions' and params.status == 'inactive' %}active{% endif %}">Unsubscribed</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=subscriptions#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('subscriptions', 'filtered', 'Inactive Subscribers', {{ counts.subscriptions.inactive }}, {status: 'inactive'})" {% if counts.subscriptions.inactive == 0 %}disabled{% endif %}>
+          Delete Inactive ({{ counts.subscriptions.inactive }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('subscriptions', 'all', 'Subscribers', {{ counts.subscriptions.total }})" {% if counts.subscriptions.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+    <!-- Card 9: Product Reviews -->
+    <div class="dm-card {% if tab == 'reviews' %}is-active{% endif %}">
+      <div>
+        <div class="dm-card-top">
+          <div class="dm-card-title">
+            <div class="dm-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <span class="dm-card-name">Product Reviews</span>
+          </div>
+          {% if tab == 'reviews' %}<span class="dm-active-pill">Viewing Table</span>{% endif %}
+        </div>
+        <div class="dm-card-body">
+          <div class="dm-count-row">
+            <span class="dm-count-num">{{ counts.reviews.total }}</span>
+            <span class="dm-count-label">reviews</span>
+          </div>
+          <div class="dm-count-sub">{{ counts.reviews.inactive }} unapproved/hidden</div>
+          <div class="dm-chips">
+            <a href="?tab=reviews" class="dm-chip {% if tab == 'reviews' and not params.status %}active{% endif %}">All</a>
+            <a href="?tab=reviews&status=active" class="dm-chip {% if tab == 'reviews' and params.status == 'active' %}active{% endif %}">Approved</a>
+            <a href="?tab=reviews&status=inactive" class="dm-chip {% if tab == 'reviews' and params.status == 'inactive' %}active{% endif %}">Hidden</a>
+          </div>
+        </div>
+      </div>
+      <div class="dm-card-actions">
+        <a href="?tab=reviews#tableSection" class="btn btn-ghost btn-sm">Browse</a>
+        <button type="button" class="btn btn-ghost btn-sm dm-btn-warn" onclick="openDeleteModalFor('reviews', 'filtered', 'Hidden Product Reviews', {{ counts.reviews.inactive }}, {status: 'inactive'})" {% if counts.reviews.inactive == 0 %}disabled{% endif %}>
+          Delete Hidden ({{ counts.reviews.inactive }})
+        </button>
+        <button type="button" class="btn btn-danger btn-sm dm-btn-danger" onclick="openDeleteModalFor('reviews', 'all', 'Product Reviews', {{ counts.reviews.total }})" {% if counts.reviews.total == 0 %}disabled{% endif %}>
+          Delete All
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- DETAILED RECORDS INSPECTION & TABLE SELECTION                             -->
+<!-- ========================================================================= -->
+<div class="panel" id="tableSection" style="margin-bottom:32px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+    <div>
+      <span class="muted" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;">Inspecting Records</span>
+      <h2 style="margin:2px 0 0;">{{ config.title }}</h2>
+      <p class="muted small" style="margin:4px 0 0;">{{ config.description }}</p>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button type="button" class="btn btn-ghost" id="btnDeleteSelected" onclick="openTableDeleteModal('selected')" disabled style="color:var(--bad); border-color:color-mix(in srgb, var(--bad) 40%, var(--line));">
+        Delete Selected (<span id="selectedCount">0</span>)
+      </button>
+      <button type="button" class="btn btn-danger dm-btn-danger" onclick="openTableDeleteModal('all')">
+        Delete All Matching ({{ total_matching }})
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <form method="get" class="filter-bar" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:center;">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <input type="text" name="q" value="{{ params.q }}" placeholder="Search in {{ config.title }}..." style="min-width:240px;">
+
+    <!-- Period / Age Filter -->
+    <select name="period" onchange="this.form.submit()">
+      <option value="" {% if not params.period %}selected{% endif %}>Any age</option>
+      <option value="older_7" {% if params.period == 'older_7' %}selected{% endif %}>Older than 7 days</option>
+      <option value="older_30" {% if params.period == 'older_30' %}selected{% endif %}>Older than 30 days</option>
+      <option value="older_60" {% if params.period == 'older_60' %}selected{% endif %}>Older than 60 days</option>
+      <option value="older_90" {% if params.period == 'older_90' %}selected{% endif %}>Older than 90 days</option>
+      <option value="older_365" {% if params.period == 'older_365' %}selected{% endif %}>Older than 1 year</option>
+    </select>
+
+    <!-- Specific filters by tab -->
+    {% if tab == 'notifications' %}
+    <select name="scope" onchange="this.form.submit()">
+      <option value="" {% if not params.scope %}selected{% endif %}>All notifications</option>
+      <option value="read" {% if params.scope == 'read' %}selected{% endif %}>Read only</option>
+      <option value="unread" {% if params.scope == 'unread' %}selected{% endif %}>Unread only</option>
+      <option value="staff" {% if params.scope == 'staff' %}selected{% endif %}>Staff notifications only</option>
+      <option value="customer" {% if params.scope == 'customer' %}selected{% endif %}>Customer notifications only</option>
+    </select>
+    {% elif tab == 'inventory_history' %}
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {% if not params.status %}selected{% endif %}>All action types</option>
+      <option value="adjust" {% if params.status == 'adjust' %}selected{% endif %}>Manual adjustment</option>
+      <option value="sale" {% if params.status == 'sale' %}selected{% endif %}>Sale deduction</option>
+      <option value="restock" {% if params.status == 'restock' %}selected{% endif %}>Restock addition</option>
+      <option value="return" {% if params.status == 'return' %}selected{% endif %}>Customer return</option>
+      <option value="create" {% if params.status == 'create' %}selected{% endif %}>Product creation</option>
+    </select>
+    {% elif tab == 'orders' or tab == 'guest_checkouts' %}
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {% if not params.status %}selected{% endif %}>All statuses</option>
+      <option value="pending" {% if params.status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="cancelled" {% if params.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+      <option value="delivered" {% if params.status == 'delivered' %}selected{% endif %}>Delivered</option>
+      <option value="paid" {% if params.status == 'paid' %}selected{% endif %}>Paid</option>
+    </select>
+    {% if tab == 'orders' %}
+    <select name="scope" onchange="this.form.submit()">
+      <option value="" {% if not params.scope %}selected{% endif %}>All order types</option>
+      <option value="registered" {% if params.scope == 'registered' %}selected{% endif %}>Registered accounts</option>
+      <option value="guest" {% if params.scope == 'guest' %}selected{% endif %}>Guest buyers only</option>
+    </select>
+    {% endif %}
+    {% elif tab == 'mpesa_transactions' %}
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {% if not params.status %}selected{% endif %}>All M-Pesa statuses</option>
+      <option value="completed" {% if params.status == 'completed' %}selected{% endif %}>Completed / Verified</option>
+      <option value="pending" {% if params.status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="failed" {% if params.status == 'failed' %}selected{% endif %}>Failed</option>
+      <option value="cancelled" {% if params.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+      <option value="timeout" {% if params.status == 'timeout' %}selected{% endif %}>Timed out</option>
+    </select>
+    {% elif tab == 'users' %}
+    <select name="scope" onchange="this.form.submit()">
+      <option value="" {% if not params.scope %}selected{% endif %}>All roles</option>
+      <option value="customer" {% if params.scope == 'customer' %}selected{% endif %}>Customers</option>
+      <option value="cashier" {% if params.scope == 'cashier' %}selected{% endif %}>Cashiers</option>
+      <option value="admin" {% if params.scope == 'admin' %}selected{% endif %}>Admins</option>
+    </select>
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {% if not params.status %}selected{% endif %}>All account statuses</option>
+      <option value="pending" {% if params.status == 'pending' %}selected{% endif %}>Pending approval</option>
+      <option value="suspended" {% if params.status == 'suspended' %}selected{% endif %}>Suspended</option>
+      <option value="rejected" {% if params.status == 'rejected' %}selected{% endif %}>Rejected</option>
+      <option value="approved" {% if params.status == 'approved' %}selected{% endif %}>Approved</option>
+    </select>
+    {% elif tab == 'contact_messages' %}
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {% if not params.status %}selected{% endif %}>All messages</option>
+      <option value="handled" {% if params.status == 'handled' %}selected{% endif %}>Handled only</option>
+      <option value="unhandled" {% if params.status == 'unhandled' %}selected{% endif %}>Unhandled only</option>
+    </select>
+    {% elif tab == 'reviews' %}
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {% if not params.status %}selected{% endif %}>All reviews</option>
+      <option value="active" {% if params.status == 'active' %}selected{% endif %}>Approved only</option>
+      <option value="inactive" {% if params.status == 'inactive' %}selected{% endif %}>Hidden / Unapproved only</option>
+    </select>
+    {% endif %}
+
+    <button class="btn btn-ghost" type="submit">Filter</button>
+    {% if params.q or params.period or params.status or params.scope %}
+    <a href="?tab={{ tab }}#tableSection" class="btn btn-ghost" style="color:var(--muted);">Clear filters</a>
+    {% endif %}
+  </form>
+
+  <!-- Items Table with Checkboxes -->
+  {% if page.object_list %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:36px;"><input type="checkbox" id="selectAllCheckbox" title="Select all on this page"></th>
+          {% if tab == 'notifications' %}
+          <th>Title / Message</th>
+          <th>Audience</th>
+          <th>Category</th>
+          <th>Read Status</th>
+          <th>Created</th>
+          {% elif tab == 'inventory_history' %}
+          <th>Product</th>
+          <th>Action</th>
+          <th>Quantity Change</th>
+          <th>Logged By</th>
+          <th>Note</th>
+          <th>Date</th>
+          {% elif tab == 'orders' or tab == 'guest_checkouts' %}
+          <th>Order Number</th>
+          <th>Customer</th>
+          <th>Channel</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Date</th>
+          {% elif tab == 'mpesa_transactions' %}
+          <th>Receipt / Request ID</th>
+          <th>Phone</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Result</th>
+          <th>Date</th>
+          {% elif tab == 'users' %}
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Account Status</th>
+          <th>Orders Placed</th>
+          <th>Joined</th>
+          {% elif tab == 'subscriptions' %}
+          <th>Email</th>
+          <th>Status</th>
+          <th>Linked User</th>
+          <th>Preferences</th>
+          <th>Subscribed</th>
+          {% elif tab == 'contact_messages' %}
+          <th>Name / Email</th>
+          <th>Subject</th>
+          <th>Handled</th>
+          <th>Date</th>
+          {% elif tab == 'reviews' %}
+          <th>Product</th>
+          <th>Reviewer</th>
+          <th>Rating</th>
+          <th>Active</th>
+          <th>Date</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for obj in page.object_list %}
+        <tr>
+          <td><input type="checkbox" class="row-checkbox" value="{{ obj.id }}"></td>
+          {% if tab == 'notifications' %}
+          <td>
+            <b>{{ obj.title }}</b>
+            {% if obj.message %}<div class="muted small">{{ obj.message|truncatechars:80 }}</div>{% endif %}
+          </td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{% if obj.for_staff %}Staff{% elif obj.user %}@{{ obj.user.username }}{% else %}Public{% endif %}</span></td>
+          <td><span class="muted small">{{ obj.get_category_display|default:obj.category }}</span></td>
+          <td>{% if obj.read %}<span class="badge badge-muted">Read</span>{% else %}<span class="badge badge-warn">Unread</span>{% endif %}</td>
+          <td><span class="muted small">{{ obj.created_at|date:"M d, Y H:i" }}</span></td>
+
+          {% elif tab == 'inventory_history' %}
+          <td><b>{{ obj.product.name|truncatechars:30 }}</b></td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{{ obj.action|upper }}</span></td>
+          <td>
+            {% if obj.change > 0 %}<span style="color:var(--ok); font-weight:600;">+{{ obj.change }}</span>
+            {% elif obj.change < 0 %}<span style="color:var(--bad); font-weight:600;">{{ obj.change }}</span>
+            {% else %}<span class="muted">0</span>{% endif %}
+            <span class="muted small">({{ obj.old_qty }} → {{ obj.new_qty }})</span>
+          </td>
+          <td><span class="muted small">{% if obj.user %}@{{ obj.user.username }}{% else %}System{% endif %}</span></td>
+          <td><span class="muted small">{{ obj.note|default:'—'|truncatechars:40 }}</span></td>
+          <td><span class="muted small">{{ obj.created_at|date:"M d, Y H:i" }}</span></td>
+
+          {% elif tab == 'orders' or tab == 'guest_checkouts' %}
+          <td><a href="{% url 'manage_order_detail' obj.number %}" target="_blank"><b>{{ obj.number }}</b></a></td>
+          <td>{{ obj.customer_name|default:'Guest' }}<div class="muted small">{{ obj.email|default:'' }}</div></td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{{ obj.get_sales_channel_display }}</span></td>
+          <td><b>{{ obj.total }} {{ site_settings.currency }}</b></td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{{ obj.get_status_display }}</span></td>
+          <td><span class="muted small">{{ obj.get_payment_status_display }}</span></td>
+          <td><span class="muted small">{{ obj.created_at|date:"M d, Y H:i" }}</span></td>
+
+          {% elif tab == 'mpesa_transactions' %}
+          <td><b>{{ obj.mpesa_receipt|default:obj.checkout_request_id|truncatechars:24 }}</b></td>
+          <td>{{ obj.phone }}</td>
+          <td><b>{{ obj.amount }} {{ site_settings.currency }}</b></td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{{ obj.status|upper }}</span></td>
+          <td><span class="muted small">{{ obj.result_description|default:'—'|truncatechars:40 }}</span></td>
+          <td><span class="muted small">{{ obj.created_at|date:"M d, Y H:i" }}</span></td>
+
+          {% elif tab == 'users' %}
+          <td><b>@{{ obj.username }}</b><div class="muted small">{{ obj.get_full_name }}</div></td>
+          <td>{{ obj.email }}</td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{{ obj.profile.get_role_display|default:'Customer' }}</span></td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{{ obj.profile.get_status_display|default:'Approved' }}</span></td>
+          <td><b>{{ obj.orders.count }}</b></td>
+          <td><span class="muted small">{{ obj.date_joined|date:"M d, Y" }}</span></td>
+
+          {% elif tab == 'subscriptions' %}
+          <td><b>{{ obj.email }}</b></td>
+          <td>{% if obj.active %}<span class="badge" style="background:color-mix(in srgb, var(--ok) 15%, transparent); color:var(--ok); font-size:11px;">Active</span>{% else %}<span class="badge badge-muted">Unsubscribed</span>{% endif %}</td>
+          <td>{% if obj.user %}@{{ obj.user.username }}{% else %}<span class="muted">Guest</span>{% endif %}</td>
+          <td><span class="muted small">{% if obj.all_categories %}All Categories{% else %}{{ obj.categories.count }} categories{% endif %}</span></td>
+          <td><span class="muted small">{{ obj.subscribed_at|date:"M d, Y H:i" }}</span></td>
+
+          {% elif tab == 'contact_messages' %}
+          <td><b>{{ obj.name }}</b><div class="muted small">{{ obj.email }}</div></td>
+          <td>{{ obj.subject|default:'(No Subject)' }}<div class="muted small">{{ obj.message|truncatechars:60 }}</div></td>
+          <td>{% if obj.handled %}<span class="badge" style="background:color-mix(in srgb, var(--ok) 15%, transparent); color:var(--ok); font-size:11px;">Handled</span>{% else %}<span class="badge badge-warn">Pending</span>{% endif %}</td>
+          <td><span class="muted small">{{ obj.created_at|date:"M d, Y H:i" }}</span></td>
+
+          {% elif tab == 'reviews' %}
+          <td><b>{{ obj.product.name|truncatechars:30 }}</b></td>
+          <td>{{ obj.name|default:obj.user.username }}</td>
+          <td><span style="color:var(--warn); font-weight:700;">★ {{ obj.rating }}</span></td>
+          <td>{% if obj.active %}<span class="badge" style="background:color-mix(in srgb, var(--ok) 15%, transparent); color:var(--ok); font-size:11px;">Approved</span>{% else %}<span class="badge badge-muted">Hidden</span>{% endif %}</td>
+          <td><span class="muted small">{{ obj.created_at|date:"M d, Y" }}</span></td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/pagination.html' %}
+  {% else %}
+  <div class="empty-state">
+    <p class="muted">No {{ config.title }} records match your current filter.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ========================================================================= -->
+<!-- IMMUTABLE AUDIT TRAIL                                                     -->
+<!-- ========================================================================= -->
+<div class="panel">
+  <h2>Data Deletion Audit Trail</h2>
+  <p class="muted small" style="margin-bottom:16px;">
+    Every deletion action across all tables is permanently recorded here for accountability and compliance.
+    <b>This audit log table is system-protected and cannot be deleted.</b>
+  </p>
+
+  {% if audit_logs %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Super Admin</th>
+          <th>Data Category</th>
+          <th>Records Pruned</th>
+          <th>Filter Scope</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in audit_logs %}
+        <tr>
+          <td><span class="muted small">{{ log.created_at|date:"M d, Y · H:i:s" }}</span></td>
+          <td><b>@{{ log.actor_username }}</b></td>
+          <td><span class="badge" style="font-size:11px; padding:2px 8px; border-radius:4px; background:var(--bg);">{{ log.data_type }}</span></td>
+          <td><span style="color:var(--bad); font-weight:700;">-{{ log.records_deleted }}</span></td>
+          <td><span class="muted small">{{ log.filter_applied|default:'Selected IDs' }}</span></td>
+          <td><code class="mono small">{{ log.ip_address|default:'—' }}</code></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p class="muted">No data deletion actions have been performed yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ========================================================================= -->
+<!-- SUPER ADMIN DELETION CONFIRMATION MODAL                                    -->
+<!-- ========================================================================= -->
+<div id="deleteModal" class="dm-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="dm-modal">
+    <div class="dm-modal-head">
+      <h2 id="modalTitle" class="dm-modal-title">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Confirm Permanent Deletion
+      </h2>
+      <button type="button" class="link-btn" onclick="closeDeleteModal()" aria-label="Close" style="font-size:24px; line-height:1; color:var(--muted);">&times;</button>
+    </div>
+
+    <div class="dm-modal-alert">
+      <b id="modalWarningHeadline">Warning: This action is permanent and cannot be undone.</b>
+      <div id="modalDetailsText" style="margin-top:4px;">Records and related cascade data will be permanently purged from the database.</div>
+      <div id="modalAccountPolicyNote" style="display:none; margin-top:8px; font-weight:600;">
+        Account Policy: Customer orders will be anonymized to preserve store sales, revenue, tax, and inventory integrity.
+      </div>
+    </div>
+
+    <form method="post" action="{% url 'manage_data_delete' tab %}" id="deleteForm">
+      {% csrf_token %}
+      <input type="hidden" name="selection_mode" id="modalSelectionMode" value="selected">
+      <div id="selectedIdsContainer"></div>
+
+      <!-- Active filters passed dynamically -->
+      <div id="filterInputsContainer">
+        <input type="hidden" name="status" id="modalFilterStatus" value="{{ params.status }}">
+        <input type="hidden" name="period" id="modalFilterPeriod" value="{{ params.period }}">
+        <input type="hidden" name="scope" id="modalFilterScope" value="{{ params.scope }}">
+        <input type="hidden" name="q" id="modalFilterQ" value="{{ params.q }}">
+      </div>
+
+      <div id="inventoryAlertCheckContainer" style="display:none; margin-bottom:14px;">
+        <label class="check" style="font-weight:600; font-size:13px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="delete_resolved_alerts" value="1" checked>
+          Also purge resolved restock alerts
+        </label>
+      </div>
+
+      <div class="form-row" style="margin-bottom:14px;">
+        <label for="confirm_text" style="font-weight:600; font-size:13px; display:block; margin-bottom:4px;">
+          Type <span style="background:color-mix(in srgb, var(--bad) 15%, transparent); color:var(--bad); padding:1px 6px; border-radius:4px; font-family:monospace; font-weight:700;">DELETE</span> to confirm:
+        </label>
+        <input type="text" name="confirm_text" id="confirm_text" placeholder="Type DELETE" required autocomplete="off" style="width:100%;">
+      </div>
+
+      <div class="form-row" style="margin-bottom:18px;">
+        <label for="super_admin_password" style="font-weight:600; font-size:13px; display:block; margin-bottom:4px;">
+          Super Admin Password:
+        </label>
+        <input type="password" name="password" id="super_admin_password" placeholder="Enter your login password" required autocomplete="current-password" style="width:100%;">
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+        <button type="submit" class="btn btn-danger dm-btn-danger">
+          Permanently Delete Data
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var selectAll = document.getElementById('selectAllCheckbox');
+  var rowCheckboxes = document.querySelectorAll('.row-checkbox');
+  var selectedCountSpan = document.getElementById('selectedCount');
+  var btnDeleteSelected = document.getElementById('btnDeleteSelected');
+
+  function updateSelectionState() {
+    var checked = Array.from(rowCheckboxes).filter(function(cb) { return cb.checked; });
+    var count = checked.length;
+    if (selectedCountSpan) selectedCountSpan.textContent = count;
+    if (btnDeleteSelected) btnDeleteSelected.disabled = (count === 0);
+    if (selectAll) {
+      selectAll.checked = (count > 0 && count === rowCheckboxes.length);
+      selectAll.indeterminate = (count > 0 && count < rowCheckboxes.length);
+    }
+  }
+
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      rowCheckboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+      updateSelectionState();
+    });
+  }
+
+  rowCheckboxes.forEach(function(cb) {
+    cb.addEventListener('change', updateSelectionState);
+  });
+});
+
+/* Open modal for a specific card in the grid */
+function openDeleteModalFor(dataType, mode, typeTitle, count, filters) {
+  var form = document.getElementById('deleteForm');
+  var modal = document.getElementById('deleteModal');
+  var modeInput = document.getElementById('modalSelectionMode');
+  var container = document.getElementById('selectedIdsContainer');
+  var headline = document.getElementById('modalWarningHeadline');
+  var details = document.getElementById('modalDetailsText');
+  var accountNote = document.getElementById('modalAccountPolicyNote');
+  var alertCheck = document.getElementById('inventoryAlertCheckContainer');
+
+  form.action = '/manage/data/' + dataType + '/delete/';
+  container.innerHTML = '';
+  modeInput.value = mode;
+
+  filters = filters || {};
+  document.getElementById('modalFilterStatus').value = filters.status || '';
+  document.getElementById('modalFilterPeriod').value = filters.period || '';
+  document.getElementById('modalFilterScope').value = filters.scope || '';
+  document.getElementById('modalFilterQ').value = filters.q || '';
+
+  headline.textContent = 'Permanently delete ALL matching ' + typeTitle + ' records (' + count + ')?';
+  details.textContent = 'This will permanently purge ' + count + ' record(s) matching this category from the database.';
+
+  accountNote.style.display = (dataType === 'users') ? 'block' : 'none';
+  alertCheck.style.display = (dataType === 'inventory_history') ? 'block' : 'none';
+
+  document.getElementById('confirm_text').value = '';
+  document.getElementById('super_admin_password').value = '';
+  modal.style.display = 'flex';
+}
+
+/* Open modal from active data table (selected checkboxes or all matching in current table) */
+function openTableDeleteModal(mode) {
+  var dataType = '{{ tab }}';
+  var typeTitle = '{{ config.title }}';
+  var form = document.getElementById('deleteForm');
+  var modal = document.getElementById('deleteModal');
+  var modeInput = document.getElementById('modalSelectionMode');
+  var container = document.getElementById('selectedIdsContainer');
+  var headline = document.getElementById('modalWarningHeadline');
+  var details = document.getElementById('modalDetailsText');
+  var accountNote = document.getElementById('modalAccountPolicyNote');
+  var alertCheck = document.getElementById('inventoryAlertCheckContainer');
+
+  form.action = '/manage/data/' + dataType + '/delete/';
+  container.innerHTML = '';
+  modeInput.value = mode;
+
+  document.getElementById('modalFilterStatus').value = '{{ params.status }}';
+  document.getElementById('modalFilterPeriod').value = '{{ params.period }}';
+  document.getElementById('modalFilterScope').value = '{{ params.scope }}';
+  document.getElementById('modalFilterQ').value = '{{ params.q }}';
+
+  if (mode === 'selected') {
+    var checked = Array.from(document.querySelectorAll('.row-checkbox:checked'));
+    var count = checked.length;
+    if (count === 0) {
+      alert('Please select at least one record from the table.');
+      return;
+    }
+    headline.textContent = 'Permanently delete ' + count + ' selected ' + typeTitle + ' record(s)?';
+    details.textContent = 'You have selected ' + count + ' item(s) from the current table page.';
+    checked.forEach(function(cb) {
+      var input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'selected_ids';
+      input.value = cb.value;
+      container.appendChild(input);
+    });
+  } else {
+    headline.textContent = 'Permanently delete ALL matching ' + typeTitle + ' records ({{ total_matching }})?';
+    details.textContent = 'This will purge all {{ total_matching }} record(s) matching your current table filters.';
+  }
+
+  accountNote.style.display = (dataType === 'users') ? 'block' : 'none';
+  alertCheck.style.display = (dataType === 'inventory_history') ? 'block' : 'none';
+
+  document.getElementById('confirm_text').value = '';
+  document.getElementById('super_admin_password').value = '';
+  modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').style.display = 'none';
+}
+
+/* Close modal on ESC key or clicking outside */
+window.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeDeleteModal();
+});
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+</script>
+{% endblock %}

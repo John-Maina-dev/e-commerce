@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}{% if q %}Search: {{ q }}{% elif active_category %}{{ active_category|capfirst }}{% else %}Shop{% endif %} · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{% if q %}Results for “{{ q }}”{% elif active_category %}{{ active_category|capfirst }}{% else %}Shop all products{% endif %}</h1>
+  <p>{{ page.paginator.count }} product{{ page.paginator.count|pluralize }}</p>
+</div>
+
+<div class="catalogue-wrap">
+  <div class="toolbar-row">
+    {% if active_category %}<a class="cat-chip" href="{% url 'catalogue' %}">× {{ active_category|capfirst }}</a>{% endif %}
+    <span class="cat-count muted">{{ page.paginator.count }} product{{ page.paginator.count|pluralize }}</span>
+    <form method="get" class="sort-form">
+      {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+      {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+      <label for="f-sort" class="sr-only">Sort by</label>
+      <select id="f-sort" name="sort" onchange="this.form.submit()">
+        <option value="newest" {% if sort == 'newest' or not sort %}selected{% endif %}>Sort: Newest</option>
+        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to high</option>
+        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to low</option>
+        <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Top rated</option>
+        <option value="bestseller" {% if sort == 'bestseller' %}selected{% endif %}>Best sellers</option>
+        <option value="name" {% if sort == 'name' %}selected{% endif %}>Name (A–Z)</option>
+      </select>
+    </form>
+  </div>
+
+  {% if page.object_list %}
+  <div class="product-grid">
+    {% for p in page.object_list %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </div>
+    <h2>No products found</h2>
+    <p>Try a different search term.</p>
+    <a class="btn" href="{% url 'catalogue' %}">Browse all products</a>
+  </div>
+  {% endif %}
+
+  {% include 'partials/pagination.html' %}
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}My orders · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>My orders</h1></div>
+<div class="account-layout">
+  {% include 'partials/account_nav.html' %}
+  <div class="panel">
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Order</th><th>Date</th><th>Items</th><th>Total</th><th>Order status</th><th>Payment</th></tr></thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td><a href="{% url 'account_order_detail' o.number %}">{{ o.number }}</a></td>
+          <td>{{ o.created_at|date:'d M Y' }}</td>
+          <td>{{ o.items.count }}</td>
+          <td>{{ o.total|money:currency }}</td>
+          <td><span class="status-badge {{ o.status|status_class }}">{{ o.get_status_display }}</span></td>
+          <td><span class="status-badge {{ o.payment_status|status_class }}">{{ o.get_payment_status_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No orders yet. <a href="{% url 'catalogue' %}">Start shopping →</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

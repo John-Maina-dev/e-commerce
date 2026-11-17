@@ -1,0 +1,91 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Security Audit Logs · {{ site_settings.store_name }}{% endblock %}
+
+{% block manage_content %}
+<div class="manage-head">
+  <div>
+    <span class="muted"><a href="{% url 'manage_accounts' %}" style="text-decoration:none; color:inherit;">← BACK TO ACCOUNTS</a></span>
+    <h1>Account &amp; Security Audit Logs</h1>
+  </div>
+</div>
+
+<div class="panel" style="margin-bottom: 20px; padding: 14px 16px;">
+  <form method="get" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    <label for="action_filter" style="font-weight: 600; font-size: 14px;">Filter by Action:</label>
+    <select id="action_filter" name="action" class="input-sm" onchange="this.form.submit()">
+      <option value="">All Security Actions</option>
+      {% for code, label in action_choices %}
+      <option value="{{ code }}" {% if action_filter == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    {% if action_filter %}
+    <a href="{% url 'account_audit_logs' %}" class="btn btn-ghost btn-sm">Clear Filter</a>
+    {% endif %}
+  </form>
+</div>
+
+<div class="panel">
+  <div class="table-wrap">
+    <table class="table-hover">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Action</th>
+          <th>Target Account</th>
+          <th>Performed By</th>
+          <th>Details / Transitions</th>
+          <th>IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td style="white-space: nowrap;">
+            <b>{{ log.created_at|date:'d M Y' }}</b>
+            <small class="muted" style="display:block;">{{ log.created_at|date:'H:i:s' }}</small>
+          </td>
+          <td>
+            <span class="status-badge" style="
+              {% if log.action == 'approve' %}background:#dcfce7; color:#15803d;
+              {% elif log.action == 'reject' or log.action == 'delete' or log.action == 'suspend' %}background:#fee2e2; color:#b91c1c;
+              {% elif log.action == 'role_change' %}background:#e0e7ff; color:#4338ca;
+              {% else %}background:#f1f5f9; color:#475569;{% endif %}">
+              {{ log.get_action_display }}
+            </span>
+          </td>
+          <td>
+            <b>{{ log.target_username }}</b>
+            {% if log.target_user %}<small class="muted"> (ID: {{ log.target_user.pk }})</small>{% endif %}
+          </td>
+          <td>
+            {% if log.actor %}
+              {{ log.actor.username }}
+            {% else %}
+              <span class="muted">System / Self</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if log.note %}<div>{{ log.note }}</div>{% endif %}
+            {% if log.old_value or log.new_value %}
+              <small class="muted">{{ log.old_value|default:'—' }} → {{ log.new_value|default:'—' }}</small>
+            {% endif %}
+          </td>
+          <td>
+            <small class="muted">{{ log.ip_address|default:'—' }}</small>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 32px;" class="muted">
+            No audit records found matching criteria.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.has_other_pages %}
+    {% include 'partials/manage_pagination.html' %}
+  {% endif %}
+</div>
+{% endblock %}

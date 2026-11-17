@@ -1,0 +1,148 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Newsletter Subscribers · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div>
+    <span class="muted">MARKETING &amp; AUDIENCE</span>
+    <h1>Newsletter Subscribers</h1>
+    <p class="muted">Members and visitors who opted in to receive new arrival alerts and boutique announcements.</p>
+  </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="{% url 'subscribers_export_csv' %}?status={{ status }}&q={{ q }}" class="btn btn-ghost">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom; margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export CSV
+    </a>
+    <button type="button" class="btn" onclick="document.getElementById('broadcastModal').style.display='flex'">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom; margin-right:4px;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Broadcast Announcement
+    </button>
+  </div>
+</div>
+
+<div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px;">
+  <div class="metric-card panel">
+    <div class="muted small">Total Subscribers</div>
+    <div class="metric-value">{{ total_count }}</div>
+  </div>
+  <div class="metric-card panel">
+    <div class="muted small">Active (Receiving Alerts)</div>
+    <div class="metric-value" style="color:#059669;">{{ active_count }}</div>
+  </div>
+  <div class="metric-card panel">
+    <div class="muted small">Unsubscribed / Paused</div>
+    <div class="metric-value" style="color:#9ca3af;">{{ inactive_count }}</div>
+  </div>
+</div>
+
+<div class="panel">
+  <form method="get" class="filter-bar" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by email..." style="min-width:260px;">
+    <select name="status" onchange="this.form.submit()">
+      <option value="" {% if not status %}selected{% endif %}>All Statuses</option>
+      <option value="active" {% if status == 'active' %}selected{% endif %}>Active Only</option>
+      <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Unsubscribed / Inactive</option>
+    </select>
+    <button class="btn btn-ghost" type="submit">Filter</button>
+    {% if q or status %}
+    <a href="{% url 'manage_subscribers' %}" class="btn btn-ghost" style="color:var(--muted);">Clear</a>
+    {% endif %}
+  </form>
+
+  {% if page.object_list %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Account</th>
+          <th>Category Preferences</th>
+          <th>Subscribed Date</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in page.object_list %}
+        <tr>
+          <td><b>{{ s.email }}</b></td>
+          <td>
+            {% if s.active %}
+            <span class="badge" style="background:#d1fae5; color:#065f46; font-size:12px; padding:3px 10px; border-radius:999px;">Active</span>
+            {% else %}
+            <span class="badge" style="background:#f3f4f6; color:#6b7280; font-size:12px; padding:3px 10px; border-radius:999px;">Unsubscribed</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if s.user %}
+            <span style="color:#2563eb; font-weight:600;">@{{ s.user.username }}</span>
+            {% else %}
+            <span class="muted">Guest</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if s.all_categories %}
+            <span class="muted small">All new arrivals</span>
+            {% else %}
+            <span class="small">
+              {% for c in s.categories.all %}
+              <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-size:11px;">{{ c.name }}</span>
+              {% empty %}
+              <span class="muted small">None selected</span>
+              {% endfor %}
+            </span>
+            {% endif %}
+          </td>
+          <td><span class="muted small">{{ s.subscribed_at|date:"M d, Y · H:i" }}</span></td>
+          <td style="text-align:right;">
+            {% if user.is_superuser or user.profile.role == 'super_admin' %}
+            <form method="post" action="{% url 'subscriber_delete' s.pk %}" style="display:inline;" onsubmit="return confirm('Remove subscriber {{ s.email }} permanently?');">
+              {% csrf_token %}
+              <button class="btn btn-ghost btn-sm" type="submit" style="color:#ef4444;" title="Delete Subscriber">
+                Delete
+              </button>
+            </form>
+            {% else %}
+            <span class="muted small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include 'partials/pagination.html' %}
+  {% else %}
+  <div class="empty-state">
+    <p class="muted">No subscribers found matching your criteria.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Broadcast Announcement Modal -->
+<div id="broadcastModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+  <div class="panel form-card" style="max-width:560px; width:100%; background:var(--surface, #ffffff); border-radius:12px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0;">Broadcast Announcement</h2>
+      <button type="button" class="link-btn" onclick="document.getElementById('broadcastModal').style.display='none'" style="font-size:24px; line-height:1; padding:4px 8px;">&times;</button>
+    </div>
+    <p class="muted small" style="margin-bottom:16px;">
+      This sends an immediate email announcement to all <b>{{ active_count }} active subscribers</b>. Each email includes a personalized one-click unsubscribe link.
+    </p>
+    <form method="post" action="{% url 'subscribers_broadcast' %}">
+      {% csrf_token %}
+      <div class="form-row">
+        <label for="broadcast_subject">Email Subject</label>
+        <input type="text" name="subject" id="broadcast_subject" placeholder="e.g. Weekend Flash Sale / New Season Collection" required>
+      </div>
+      <div class="form-row">
+        <label for="broadcast_message">Announcement Message</label>
+        <textarea name="message" id="broadcast_message" rows="6" placeholder="Write your announcement or newsletter update here..." required></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('broadcastModal').style.display='none'">Cancel</button>
+        <button type="submit" class="btn">Send Announcement</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

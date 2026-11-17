@@ -1,0 +1,13 @@
+NEW ARRIVAL: {{ product.name }}
+
+A stylish new piece has arrived at {{ site.store_name }} in {{ product.category.name }}.
+
+Product: {{ product.name }}
+Price: {{ product.effective_price }} {{ currency }}
+{% if product.brand %}Brand: {{ product.brand }}{% endif %}
+
+View product & order:
+{{ product_url }}
+
+To unsubscribe, click the link below:
+{{ unsubscribe_url }}

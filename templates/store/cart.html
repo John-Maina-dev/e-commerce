@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Shopping Cart · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+  <div>
+    <h1>Shopping Cart</h1>
+    <p class="muted">{{ items|length }} item{{ items|length|pluralize }} in your cart</p>
+  </div>
+  {% if items %}
+  <div>
+    <form method="post" action="{% url 'cart_clear' %}" onsubmit="return confirm('Are you sure you want to remove all items from your cart?');" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline btn-sm" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Clear Cart
+      </button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+{% if items %}
+<div class="cart-layout">
+  <div class="cart-items">
+    {% for i in items %}
+    <div class="cart-row">
+      <a class="cart-thumb" href="{% url 'product_detail' i.product.slug %}">
+        {% if i.product.image_src %}
+          <img src="{{ i.product.image_src }}" alt="{{ i.product.name }}">
+        {% else %}
+          <div class="placeholder">RB</div>
+        {% endif %}
+      </a>
+      <div class="cart-info">
+        <h3><a href="{% url 'product_detail' i.product.slug %}">{{ i.product.name }}</a></h3>
+        <span class="muted">SKU: {{ i.product.sku }}{% if i.product.category %} · {{ i.product.category.name }}{% endif %}</span>
+        <p class="muted">
+          {% if i.product.out_of_stock %}
+            <span class="bad">Out of stock</span>
+          {% elif i.product.low_stock %}
+            <span class="warn">Only {{ i.product.stock }} left in stock</span>
+          {% endif %}
+        </p>
+        <div style="display: flex; align-items: center; gap: 14px; margin-top: 6px;">
+          <form method="post" action="{% url 'cart_update' i.product.id %}" class="inline-form">
+            {% csrf_token %}
+            <div class="qty-wrap">
+              <button type="submit" name="quantity" value="{{ i.quantity|add:'-1' }}" class="qty-btn" {% if i.quantity <= 1 %}disabled{% endif %} aria-label="Decrease quantity">−</button>
+              <span class="qty-static">{{ i.quantity }}</span>
+              <button type="submit" name="quantity" value="{{ i.quantity|add:'1' }}" class="qty-btn" {% if i.quantity >= i.product.stock %}disabled{% endif %} aria-label="Increase quantity">+</button>
+            </div>
+          </form>
+          <form method="post" action="{% url 'cart_remove' i.product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="link-btn muted" style="color: #ef4444; font-size: 13px;">Remove</button>
+          </form>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <strong class="cart-line">{{ i.line|money:currency }}</strong>
+        <div class="muted small">{{ i.product.effective_price|money:currency }} each</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <aside class="summary panel summary-card">
+    <h2>Order summary</h2>
+    <div class="summary-row"><span>Subtotal</span><strong>{{ subtotal|money:currency }}</strong></div>
+    {% if coupon %}
+    <div class="summary-row">
+      <span>Discount ({{ coupon.code }}) <form method="post" action="{% url 'cart_remove_coupon' %}" class="inline-form">{% csrf_token %}<button class="link-btn">remove</button></form></span>
+      <strong class="good">-{{ discount|money:currency }}</strong>
+    </div>
+    {% endif %}
+    <div class="summary-row"><span>Shipping</span><strong>{% if shipping %}{{ shipping|money:currency }}{% else %}Free{% endif %}</strong></div>
+    {% if tax %}<div class="summary-row"><span>VAT / Tax ({{ site_settings.tax_rate }}%)</span><strong>{{ tax|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row total"><span>Total</span><strong>{{ total|money:currency }}</strong></div>
+
+    <form method="post" action="{% url 'cart_apply_coupon' %}" class="coupon-form">
+      {% csrf_token %}
+      <label for="coupon-code" class="sr-only">Coupon code</label>
+      <input id="coupon-code" type="text" name="code" placeholder="Coupon code" value="{{ coupon.code|default:'' }}">
+      <button class="btn btn-ghost" type="submit">Apply</button>
+    </form>
+    {% if not coupon and subtotal < site_settings.free_shipping_threshold %}
+    <p class="hint">Free shipping on orders over {{ site_settings.free_shipping_threshold|money:currency }}.</p>
+    {% endif %}
+
+    <a class="btn btn-full btn-lg" href="{% url 'checkout' %}">Proceed to Checkout</a>
+    <a class="btn btn-ghost btn-full" href="{% url 'catalogue' %}">Continue Shopping</a>
+  </aside>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">
+    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+  </div>
+  <h2>Your cart is empty</h2>
+  <p>Browse the collection and discover timeless style.</p>
+  <a class="btn" href="{% url 'catalogue' %}">Browse products</a>
+</div>
+{% endif %}
+
+<!-- Major Requirement: Intelligent Recommendations Section at bottom of cart -->
+{% if recommendations.you_may_also_like %}
+<section class="cart-recommendations-section" style="margin-top: 56px; padding-top: 36px; border-top: 2px solid var(--border);">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
+    <div>
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent);">INTELLIGENT RECOMMENDATIONS</span>
+      <h2 style="margin: 2px 0 0; font-size: 26px;">YOU MAY ALSO LIKE</h2>
+      <p class="muted small" style="margin-top: 4px;">Curated pieces selected to complement the items in your shopping bag.</p>
+    </div>
+    <div class="rec-tabs" role="tablist" style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button type="button" class="btn btn-sm btn-outline is-active rec-filter-tab" data-group="all">All</button>
+      {% if recommendations.frequently_bought %}
+        <button type="button" class="btn btn-sm btn-outline rec-filter-tab" data-group="frequent">Frequently Bought Together</button>
+      {% endif %}
+      {% if recommendations.complete_your_look %}
+        <button type="button" class="btn btn-sm btn-outline rec-filter-tab" data-group="look">Complete Your Look</button>
+      {% endif %}
+      {% if recommendations.related_products %}
+        <button type="button" class="btn btn-sm btn-outline rec-filter-tab" data-group="related">Related Products</button>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="product-grid" id="recStoreGrid">
+    {% for p in recommendations.you_may_also_like %}
+    <article class="product-card rec-card" data-rec-id="{{ p.id }}">
+      <a class="product-card-media" href="{% url 'product_detail' p.slug %}">
+        {% if p.image %}
+          <img src="{{ p.image }}" alt="{{ p.name }}" loading="lazy">
+        {% else %}
+          <div class="placeholder">RB</div>
+        {% endif %}
+        {% if p.has_discount %}
+          <span class="badge sale">-{{ p.discount_percent }}%</span>
+        {% endif %}
+      </a>
+      <div class="product-card-body">
+        <span class="product-card-category">{{ p.category|default:'Boutique' }}</span>
+        <h3 class="product-card-title"><a href="{% url 'product_detail' p.slug %}">{{ p.name }}</a></h3>
+        <div class="product-card-price">
+          <b>{{ currency }} {{ p.price }}</b>
+          {% if p.has_discount %}
+            <span class="product-card-old">{{ currency }} {{ p.regular_price }}</span>
+          {% endif %}
+        </div>
+        <div style="margin-top: 10px;">
+          <button type="button" class="btn btn-sm btn-full rec-add-btn" data-pk="{{ p.id }}" data-name="{{ p.name }}">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Floating Toast Notification -->
+<div id="cartToast" class="message success" style="position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+  <span id="cartToastText"></span>
+</div>
+
+<script>
+  (function () {
+    var CSRF = '{{ csrf_token }}';
+    var toast = document.getElementById('cartToast');
+    var toastText = document.getElementById('cartToastText');
+    var toastTimer = null;
+
+    function showToast(msg) {
+      if (!toast) return;
+      toastText.textContent = msg;
+      toast.style.display = 'block';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        toast.style.display = 'none';
+      }, 3500);
+    }
+
+    // Add recommendation to cart without full reload
+    document.querySelectorAll('.rec-add-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pk = btn.dataset.pk;
+        var name = btn.dataset.name;
+        btn.disabled = true;
+        btn.textContent = 'Adding…';
+
+        fetch('/cart/add/' + pk + '/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': CSRF,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'quantity=1'
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            btn.disabled = false;
+            btn.textContent = 'Added ✓';
+            btn.classList.add('btn-ghost');
+            showToast(name + ' added to your shopping cart!');
+            // Update nav cart count badge if available
+            var countEl = document.querySelector('.cart-count, .nav-cart-count');
+            if (countEl && data.cart_count) {
+              countEl.textContent = data.cart_count;
+            }
+            // Auto reload after brief moment to refresh subtotal and new recommendations
+            setTimeout(function () {
+              window.location.reload();
+            }, 800);
+          })
+          .catch(function () {
+            btn.disabled = false;
+            btn.textContent = 'Add to Cart';
+            // Fallback: standard post
+            var f = document.createElement('form');
+            f.method = 'POST';
+            f.action = '/cart/add/' + pk + '/';
+            var csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = CSRF;
+            f.appendChild(csrfInput);
+            document.body.appendChild(f);
+            f.submit();
+          });
+      });
+    });
+  })();
+</script>
+{% endif %}
+{% endblock %}

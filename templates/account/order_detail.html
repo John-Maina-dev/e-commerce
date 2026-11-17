@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}Order {{ order.number }} · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Order {{ order.number }}</h1>
+  <p>Placed {{ order.created_at|date:'d M Y H:i' }} · <a href="{% url 'account_orders' %}">← All orders</a></p>
+</div>
+
+<div class="order-badges">
+  <span class="status-badge {{ order.status|status_class }}">Order: {{ order.get_status_display }}</span>
+  <span class="status-badge {{ order.payment_status|status_class }}">Payment: {{ order.get_payment_status_display }}</span>
+  {% if order.payment_method == 'mpesa' %}<span class="status-badge">M-Pesa</span>{% endif %}
+</div>
+
+<div class="timeline panel">
+  <h2>Order progress</h2>
+  {% if order.status_history.all %}
+  <ol class="timeline-list">
+    {% for h in order.status_history.all %}
+    <li class="done">
+      <span class="dot"></span>
+      <div>
+        <b>{{ h.get_status_display }}</b>
+        <span class="muted">{{ h.created_at|date:'d M Y H:i' }}{% if h.note %} — {{ h.note }}{% endif %}</span>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="muted">Order placed — status pending.</p>
+  {% endif %}
+</div>
+
+<div class="order-layout">
+  <div class="panel">
+    <h2>Items</h2>
+    {% for i in order.items.all %}
+    <div class="cart-row">
+      <span>{{ i.product_name }} <small class="muted">× {{ i.quantity }}</small></span>
+      <strong>{{ i.subtotal|money:currency }}</strong>
+    </div>
+    {% endfor %}
+    <hr>
+    <div class="summary-row"><span>Subtotal</span><strong>{{ order.subtotal|money:currency }}</strong></div>
+    {% if order.discount %}<div class="summary-row"><span>Discount</span><strong class="good">-{{ order.discount|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row"><span>Shipping</span><strong>{% if order.shipping %}{{ order.shipping|money:currency }}{% else %}Free{% endif %}</strong></div>
+    {% if order.tax %}<div class="summary-row"><span>Tax</span><strong>{{ order.tax|money:currency }}</strong></div>{% endif %}
+    <div class="summary-row total"><span>Total</span><strong>{{ order.total|money:currency }}</strong></div>
+  </div>
+
+  <div class="panel">
+    <h2>Delivery</h2>
+    <p><b>{{ order.customer_name }}</b><br>{{ order.phone }}<br>{{ order.address_line1 }}{% if order.city %}, {{ order.city }}{% endif %}{% if order.county %}, {{ order.county }}{% endif %}</p>
+    {% if order.payments.all %}
+    <h2>Payments</h2>
+    {% for p in order.payments.all %}
+    <p class="muted">{{ p.get_method_display }} · {{ p.reference }} · {{ p.amount|money:currency }} · <span class="status-badge {{ p.status|status_class }}">{{ p.get_status_display }}</span></p>
+    {% endfor %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

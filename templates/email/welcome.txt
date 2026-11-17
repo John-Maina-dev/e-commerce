@@ -1,0 +1,8 @@
+Hello {{ user.first_name|default:user.username }},
+
+Welcome to {{ site.store_name }}! You now have a wishlist, order tracking and faster checkout.
+
+Start shopping: {{ protocol }}://{{ domain }}
+
+Thanks,
+The {{ site.store_name }} team

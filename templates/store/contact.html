@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Contact · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Contact us</h1><p>We'd love to hear from you.</p></div>
+<div class="contact-layout">
+  <div class="panel">
+    <h2>Send a message</h2>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-grid">
+        <div class="form-row"><label for="id_name">Your name</label>{{ form.name }}</div>
+        <div class="form-row"><label for="id_email">Email</label>{{ form.email }}</div>
+        <div class="form-row form-wide"><label for="id_subject">Subject</label>{{ form.subject }}</div>
+        <div class="form-row form-wide"><label for="id_message">Message</label>{{ form.message }}</div>
+      </div>
+      {% if form.errors %}<p class="form-errors">Please correct the highlighted fields.</p>{% endif %}
+      <button class="btn" type="submit">Send message</button>
+    </form>
+  </div>
+  <aside class="panel">
+    <h2>Reach us</h2>
+    <p><b>Email</b><br>{{ site_settings.contact_email|default:'—' }}</p>
+    <p><b>Phone</b><br>{{ site_settings.phone|default:'—' }}</p>
+    <p><b>Store</b><br>{{ site_settings.address|default:'—' }}</p>
+    <p class="muted">We usually reply within one business day.</p>
+  </aside>
+</div>
+{% endblock %}

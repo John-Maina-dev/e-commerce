@@ -1,0 +1,13 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}{{ title }} · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head"><div><span class="muted">CONFIRM</span><h1>{{ title }}</h1></div></div>
+<div class="auth-wrap"><div class="auth-card panel">
+  <p>{{ message }}</p>
+  <form method="post" class="confirm-actions">
+    {% csrf_token %}
+    <a class="btn btn-ghost" href="{{ request.META.HTTP_REFERER|default:'/' }}">Cancel</a>
+    <button class="btn btn-danger" type="submit">Confirm delete</button>
+  </form>
+</div></div>
+{% endblock %}

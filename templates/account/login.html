@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Sign in · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card panel">
+    <div class="auth-brand">
+      {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" alt="{{ site_settings.store_name }} logo" class="brand-logo">{% else %}<span class="brand-mark">RB</span>{% endif %}
+      <div><h1>Welcome back</h1><p>Sign in to manage your orders and wishlist.</p></div>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-row"><label for="id_username">Username</label><input id="id_username" type="text" name="username" autofocus required autocomplete="username"></div>
+      <div class="form-row"><label for="id_password">Password</label><input id="id_password" type="password" name="password" required autocomplete="current-password"></div>
+      {% if form.non_field_errors %}<div class="alert alert-error">{{ form.non_field_errors.0 }}</div>{% endif %}
+      <button class="btn btn-full btn-lg" type="submit">Sign in</button>
+    </form>
+    <p class="auth-alt"><a href="{% url 'password_reset' %}">Forgot password?</a></p>
+    <p class="auth-alt">New here? <a href="{% url 'register' %}">Create an account</a></p>
+  </div>
+</div>
+{% endblock %}

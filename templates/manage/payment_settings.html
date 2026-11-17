@@ -1,0 +1,184 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}M-Pesa STK Push settings · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CONFIGURATION</span><h1>M-Pesa STK Push</h1></div>
+  <div class="muted small">Settings → Payment Settings → M-Pesa STK Push</div>
+</div>
+
+<div class="manage-grid">
+  <form method="post" class="form-card panel" autocomplete="off">
+    {% csrf_token %}
+
+    <h2>M-Pesa environment</h2>
+    <div class="mpesa-toggle">
+      <div>
+        <label class="switch">
+          <input type="checkbox" name="mpesa_enabled" id="id_mpesa_enabled" {% if form.mpesa_enabled.value %}checked{% endif %}>
+          <span class="switch-track" aria-hidden="true"></span>
+          <span class="switch-label">Enable M-Pesa STK Push</span>
+        </label>
+        <p class="form-hint">When disabled, checkout will not attempt an M-Pesa STK Push.</p>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_environment">Environment</label>
+      {{ form.mpesa_environment }}
+      {{ form.mpesa_environment.errors }}
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_account_type">Account type</label>
+      {{ form.mpesa_account_type }}
+      <p class="form-hint">PayBill sends <code>CustomerPayBillOnline</code>; a Till number sends <code>CustomerBuyGoodsOnline</code>.</p>
+      {% if s.mpesa_environment == 'sandbox' and s.mpesa_account_type == 'till' and s.mpesa_shortcode == '174379' %}
+      <p class="form-hint" style="color:#b45309"><b>⚠ Check account type.</b> Sandbox shortcode <code>174379</code> is the PayBill test number. Set Account type to <b>PayBill</b> for sandbox STK Push.</p>
+      {% endif %}
+      {{ form.mpesa_account_type.errors }}
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_business_name">Business name <span class="muted">(optional)</span></label>
+      {{ form.mpesa_business_name }}
+      <p class="form-hint">An internal label to identify this M-Pesa account.</p>
+      {{ form.mpesa_business_name.errors }}
+    </div>
+
+    <hr>
+    <h2>Daraja credentials</h2>
+
+    <div class="form-row">
+      <label for="id_mpesa_consumer_key">Consumer Key</label>
+      <div class="secret-field">
+        {{ form.mpesa_consumer_key }}
+        <button type="button" class="secret-toggle" data-toggle-secret aria-label="Show or hide value">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p class="form-hint">{% if s.mpesa_consumer_key %}<span class="badge badge-muted">configured</span> Leave blank to keep the saved value.{% else %}Required when M-Pesa is enabled.{% endif %}</p>
+      {{ form.mpesa_consumer_key.errors }}
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_consumer_secret">Consumer Secret</label>
+      <div class="secret-field">
+        {{ form.mpesa_consumer_secret }}
+        <button type="button" class="secret-toggle" data-toggle-secret aria-label="Show or hide value">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p class="form-hint">{% if s.mpesa_consumer_secret %}<span class="badge badge-muted">configured</span> Leave blank to keep the saved value.{% else %}Required when M-Pesa is enabled.{% endif %}</p>
+      {{ form.mpesa_consumer_secret.errors }}
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_shortcode">Business Shortcode</label>
+      {{ form.mpesa_shortcode }}
+      <p class="form-hint">Digits only, e.g. <code>174379</code> for sandbox.</p>
+      {{ form.mpesa_shortcode.errors }}
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_passkey">Passkey</label>
+      <div class="secret-field">
+        {{ form.mpesa_passkey }}
+        <button type="button" class="secret-toggle" data-toggle-secret aria-label="Show or hide value">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p class="form-hint">{% if s.mpesa_passkey %}<span class="badge badge-muted">configured</span> Leave blank to keep the saved value.{% else %}Required when M-Pesa is enabled.{% endif %}</p>
+      {{ form.mpesa_passkey.errors }}
+    </div>
+
+    <hr>
+    <h2>Callback &amp; reference</h2>
+
+    <div class="form-row">
+      <label for="callback-url">STK Push Callback URL</label>
+      <div class="secret-field">
+        <input type="url" id="callback-url" value="{{ callback_url }}" readonly>
+        <button type="button" class="secret-toggle" id="copy-callback" data-copy="{{ callback_url }}" aria-label="Copy callback URL">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <p class="form-hint">Generated from this project's configured domain. Must be publicly reachable over HTTPS in production.</p>
+      {% if 'https://' not in callback_url %}<p class="form-hint" style="color:#b45309"><b>⚠ Not public HTTPS.</b> Safaricom cannot call <code>localhost</code>/plain HTTP. Use a public HTTPS domain or tunnel (e.g. ngrok) so payment callbacks can reach this store.</p>{% endif %}
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_account_reference">Account reference</label>
+      {{ form.mpesa_account_reference }}
+      <p class="form-hint">Shown on the customer's M-Pesa statement (max 50 characters).</p>
+      {{ form.mpesa_account_reference.errors }}
+    </div>
+
+    <div class="form-row">
+      <label for="id_mpesa_transaction_desc">Transaction description</label>
+      {{ form.mpesa_transaction_desc }}
+      {{ form.mpesa_transaction_desc.errors }}
+    </div>
+
+    <hr>
+    <h2>Inventory strategy</h2>
+    <p class="muted small">Controls when product stock is deducted for a sale. Gateway callbacks always decide whether an order is actually paid.</p>
+    <div class="form-row">
+      <label for="id_inventory_strategy">Deduct stock…</label>
+      {{ form.inventory_strategy }}
+    </div>
+
+    <button class="btn btn-lg" type="submit">Save M-Pesa Settings</button>
+  </form>
+
+  <div class="panel">
+    <h2>Connection test</h2>
+    <p class="muted">Checks the whole outbound path: Daraja OAuth, entitlement to call the STK Push API, and that the callback URL is a public HTTPS address Safaricom can reach. Secrets and access tokens are never displayed.</p>
+    <form method="post" action="{% url 'test_mpesa' %}">
+      {% csrf_token %}
+      <button class="btn btn-outline btn-full" type="submit">Test M-Pesa Connection</button>
+    </form>
+    <p class="muted small">If the test reports <b>404.001.03 / STK Push NOT enabled</b>, the credentials are fine but Safaricom has not enabled the “Lipa na M-Pesa Online” product for this app or shortcode. Add it at developer.safaricom.co.ke → My Apps, then save the credentials. If it is already added, email <b>apisupport@safaricom.co.ke</b> with the app ID, shortcode and the requestId from the test. No code change can grant it and retrying will not fix it — until Safaricom enables it, checkout automatically offers customers the manual PayBill/Till fallback.</p>
+    <hr>
+    <h2>Status</h2>
+    <p>Environment: <b>{{ s.mpesa_environment|upper }}</b> · Enabled: <b>{% if s.mpesa_enabled %}Yes{% else %}No{% endif %}</b></p>
+    <p>Account type: <b>{{ s.get_mpesa_account_type_display }}</b>{% if s.mpesa_business_name %} · <b>{{ s.mpesa_business_name }}</b>{% endif %}</p>
+    <p class="muted small">
+      Consumer Key: <b>{% if s.mpesa_consumer_key %}configured{% else %}missing{% endif %}</b> ·
+      Consumer Secret: <b>{% if s.mpesa_consumer_secret %}configured{% else %}missing{% endif %}</b> ·
+      Passkey: <b>{% if s.mpesa_passkey %}configured{% else %}missing{% endif %}</b>
+    </p>
+    <hr>
+    <h2>How this is used</h2>
+    <p class="muted small">
+      These settings are used to initiate M-Pesa STK Push payments during checkout.
+      Customers receive an M-Pesa payment prompt on their phone after submitting an order.
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    // Show / hide secret inputs. Saved secrets are never pre-filled, so this
+    // only ever reveals what the administrator is currently typing.
+    document.querySelectorAll('[data-toggle-secret]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var input = btn.parentElement.querySelector('input');
+        if (!input) return;
+        input.type = input.type === 'password' ? 'text' : 'password';
+      });
+    });
+    // Copy the generated callback URL — never a credential.
+    var copyBtn = document.getElementById('copy-callback');
+    if (copyBtn && navigator.clipboard) {
+      copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(copyBtn.getAttribute('data-copy')).then(function () {
+          copyBtn.classList.add('is-copied');
+          setTimeout(function () { copyBtn.classList.remove('is-copied'); }, 1500);
+        });
+      });
+    }
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load store_extras %}
+{% block title %}My account · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><h1>My account</h1><p>Welcome back, {{ user.username }}.</p></div>
+<div class="account-layout">
+  {% include 'partials/account_nav.html' %}
+  <div>
+    <div class="stat-grid">
+      <a class="stat-card" href="{% url 'account_orders' %}"><small>Orders</small><b>{{ order_count }}</b></a>
+      <a class="stat-card" href="{% url 'wishlist' %}"><small>Wishlist items</small><b>{{ wishlist_count }}</b></a>
+      <a class="stat-card" href="{% url 'account_addresses' %}"><small>Saved addresses</small><b>{{ address_count }}</b></a>
+    </div>
+    <div class="panel">
+      <h2>Recent orders</h2>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Order</th><th>Date</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for o in recent_orders %}
+          <tr>
+            <td><a href="{% url 'account_order_detail' o.number %}">{{ o.number }}</a></td>
+            <td>{{ o.created_at|date:'d M Y' }}</td>
+            <td>{{ o.total|money:currency }}</td>
+            <td><span class="status-badge {{ o.status|status_class }}">{{ o.get_status_display }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No orders yet. <a href="{% url 'catalogue' %}">Start shopping →</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

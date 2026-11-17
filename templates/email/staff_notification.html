@@ -1,0 +1,7 @@
+{% extends 'email/_base_email.html' %}
+{% block body %}
+<h2>{{ title }}</h2>
+{% if message %}<p>{{ message }}</p>{% endif %}
+<p><a class="btn" href="{% if link %}{{ protocol }}://{{ domain }}{{ link }}{% else %}{{ protocol }}://{{ domain }}/manage/{% endif %}">Open in the management console</a></p>
+<p>This is an automated notification from {{ site.store_name }}.</p>
+{% endblock %}

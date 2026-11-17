@@ -1,0 +1,260 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Account Management · {{ site_settings.store_name }}{% endblock %}
+
+{% block manage_content %}
+<div class="manage-head">
+  <div>
+    <span class="muted">SUPER ADMIN CONTROL CENTER</span>
+    <h1>Account Approvals &amp; Roles</h1>
+  </div>
+  <div class="head-actions">
+    <a class="btn btn-outline" href="{% url 'account_audit_logs' %}">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+      Security Audit Logs
+    </a>
+  </div>
+</div>
+
+<!-- Overview Metric Cards -->
+<div class="stat-grid" style="margin-bottom: 24px;">
+  <div class="stat-card">
+    <small>Total Accounts</small>
+    <b>{{ total_accounts }}</b>
+  </div>
+  <div class="stat-card" style="border-left: 4px solid var(--primary, #d97706);">
+    <small>Pending Approval</small>
+    <b style="color: var(--primary, #d97706);">{{ pending_count }}</b>
+    <small class="muted">Awaiting review</small>
+  </div>
+  <div class="stat-card" style="border-left: 4px solid #16a34a;">
+    <small>Approved Accounts</small>
+    <b style="color: #16a34a;">{{ approved_count }}</b>
+    <small class="muted">Active login enabled</small>
+  </div>
+  <div class="stat-card" style="border-left: 4px solid #dc2626;">
+    <small>Rejected / Suspended</small>
+    <b style="color: #dc2626;">{{ rejected_count|add:suspended_count }}</b>
+    <small class="muted">{{ rejected_count }} rejected · {{ suspended_count }} suspended</small>
+  </div>
+</div>
+
+<!-- Search & Status Tabs -->
+<div class="panel" style="margin-bottom: 20px; padding: 16px;">
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;">
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;" role="tablist">
+      <a href="?status=all{% if search_q %}&q={{ search_q }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}"
+         class="btn btn-sm {% if status_tab == 'all' %}btn-primary{% else %}btn-ghost{% endif %}">
+        All Accounts ({{ total_accounts }})
+      </a>
+      <a href="?status=pending{% if search_q %}&q={{ search_q }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}"
+         class="btn btn-sm {% if status_tab == 'pending' %}btn-primary{% else %}btn-ghost{% endif %}">
+        Pending {% if pending_count %}<span class="badge-count" style="margin-left: 4px; background:#d97706;">{{ pending_count }}</span>{% endif %}
+      </a>
+      <a href="?status=approved{% if search_q %}&q={{ search_q }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}"
+         class="btn btn-sm {% if status_tab == 'approved' %}btn-primary{% else %}btn-ghost{% endif %}">
+        Approved ({{ approved_count }})
+      </a>
+      <a href="?status=suspended{% if search_q %}&q={{ search_q }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}"
+         class="btn btn-sm {% if status_tab == 'suspended' %}btn-primary{% else %}btn-ghost{% endif %}">
+        Suspended ({{ suspended_count }})
+      </a>
+      <a href="?status=rejected{% if search_q %}&q={{ search_q }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}"
+         class="btn btn-sm {% if status_tab == 'rejected' %}btn-primary{% else %}btn-ghost{% endif %}">
+        Rejected ({{ rejected_count }})
+      </a>
+    </div>
+
+    <form method="get" style="display: flex; gap: 8px; align-items: center;">
+      {% if status_tab != 'all' %}<input type="hidden" name="status" value="{{ status_tab }}">{% endif %}
+      <select name="role" class="input-sm" onchange="this.form.submit()">
+        <option value="">All Roles</option>
+        {% for r_val, r_label in roles %}
+        <option value="{{ r_val }}" {% if role_filter == r_val %}selected{% endif %}>{{ r_label }}</option>
+        {% endfor %}
+      </select>
+      <input type="search" name="q" value="{{ search_q }}" placeholder="Search username, email, phone…" class="input-sm" style="min-width: 220px;">
+      <button class="btn btn-sm" type="submit">Filter</button>
+      {% if search_q or role_filter or status_tab != 'all' %}
+      <a href="{% url 'manage_accounts' %}" class="btn btn-ghost btn-sm">Reset</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Accounts Table -->
+<div class="panel">
+  <div class="table-wrap">
+    <table class="table-hover">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Contact &amp; Phone</th>
+          <th>Assigned Role</th>
+          <th>Approval Status</th>
+          <th>Joined / Activity</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="avatar" style="width: 36px; height: 36px; font-size: 14px;">{{ u.username|first|upper }}</span>
+              <div>
+                <b>{{ u.username }}</b>
+                {% if u.id == 1 %}<span class="status-badge" style="background:#e0e7ff; color:#3730a3; margin-left: 4px;">Primary Superuser</span>{% endif %}
+                {% if u.id == request.user.id %}<span class="status-badge" style="background:#fef3c7; color:#92400e; margin-left: 4px;">You</span>{% endif %}
+                <br>
+                <small class="muted">{{ u.get_full_name|default:'—' }}</small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div>{{ u.email|default:'—' }}</div>
+            {% if u.profile.phone %}<small class="muted">Tel: {{ u.profile.phone }}</small>{% endif %}
+          </td>
+          <td>
+            <form method="post" action="{% url 'account_role_update' u.pk %}" style="display: inline-flex; align-items: center; gap: 6px;">
+              {% csrf_token %}
+              <select name="role" class="input-sm" onchange="this.form.submit()"
+                      {% if u.id == 1 or u.id == request.user.id and u.profile.role == 'super_admin' %}disabled title="Primary Super Admin role is protected"{% endif %}
+                      style="font-size: 13px; font-weight: 500;">
+                {% for r_val, r_label in roles %}
+                <option value="{{ r_val }}" {% if u.profile.role == r_val %}selected{% endif %}>{{ r_label }}</option>
+                {% endfor %}
+              </select>
+            </form>
+          </td>
+          <td>
+            {% if u.profile.status == 'approved' %}
+              <span class="status-badge is-ok">Approved</span>
+            {% elif u.profile.status == 'pending' %}
+              <span class="status-badge is-pending" style="background:#fef3c7; color:#92400e; font-weight:700;">Pending Approval</span>
+            {% elif u.profile.status == 'rejected' %}
+              <span class="status-badge is-bad">Rejected</span>
+              {% if u.profile.rejection_reason %}<br><small class="muted" title="{{ u.profile.rejection_reason }}">{{ u.profile.rejection_reason|truncatechars:28 }}</small>{% endif %}
+            {% elif u.profile.status == 'suspended' %}
+              <span class="status-badge is-bad">Suspended</span>
+              {% if u.profile.suspension_reason %}<br><small class="muted" title="{{ u.profile.suspension_reason }}">{{ u.profile.suspension_reason|truncatechars:28 }}</small>{% endif %}
+            {% endif %}
+          </td>
+          <td>
+            <div>{{ u.date_joined|date:'d M Y' }}</div>
+            <small class="muted">
+              {% if u.last_login %}Active {{ u.last_login|timesince }} ago{% else %}Never logged in{% endif %} · {{ u.order_count }} order{{ u.order_count|pluralize }}
+            </small>
+          </td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end;">
+              {% if u.profile.status == 'pending' %}
+                <form method="post" action="{% url 'account_action' u.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="approve">
+                  <button type="submit" class="btn btn-sm btn-primary" title="Approve registration">Approve</button>
+                </form>
+                <button type="button" class="btn btn-sm btn-outline" style="color: #dc2626;"
+                        onclick="promptReject({{ u.pk }}, '{{ u.username }}')">Reject</button>
+              {% elif u.profile.status == 'approved' %}
+                {% if u.id != 1 and u.id != request.user.id %}
+                <button type="button" class="btn btn-sm btn-ghost" style="color: #d97706;"
+                        onclick="promptSuspend({{ u.pk }}, '{{ u.username }}')">Suspend</button>
+                {% endif %}
+              {% elif u.profile.status == 'suspended' %}
+                <form method="post" action="{% url 'account_action' u.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="reactivate">
+                  <button type="submit" class="btn btn-sm btn-outline">Reactivate</button>
+                </form>
+              {% elif u.profile.status == 'rejected' %}
+                <form method="post" action="{% url 'account_action' u.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="approve">
+                  <button type="submit" class="btn btn-sm btn-outline">Approve</button>
+                </form>
+              {% endif %}
+
+              {% if u.id != 1 and u.id != request.user.id %}
+              <form method="post" action="{% url 'account_delete' u.pk %}" style="display:inline;"
+                    onsubmit="return confirm('Are you sure you want to delete or deactivate account {{ u.username }}?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-ghost btn-sm" style="color: #94a3b8;" title="Delete or deactivate account">×</button>
+              </form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 32px;" class="muted">
+            No accounts match the selected criteria.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.has_other_pages %}
+    {% include 'partials/manage_pagination.html' %}
+  {% endif %}
+</div>
+
+<!-- Modal for Reject / Suspend Reason -->
+<div class="modal-backdrop" id="reasonModal" hidden>
+  <div class="modal panel" style="max-width: 440px;" role="dialog" aria-modal="true">
+    <div class="panel-head">
+      <h2 id="modalActionTitle">Action Account</h2>
+      <button type="button" class="icon-btn" onclick="closeReasonModal()">×</button>
+    </div>
+    <form id="reasonForm" method="post" action="">
+      {% csrf_token %}
+      <input type="hidden" name="action" id="modalActionField" value="">
+      <p id="modalActionPrompt" class="muted" style="margin-bottom: 14px; font-size: 14px;"></p>
+      <div class="form-row">
+        <label for="actionReason">Reason (optional):</label>
+        <textarea id="actionReason" name="reason" rows="3" placeholder="Provide context for the user or audit log…" style="width: 100%;"></textarea>
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button type="button" class="btn btn-ghost" onclick="closeReasonModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Confirm</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function promptReject(userId, username) {
+  var modal = document.getElementById('reasonModal');
+  var form = document.getElementById('reasonForm');
+  form.action = '/manage/accounts/' + userId + '/action/';
+  document.getElementById('modalActionField').value = 'reject';
+  document.getElementById('modalActionTitle').textContent = 'Reject Account';
+  document.getElementById('modalActionPrompt').textContent = 'Are you sure you want to reject the registration for ' + username + '? The user will not be able to log in.';
+  document.getElementById('modalSubmitBtn').textContent = 'Reject Registration';
+  document.getElementById('modalSubmitBtn').style.background = '#dc2626';
+  modal.hidden = false;
+  modal.classList.add('open');
+}
+
+function promptSuspend(userId, username) {
+  var modal = document.getElementById('reasonModal');
+  var form = document.getElementById('reasonForm');
+  form.action = '/manage/accounts/' + userId + '/action/';
+  document.getElementById('modalActionField').value = 'suspend';
+  document.getElementById('modalActionTitle').textContent = 'Suspend Account';
+  document.getElementById('modalActionPrompt').textContent = 'Are you sure you want to suspend account ' + username + '? They will be immediately blocked from logging in.';
+  document.getElementById('modalSubmitBtn').textContent = 'Suspend Account';
+  document.getElementById('modalSubmitBtn').style.background = '#dc2626';
+  modal.hidden = false;
+  modal.classList.add('open');
+}
+
+function closeReasonModal() {
+  var modal = document.getElementById('reasonModal');
+  modal.hidden = true;
+  modal.classList.remove('open');
+}
+</script>
+{% endblock %}

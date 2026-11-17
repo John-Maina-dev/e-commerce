@@ -1,0 +1,32 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Coupons · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">PROMOTIONS</span><h1>Coupons</h1></div>
+  <div class="head-actions"><a class="btn" href="{% url 'coupon_add' %}">+ Add coupon</a></div>
+</div>
+
+<div class="panel">
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Code</th><th>Type</th><th>Value</th><th>Used / Limit</th><th>Active</th><th>Valid</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in coupons %}
+      <tr>
+        <td><b>{{ c.code }}</b></td>
+        <td>{{ c.get_discount_type_display }}</td>
+        <td>{% if c.discount_type == 'percent' %}{{ c.value }}%{% else %}{{ c.value }}{% endif %}</td>
+        <td>{{ c.usage_count }}{% if c.max_uses %} / {{ c.max_uses }}{% endif %}</td>
+        <td>{% if c.active %}<span class="status-badge is-healthy">On</span>{% else %}<span class="status-badge is-out">Off</span>{% endif %}</td>
+        <td>{% if c.is_valid %}<span class="status-badge is-healthy">Valid</span>{% else %}<span class="status-badge is-low">Expired</span>{% endif %}</td>
+        <td class="row-actions">
+          <a class="btn btn-ghost btn-sm" href="{% url 'coupon_edit' c.id %}">Edit</a>
+          <a class="btn btn-danger btn-sm" href="{% url 'coupon_delete' c.id %}">Delete</a>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="7">No coupons yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Notifications · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">INBOX</span><h1>Notifications</h1></div>
+  <div class="head-actions">
+    {% if page.paginator.count %}
+    <form method="post" action="{% url 'notifications_clear' %}">{% csrf_token %}<button class="btn btn-ghost" type="submit">Mark all read</button></form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="tabs" role="tablist">
+  <a class="{% if state != 'unread' %}active{% endif %}" href="{% url 'manage_notifications' %}">All</a>
+  <a class="{% if state == 'unread' %}active{% endif %}" href="{% url 'manage_notifications' %}?state=unread">Unread</a>
+</div>
+
+<div class="panel">
+  {% if page %}
+  <ul class="notification-list">
+    {% for n in page %}
+    <li class="notification-item {% if not n.read %}unread{% endif %}">
+      <span class="notification-cat cat-{{ n.category }}">{{ n.get_category_display|default:'Update' }}</span>
+      <div class="notification-body">
+        {% if n.link %}<a href="{{ n.link }}"><b>{{ n.title }}</b></a>{% else %}<b>{{ n.title }}</b>{% endif %}
+        {% if n.message %}<span class="muted">{{ n.message }}</span>{% endif %}
+        <small class="muted">{{ n.created_at|timesince }} ago{% if not n.read %} · unread{% endif %}</small>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">No notifications{% if state == 'unread' %} left unread{% endif %}.</p>
+  {% endif %}
+  {% include 'partials/manage_pagination.html' %}
+</div>
+{% endblock %}

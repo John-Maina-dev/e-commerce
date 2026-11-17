@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Bad request · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="error-page">
+  <h1 class="error-code">400</h1>
+  <h2>Bad request</h2>
+  <p class="muted">Something in that request didn't look right. Please go back and try again.</p>
+  <a class="btn" href="{% url 'home' %}">Back to store</a>
+</div>
+{% endblock %}

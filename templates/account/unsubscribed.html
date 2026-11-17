@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Unsubscribe · {{ site_settings.store_name }}{% endblock %}
+{% block content %}
+<div class="auth-wrap" style="max-width:540px; margin:40px auto; padding:0 16px;">
+  <div class="panel form-card" style="text-align:center; padding:36px 28px;">
+    {% if success %}
+      {% if resubscribed %}
+      <div style="font-size:48px; margin-bottom:12px;">🎉</div>
+      <h1>Subscription restored!</h1>
+      <p class="muted">{{ message }}</p>
+      <p style="margin-top:24px;">
+        <a class="btn" href="{% url 'home' %}">Return to store</a>
+      </p>
+      {% else %}
+      <div style="font-size:48px; margin-bottom:12px;">👋</div>
+      <h1>You have been unsubscribed</h1>
+      <p class="muted">{{ message }}</p>
+      <p class="muted small" style="margin-top:16px;">You will no longer receive new arrival alerts at this address.</p>
+
+      {% if sub %}
+      <form method="post" style="margin-top:28px; padding-top:20px; border-top:1px solid var(--border, #e5e7eb);">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="resubscribe">
+        <p class="muted small">Unsubscribed by mistake?</p>
+        <button class="btn btn-ghost" type="submit">Resubscribe {{ sub.email }}</button>
+      </form>
+      {% endif %}
+
+      <p style="margin-top:20px;">
+        <a href="{% url 'home' %}" class="muted small">← Return to Reeves Boutique</a>
+      </p>
+      {% endif %}
+    {% else %}
+      <div style="font-size:48px; margin-bottom:12px;">⚠️</div>
+      <h1>Invalid Link</h1>
+      <p class="muted">{{ message }}</p>
+      <p style="margin-top:24px;">
+        <a class="btn" href="{% url 'home' %}">Return to home</a>
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
