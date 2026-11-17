@@ -5,8 +5,11 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+<<<<<<< HEAD
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -78,10 +81,13 @@ class Product(models.Model):
     featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     is_bestseller = models.BooleanField(default=False)
+<<<<<<< HEAD
     subscribers_notified = models.BooleanField(
         default=False,
         help_text='Whether new arrival notifications have already been dispatched for this product.'
     )
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     image_url = models.URLField(blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=Decimal('0.0'),
@@ -439,8 +445,11 @@ class Order(models.Model):
         ('mpesa', 'M-Pesa STK Push'),
         ('cod', 'Cash / manual payment'),
         ('card', 'Card payment'),
+<<<<<<< HEAD
         ('bank', 'Bank transfer'),
         ('split', 'Split payment'),
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     ]
     SALES_CHANNEL_CHOICES = [
         ('online', 'Online store'),
@@ -454,6 +463,7 @@ class Order(models.Model):
     pos_token = models.CharField(max_length=64, blank=True, null=True, unique=True,
                                  help_text='Client-supplied idempotency token for POS sales so a '
                                            'retried request can never create a duplicate sale.')
+<<<<<<< HEAD
     checkout_token = models.CharField(max_length=64, blank=True, null=True, unique=True,
                                       help_text='Idempotency token for online checkout so a double '
                                                 'submit can never create two orders.')
@@ -461,6 +471,11 @@ class Order(models.Model):
                                           choices=[('cash', 'Cash'), ('mpesa', 'M-Pesa'),
                                                    ('card', 'Card'), ('bank', 'Bank transfer'),
                                                    ('split', 'Split payment'), ('other', 'Other')],
+=======
+    pos_payment_method = models.CharField(max_length=10, blank=True, default='',
+                                          choices=[('cash', 'Cash'), ('mpesa', 'M-Pesa'),
+                                                   ('card', 'Card'), ('other', 'Other')],
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
                                           help_text='Exact till payment option chosen by the cashier.')
     served_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                                   null=True, blank=True, related_name='served_orders',
@@ -585,12 +600,16 @@ class OrderReturn(models.Model):
 
 
 class Payment(models.Model):
+<<<<<<< HEAD
     METHOD_CHOICES = [
         ('mpesa', 'M-Pesa STK Push'),
         ('manual', 'Cash / manual'),
         ('card', 'Card payment'),
         ('bank', 'Bank transfer'),
     ]
+=======
+    METHOD_CHOICES = [('mpesa', 'M-Pesa STK Push'), ('manual', 'Cash / manual'), ('card', 'Card payment')]
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     STATUS_CHOICES = Order.PAYMENT_STATUS_CHOICES
     VERIFICATION_CHOICES = [
         ('', 'Not verified'),
@@ -608,12 +627,15 @@ class Payment(models.Model):
     result_code = models.CharField(max_length=20, blank=True, default='')
     result_description = models.TextField(blank=True)
     verification = models.CharField(max_length=20, choices=VERIFICATION_CHOICES, blank=True, default='')
+<<<<<<< HEAD
     manual_code = models.CharField(
         max_length=40, blank=True, default='',
         help_text='M-Pesa transaction code the customer entered for manual verification.')
     manual_submitted_at = models.DateTimeField(
         null=True, blank=True,
         help_text='When the customer submitted their manual M-Pesa code.')
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     amount_paid = models.DecimalField(**MONEY, null=True, blank=True,
                                       help_text='Cash actually handed over at the till (POS cash sales).')
     change_given = models.DecimalField(**MONEY, null=True, blank=True,
@@ -643,11 +665,14 @@ class Payment(models.Model):
     def is_manually_reviewed(self):
         return self.verification == 'manual'
 
+<<<<<<< HEAD
     @property
     def awaits_manual_code_review(self):
         """True when a customer has submitted an M-Pesa code we still must check."""
         return bool(self.manual_code) and self.status == 'requires_review'
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     @classmethod
     def record(cls, order, method, amount, status='pending', reference=''):
         return cls.objects.create(order=order, method=method, amount=amount, status=status, reference=reference)
@@ -679,6 +704,7 @@ class MpesaTransaction(models.Model):
 
 class NewsletterSubscriber(models.Model):
     email = models.EmailField(unique=True)
+<<<<<<< HEAD
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='newsletter_subscriptions'
@@ -699,6 +725,11 @@ class NewsletterSubscriber(models.Model):
             self.unsubscribe_token = uuid.uuid4().hex
         super().save(*args, **kwargs)
 
+=======
+    active = models.BooleanField(default=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     def __str__(self):
         return self.email
 
@@ -727,7 +758,10 @@ class Notification(models.Model):
         ('customer', 'Customer'),
         ('account', 'Account'),
         ('system', 'System'),
+<<<<<<< HEAD
         ('product', 'New Arrival'),
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     ]
 
     title = models.CharField(max_length=200)
@@ -759,7 +793,10 @@ class Notification(models.Model):
 
 class SiteSettings(models.Model):
     ENV_CHOICES = [('sandbox', 'Sandbox'), ('production', 'Production')]
+<<<<<<< HEAD
     ACCOUNT_TYPE_CHOICES = [('paybill', 'PayBill'), ('till', 'Till Number (Buy Goods)')]
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
     # Branding
     store_name = models.CharField(max_length=160, default='Reeves Boutique')
@@ -827,10 +864,13 @@ class SiteSettings(models.Model):
     # M-Pesa
     mpesa_enabled = models.BooleanField(default=False)
     mpesa_environment = models.CharField(max_length=20, choices=ENV_CHOICES, default='sandbox')
+<<<<<<< HEAD
     mpesa_account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, default='paybill')
     mpesa_business_name = models.CharField(
         max_length=160, blank=True, default='',
         help_text='Internal label to identify this M-Pesa account (e.g. the business name).')
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     mpesa_consumer_key = models.CharField(max_length=300, blank=True, default='')
     mpesa_consumer_secret = models.CharField(max_length=300, blank=True, default='')
     mpesa_shortcode = models.CharField(max_length=50, blank=True, default='')
@@ -881,6 +921,7 @@ class SiteSettings(models.Model):
         if not self.tax_enabled:
             return Decimal('0.00')
         return (subtotal * self.tax_rate / Decimal('100')).quantize(Decimal('0.01'))
+<<<<<<< HEAD
 
 
 class UserProfile(models.Model):
@@ -1051,3 +1092,5 @@ class DataDeletionAuditLog(models.Model):
 
     def __str__(self):
         return f'{self.actor_username or "System"} deleted {self.records_deleted} {self.data_type} records on {self.created_at:%Y-%m-%d %H:%M}'
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

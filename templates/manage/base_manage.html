@@ -99,11 +99,16 @@
       <a href="{% url 'dashboard' %}" class="{% if request.path == '/manage/' %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
         Dashboard
+<<<<<<< HEAD
+=======
+        {% if unread_notifications %}<span class="badge-count">{{ unread_notifications }}</span>{% endif %}
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       </a>
       <a href="{% url 'manage_notifications' %}" class="{% if '/manage/notifications' in request.path %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
         Notifications
       </a>
+<<<<<<< HEAD
       <a href="{% url 'pos_terminal' %}" class="pos-nav-link {% if request.path == '/manage/pos/' %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 9h4M7 12h7"/></svg>
         POS till
@@ -112,6 +117,12 @@
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         POS Analytics
       </a>
+=======
+      <a href="{% url 'pos_terminal' %}" class="pos-nav-link {% if '/manage/pos' in request.path %}active{% endif %}">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 9h4M7 12h7"/></svg>
+        POS till
+      </a>
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       <a href="{% url 'manage_products' %}" class="{% if '/manage/products' in request.path %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg>
         Products
@@ -136,6 +147,7 @@
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Customers
       </a>
+<<<<<<< HEAD
       <a href="{% url 'manage_subscribers' %}" class="{% if '/manage/subscribers' in request.path %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>
         Subscribers
@@ -151,6 +163,8 @@
         Data Management
       </a>
       {% endif %}
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       <a href="{% url 'manage_reviews' %}" class="{% if '/manage/reviews' in request.path %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
         Reviews
@@ -163,7 +177,10 @@
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
         Payments
       </a>
+<<<<<<< HEAD
       {% if user.is_superuser or user.profile.role == 'super_admin' %}
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       <span class="sidebar-section">Settings</span>
       <a href="{% url 'manage_settings' %}" class="{% if '/manage/settings' in request.path and not '/email' in request.path and not '/payments' in request.path %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
@@ -177,7 +194,10 @@
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
         M-Pesa
       </a>
+<<<<<<< HEAD
       {% endif %}
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       <a href="{% url 'manage_analytics' %}" class="{% if '/manage/analytics' in request.path %}active{% endif %}">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
         Analytics
@@ -194,6 +214,18 @@
     </div>
   </aside>
   <div class="manage-main">
+<<<<<<< HEAD
+=======
+    {% if unread_notifications %}
+    <div class="manage-notices">
+      <span>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        {{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}
+      </span>
+      <form method="post" action="{% url 'notifications_clear' %}">{% csrf_token %}<button class="link-btn" type="submit">Mark all read</button></form>
+    </div>
+    {% endif %}
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     {% block manage_content %}{% endblock %}
   </div>
 </div>

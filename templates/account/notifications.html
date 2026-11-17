@@ -21,6 +21,7 @@
           <div class="notification-body">
             {% if n.link %}<a href="{{ n.link }}"><b>{{ n.title }}</b></a>{% else %}<b>{{ n.title }}</b>{% endif %}
             {% if n.message %}<span class="muted">{{ n.message }}</span>{% endif %}
+<<<<<<< HEAD
             <div style="display:flex; gap:12px; align-items:center; margin-top:4px;">
               <small class="muted">{{ n.created_at|timesince }} ago</small>
               {% if not n.read %}
@@ -30,6 +31,9 @@
               </form>
               {% endif %}
             </div>
+=======
+            <small class="muted">{{ n.created_at|timesince }} ago</small>
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
           </div>
         </li>
         {% endfor %}

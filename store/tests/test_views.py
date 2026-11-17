@@ -1,12 +1,18 @@
 import json
 from decimal import Decimal
+<<<<<<< HEAD
 from unittest import mock
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
+<<<<<<< HEAD
 from store import mpesa
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from store.models import MpesaTransaction, Order, Payment, Product, Review, SiteSettings, WishlistItem
 from store.tests.test_models import make_category, make_product
 
@@ -166,6 +172,7 @@ class CheckoutViewTests(TestCase):
         resp = self.client.get(reverse('order_detail', args=[order.number]))
         self.assertEqual(resp.status_code, 200)
 
+<<<<<<< HEAD
     def test_checkout_form_includes_idempotency_token(self):
         resp = self.client.get(reverse('checkout'))
         self.assertContains(resp, 'name="checkout_token"')
@@ -295,6 +302,8 @@ class MpesaCheckoutRecoveryTests(TestCase):
         self.assertNotContains(page, 'Send M-Pesa prompt')
         self.assertNotContains(page, 'Pay on delivery instead')
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 class AccountViewTests(TestCase):
     def setUp(self):
@@ -649,6 +658,7 @@ class MpesaCallbackViewTests(TestCase):
         self.assertEqual(self.order.status, 'pending')
         self.tx.refresh_from_db()
         self.assertEqual(self.tx.status, 'completed')
+<<<<<<< HEAD
 
 
 class EndToEndOrderFlowTests(TestCase):
@@ -752,3 +762,5 @@ class EndToEndOrderFlowTests(TestCase):
         stranger = Client()
         resp = stranger.get(reverse('order_status_json', args=[order.number]))
         self.assertEqual(resp.status_code, 404)
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

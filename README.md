@@ -77,6 +77,7 @@ For Gmail, use an App Password rather than your normal Gmail password when 2-Ste
 If the in-app SMTP settings are left disabled, Django falls back to the `EMAIL_*` values in `.env`.
 
 ## M-Pesa STK Push
+<<<<<<< HEAD
 Open **Manage → Settings → M-Pesa STK Push**. Select Sandbox or Production, choose the
 account type (**PayBill** or **Till Number / Buy Goods**) and enter the Daraja
 credentials. Secrets are write-only: saved values are never rendered back into the
@@ -111,6 +112,14 @@ product is not enabled for the app/shortcode. That can only be fixed on the
 Daraja portal or by Safaricom API support (`apisupport@safaricom.co.ke`) with
 the app ID, shortcode and the `requestId` from the failed call.
 
+=======
+Open **Manage → Settings → M-Pesa Daraja STK Push**. Select Sandbox or Production and enter the Daraja credentials. The callback URL must be publicly reachable over HTTPS in production and should point to:
+
+`/payments/mpesa/callback/`
+
+The checkout uses server-side Daraja OAuth and STK Push requests. Safaricom's callback updates the transaction and order to `paid` only after a successful callback result.
+
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 Do not put live credentials in source control. Use HTTPS in production.
 
 ## Inventory intelligence

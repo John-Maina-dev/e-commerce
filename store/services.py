@@ -72,10 +72,14 @@ def cart_count(request):
 
 def cart_items(request):
     cart = get_cart(request)
+<<<<<<< HEAD
     # Only products a customer is actually allowed to buy (active, not hidden
     # or archived) make it out of the cart. A product that is deactivated or
     # deleted after being added silently drops out instead of being orderable.
     products = {str(p.id): p for p in Product.objects.visible().filter(id__in=[int(i) for i in cart.keys()])}
+=======
+    products = {str(p.id): p for p in Product.objects.filter(id__in=[int(i) for i in cart.keys()])}
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     items = []
     for pid, qty in cart.items():
         p = products.get(pid)
@@ -97,6 +101,7 @@ def cart_subtotal(items):
 def add_to_cart(request, product, qty=1):
     cart = get_cart(request)
     key = str(product.id)
+<<<<<<< HEAD
     try:
         qty = int(qty)
     except (TypeError, ValueError):
@@ -104,6 +109,8 @@ def add_to_cart(request, product, qty=1):
     # Quantity is always at least one: a negative or zero value can never
     # reduce/remove an existing line by accident.
     qty = max(1, qty)
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     current = int(cart.get(key, 0))
     cart[key] = min(current + qty, product.stock) if product.stock else 0
     save_cart(request, cart)
@@ -190,14 +197,23 @@ def totals_for(request, coupon=None):
 
 
 @transaction.atomic
+<<<<<<< HEAD
 def create_order_from_cart(request, data, payment_method, totals, checkout_token=''):
+=======
+def create_order_from_cart(request, data, payment_method, totals):
+    from uuid import uuid4
+
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     settings = SiteSettings.get()
     user = request.user if request.user.is_authenticated else None
     hold_stock = settings.inventory_strategy == 'hold'
     order = Order.objects.create(
         number=Order.next_number(),
         user=user,
+<<<<<<< HEAD
         checkout_token=(checkout_token or None),
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         customer_name=data.get('customer_name', ''),
         phone=data.get('phone', ''),
         email=data.get('email', ''),
@@ -217,8 +233,11 @@ def create_order_from_cart(request, data, payment_method, totals, checkout_token
     )
     for item in totals['items']:
         p = Product.objects.select_for_update().get(pk=item['product'].pk)
+<<<<<<< HEAD
         if not p.is_visible:
             raise ValueError(f'{p.name} is no longer available for purchase.')
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         if p.stock < item['quantity']:
             raise ValueError(f'Not enough stock for {p.name}. Available: {p.stock}.')
         if hold_stock:
@@ -478,6 +497,7 @@ def evaluate_product_stock(product, user=None):
     return new_alerts
 
 
+<<<<<<< HEAD
 # ---------------------------------------------------------------------------
 # Related products
 # ---------------------------------------------------------------------------
@@ -521,6 +541,8 @@ def related_products(product, limit=4):
     return results
 
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def recompute_product_rating(product):
     from django.db.models import Avg, Count
     from decimal import Decimal, ROUND_HALF_UP
@@ -571,6 +593,7 @@ def process_return(order, item, quantity, reason='', restock=True, user=None):
                                 note=f'Return · order {order.number} · {reason}'[:300], user=user)
         evaluate_product_stock(p)
     return ret
+<<<<<<< HEAD
 
 
 # --------------------------------------------------------------------------- #
@@ -722,3 +745,5 @@ def send_subscriber_broadcast(subject, message, user=None, base_url=''):
     ).start()
 
     return len(subscribers), 0
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

@@ -5,6 +5,7 @@ here on the server via store.pos — the browser only describes intent.
 """
 import json
 import logging
+<<<<<<< HEAD
 from decimal import Decimal
 import re
 from uuid import uuid4
@@ -17,24 +18,41 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
+=======
+from uuid import uuid4
+
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from django.views.decorators.http import require_GET, require_POST
 
 from . import pos, services
 from .decorators import has_role, staff_required
+<<<<<<< HEAD
 from .models import Order, OrderItem, Payment, PosSession, SiteSettings, UserProfile
+=======
+from .models import Order, PosSession, SiteSettings
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from .views import _can_view_order
 
 logger = logging.getLogger('store')
 
 
 # --------------------------------------------------------------------------- #
+<<<<<<< HEAD
 # Terminal & Sessions
+=======
+# Terminal
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 # --------------------------------------------------------------------------- #
 
 @staff_required
 def pos_terminal(request):
     session = PosSession.objects.filter(user=request.user,
                                         status=PosSession.STATUS_OPEN).first()
+<<<<<<< HEAD
     settings = SiteSettings.get()
     context = {
         'session': session,
@@ -42,6 +60,12 @@ def pos_terminal(request):
         'can_discount': has_role(request.user, 'Manager', 'Admin'),
         'tax_enabled': settings.tax_enabled,
         'tax_rate': str(settings.tax_rate),
+=======
+    context = {
+        'session': session,
+        'mpesa_ready': SiteSettings.get().mpesa_complete,
+        'can_discount': has_role(request.user, 'Manager', 'Admin'),
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     }
     return render(request, 'manage/pos.html', context)
 
@@ -50,6 +74,10 @@ def pos_terminal(request):
 @staff_required
 def pos_session_open(request):
     try:
+<<<<<<< HEAD
+=======
+        from decimal import Decimal
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         opening = Decimal(request.POST.get('opening_cash') or '0')
     except Exception:
         opening = Decimal('0')
@@ -71,7 +99,11 @@ def pos_session_close(request):
         return redirect('pos_terminal')
     report = pos.session_report(session)
     if request.POST.get('confirm'):
+<<<<<<< HEAD
         from decimal import InvalidOperation
+=======
+        from decimal import Decimal, InvalidOperation
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         try:
             counted = Decimal(request.POST.get('closing_cash') or '0')
         except InvalidOperation:
@@ -87,11 +119,16 @@ def pos_session_close(request):
 
 
 # --------------------------------------------------------------------------- #
+<<<<<<< HEAD
 # Hardware Barcode Scanner & Search APIs
+=======
+# JSON APIs used by the terminal
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 # --------------------------------------------------------------------------- #
 
 @require_GET
 @staff_required
+<<<<<<< HEAD
 def pos_barcode_scan(request):
     """Instant lookup of product by exact barcode or SKU for hardware scanners."""
     code = request.GET.get('code', '').strip()
@@ -105,11 +142,14 @@ def pos_barcode_scan(request):
 
 @require_GET
 @staff_required
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def pos_search(request):
     results = pos.search_products(request.GET.get('q', ''))
     return JsonResponse({'results': [pos.serialize_product(p) for p in results]})
 
 
+<<<<<<< HEAD
 @require_GET
 @staff_required
 def pos_catalogue(request):
@@ -270,6 +310,8 @@ def pos_customer_create(request):
 # Checkout & Sale Completion
 # --------------------------------------------------------------------------- #
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 @require_POST
 @staff_required
 def pos_checkout(request):
@@ -279,11 +321,14 @@ def pos_checkout(request):
         method = str(payload.get('payment_method') or '').lower()
         discount = payload.get('discount') or 0
         cash = payload.get('cash_received')
+<<<<<<< HEAD
         customer_id = payload.get('customer_id')
         bank_reference = payload.get('bank_reference') or ''
         card_reference = payload.get('card_reference') or ''
         tenders = payload.get('tenders') or None
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         order, created = pos.create_pos_sale(
             user=request.user,
             items_payload=items,
@@ -292,12 +337,17 @@ def pos_checkout(request):
             cash_received=cash,
             phone=str(payload.get('phone') or ''),
             customer_name=str(payload.get('customer_name') or ''),
+<<<<<<< HEAD
             customer_id=customer_id,
             token=str(payload.get('token') or ''),
             discount_authorised=has_role(request.user, 'Manager', 'Admin'),
             bank_reference=bank_reference,
             card_reference=card_reference,
             tenders_payload=tenders,
+=======
+            token=str(payload.get('token') or ''),
+            discount_authorised=has_role(request.user, 'Manager', 'Admin'),
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         )
     except PermissionError as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=403)
@@ -308,6 +358,7 @@ def pos_checkout(request):
         return JsonResponse({'ok': False, 'error': 'The sale could not be completed.'},
                             status=500)
 
+<<<<<<< HEAD
     # The post-commit STK Push hook may already have cancelled or failed the
     # sale (e.g. Daraja rejected the prompt). Re-read so the terminal reflects
     # the real state instead of the pre-commit instance.
@@ -315,6 +366,10 @@ def pos_checkout(request):
     state = pos.serialize_order_status(order)
     state['receipt_url'] = reverse('receipt', args=[order.number])
     state['pdf_receipt_url'] = reverse('receipt_pdf', args=[order.number])
+=======
+    state = pos.serialize_order_status(order)
+    state['receipt_url'] = reverse('receipt', args=[order.number])
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     state['created'] = created
     state['pending_mpesa'] = order.payment_status in ('pending', 'processing')
     return JsonResponse({'ok': True, 'sale': state})
@@ -325,15 +380,22 @@ def pos_checkout(request):
 def pos_order_state(request, number):
     order = get_object_or_404(Order.objects.prefetch_related('payments',
                                                              'mpesa_transactions'),
+<<<<<<< HEAD
                                number=number)
     state = pos.serialize_order_status(order)
     state['receipt_url'] = reverse('receipt', args=[order.number])
     state['pdf_receipt_url'] = reverse('receipt_pdf', args=[order.number])
+=======
+                              number=number)
+    state = pos.serialize_order_status(order)
+    state['receipt_url'] = reverse('receipt', args=[order.number])
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     state['pending_mpesa'] = order.payment_status in ('pending', 'processing')
     return JsonResponse(state)
 
 
 # --------------------------------------------------------------------------- #
+<<<<<<< HEAD
 # Standalone Customer Display Screen
 # --------------------------------------------------------------------------- #
 
@@ -423,6 +485,9 @@ def pos_dashboard(request):
 
 # --------------------------------------------------------------------------- #
 # Receipts (HTML & PDF)
+=======
+# Receipt (shared by POS + online orders)
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 # --------------------------------------------------------------------------- #
 
 def receipt(request, number):
@@ -439,6 +504,7 @@ def receipt(request, number):
     if request.GET.get('download'):
         response['Content-Disposition'] = f'attachment; filename="receipt-{order.number}.html"'
     return response
+<<<<<<< HEAD
 
 
 def receipt_pdf(request, number):
@@ -462,3 +528,5 @@ def receipt_pdf(request, number):
     response = HttpResponse(buf.getvalue(), content_type='application/pdf')
     response['Content-Disposition'] = f'{disposition}; filename="receipt-{order.number}.pdf"'
     return response
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

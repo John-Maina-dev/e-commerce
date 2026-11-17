@@ -331,6 +331,7 @@
 
   /* ---------- Button loading states ---------- */
   document.querySelectorAll('form[data-submit-loading]').forEach(function (form) {
+<<<<<<< HEAD
     form.addEventListener('submit', function (event) {
       var buttons = form.querySelectorAll('button[type="submit"]');
       var submitter = event.submitter || form.querySelector('button[type="submit"]');
@@ -341,6 +342,14 @@
       if (target && target.dataset.loadingText && !target.querySelector('svg')) {
         target.textContent = target.dataset.loadingText;
       }
+=======
+    form.addEventListener('submit', function () {
+      var btn = form.querySelector('button[type="submit"]');
+      if (!btn || btn.disabled) return;
+      btn.classList.add('is-loading');
+      btn.disabled = true;
+      if (btn.dataset.loadingText && !btn.querySelector('svg')) btn.textContent = btn.dataset.loadingText;
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     });
   });
 
@@ -439,6 +448,7 @@
       slider.addEventListener('touchstart', pause, { passive: true });
     }
   });
+<<<<<<< HEAD
 
   /* AJAX Newsletter Subscribe */
   document.querySelectorAll('form.newsletter').forEach(function (form) {
@@ -474,4 +484,6 @@
       });
     });
   });
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 })();

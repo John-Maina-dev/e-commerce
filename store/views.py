@@ -1,17 +1,28 @@
 import logging
+<<<<<<< HEAD
 import re
 from decimal import Decimal
 from uuid import uuid4
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
+=======
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth import login
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import AuthenticationForm
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.core.validators import validate_email
+<<<<<<< HEAD
 from django.db import IntegrityError, transaction
+=======
+from django.db import transaction
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from django.db.models import Case, F, Q, When
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -22,9 +33,14 @@ from django.views.decorators.http import require_POST
 from . import emails, mpesa, notify, services
 from .decorators import login_required_view
 from .forms import AddressForm, ContactForm, ProfileForm, RegistrationForm, ReviewForm, SitePasswordResetForm
+<<<<<<< HEAD
 from .models import (AccountAuditLog, Address, Category, MpesaTransaction, NewsletterSubscriber,
                      Order, OrderStatusHistory, Payment, Product, Review,
                      SiteSettings, UserProfile, WishlistItem)
+=======
+from .models import (Address, Category, MpesaTransaction, NewsletterSubscriber,
+                     Order, Product, Review, SiteSettings, WishlistItem)
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from .tokens import site_token_generator
 
 logger = logging.getLogger('store')
@@ -62,8 +78,13 @@ class StorePasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 def home(request):
     settings = SiteSettings.get()
     categories = Category.objects.filter(active=True)[:6]
+<<<<<<< HEAD
     new_arrivals = (Product.objects.visible().select_related('category')
                     .order_by('-is_new', '-created_at')[:8])
+=======
+    new_arrivals = (Product.objects.visible().select_related('category').filter(is_new=True)[:8]
+                    or Product.objects.visible().select_related('category')[:8])
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     best_sellers = Product.objects.visible().select_related('category').filter(is_bestseller=True)[:8]
     featured = Product.objects.visible().select_related('category').filter(featured=True)[:8]
     testimonials = Review.objects.filter(active=True).select_related('product', 'user')[:6]
@@ -123,7 +144,10 @@ def search_suggestions(request):
                .filter(Q(name__icontains=q) | Q(sku__icontains=q) | Q(brand__icontains=q)
                        | Q(category__name__icontains=q))
                .order_by('-is_bestseller', '-created_at')[:6])
+<<<<<<< HEAD
     currency = SiteSettings.get().currency
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     return JsonResponse({'results': [
         {
             'id': p.pk,
@@ -131,7 +155,11 @@ def search_suggestions(request):
             'slug': p.slug,
             'category': p.category.name,
             'price': f'{p.effective_price:,.0f}',
+<<<<<<< HEAD
             'currency': currency,
+=======
+            'currency': SiteSettings.get().currency,
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
             'image': p.image_src or '',
             'out_of_stock': p.out_of_stock,
         } for p in results
@@ -142,7 +170,12 @@ def product_detail(request, slug):
     product = get_object_or_404(
         Product.objects.visible().select_related('category').prefetch_related('images'), slug=slug)
     reviews = product.reviews.filter(active=True).select_related('user')
+<<<<<<< HEAD
     related = services.related_products(product, limit=4)
+=======
+    related = (Product.objects.visible().filter(category=product.category)
+               .exclude(pk=product.pk).select_related('category')[:4])
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     form = ReviewForm()
     if request.method == 'POST' and request.user.is_authenticated:
         form = ReviewForm(request.POST)
@@ -174,6 +207,7 @@ def product_detail(request, slug):
 
 
 def cart(request):
+<<<<<<< HEAD
     from . import recommendations
     totals = services.totals_for(request)
     cart_pids = [item['product'].id for item in totals['items']]
@@ -183,6 +217,10 @@ def cart(request):
         'recommendations': recs,
     }
     return render(request, 'store/cart.html', context)
+=======
+    totals = services.totals_for(request)
+    return render(request, 'store/cart.html', totals)
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 
 @require_POST
@@ -193,6 +231,7 @@ def cart_add(request, pk):
         qty = int(qty)
     except (TypeError, ValueError):
         qty = 1
+<<<<<<< HEAD
 
     is_ajax = (request.headers.get('x-requested-with') == 'XMLHttpRequest' or
                'application/json' in request.headers.get('accept', ''))
@@ -221,6 +260,15 @@ def cart_add(request, pk):
                 'tax': str(totals['tax']),
             })
         messages.success(request, msg)
+=======
+    if product.stock <= 0:
+        messages.error(request, f'{product.name} is out of stock.')
+    elif qty > product.stock:
+        messages.error(request, f'Only {product.stock} units of {product.name} are available.')
+    else:
+        services.add_to_cart(request, product, qty)
+        messages.success(request, f'{product.name} added to cart.')
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     return redirect(services.safe_next(request, 'cart'))
 
 
@@ -232,15 +280,19 @@ def cart_update(request, pk):
         qty = int(qty)
     except (TypeError, ValueError):
         qty = 1
+<<<<<<< HEAD
 
     is_ajax = (request.headers.get('x-requested-with') == 'XMLHttpRequest' or
                'application/json' in request.headers.get('accept', ''))
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     if qty <= 0:
         services.remove_from_cart(request, pk)
     else:
         services.set_cart_qty(request, product, qty)
         messages.success(request, 'Cart updated.')
+<<<<<<< HEAD
 
     if is_ajax:
         totals = services.totals_for(request)
@@ -251,6 +303,8 @@ def cart_update(request, pk):
             'total': str(totals['total']),
             'tax': str(totals['tax']),
         })
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     return redirect('cart')
 
 
@@ -258,6 +312,7 @@ def cart_update(request, pk):
 def cart_remove(request, pk):
     services.remove_from_cart(request, pk)
     messages.success(request, 'Item removed from cart.')
+<<<<<<< HEAD
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         totals = services.totals_for(request)
         return JsonResponse({
@@ -275,6 +330,8 @@ def cart_clear(request):
     messages.success(request, 'Your cart has been cleared.')
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'ok': True, 'cart_count': 0})
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     return redirect('cart')
 
 
@@ -330,6 +387,7 @@ def wishlist_move_to_cart(request, pk):
     return redirect('wishlist')
 
 
+<<<<<<< HEAD
 # --------------------------------------------------------------------------- #
 # Checkout
 # --------------------------------------------------------------------------- #
@@ -352,6 +410,8 @@ def _checkout_token(request):
     return token
 
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def checkout(request):
     if request.method == 'POST':
         return _process_checkout(request)
@@ -382,7 +442,10 @@ def checkout(request):
         'addresses': addresses,
         'initial': initial,
         'mpesa_available': settings.mpesa_enabled,
+<<<<<<< HEAD
         'checkout_token': _checkout_token(request),
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     })
 
 
@@ -418,6 +481,7 @@ def _process_checkout(request):
         'city': city,
         'county': county,
     }
+<<<<<<< HEAD
 
     # Idempotency: the hidden token (minted per checkout page load) lets us
     # recognise a retried submission — double-click, back/refresh — and return
@@ -440,15 +504,22 @@ def _process_checkout(request):
                 messages.info(request, f'Order {existing.number} was already placed.')
                 return redirect('order_detail', number=existing.number)
         raise
+=======
+    try:
+        order = services.create_order_from_cart(request, data, payment_method, totals)
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     except ValueError as e:
         messages.error(request, str(e))
         return redirect('cart')
 
+<<<<<<< HEAD
     # Rotate the idempotency token so the next checkout starts fresh and can
     # never replay this one (the previous token is now bound to the order).
     request.session['checkout_token'] = uuid4().hex
     request.session.modified = True
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     if not request.user.is_authenticated:
         guest_orders = request.session.setdefault('guest_orders', [])
         if order.number not in guest_orders:
@@ -464,6 +535,7 @@ def _process_checkout(request):
             if payment:
                 payment.status = 'processing'
                 payment.transaction_id = tx.checkout_request_id
+<<<<<<< HEAD
                 payment.reference = tx.merchant_request_id or tx.transaction_id
                 payment.save(update_fields=['status', 'transaction_id', 'reference', 'updated_at'])
             order.payment_status = 'processing'
@@ -491,12 +563,22 @@ def _process_checkout(request):
                 'Your order has been saved — retry the payment or switch to '
                 'pay on delivery from the order page.')
             return redirect('order_detail', number=order.number)
+=======
+                payment.reference = tx.transaction_id
+                payment.save(update_fields=['status', 'transaction_id', 'reference', 'updated_at'])
+            messages.success(request, 'M-Pesa prompt sent to your phone. Complete the payment and your order will update automatically.')
+        except RuntimeError as e:
+            _cancel_order(order, 'M-Pesa payment could not be started: {}'.format(e))
+            messages.error(request, str(e))
+            return redirect('cart')
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     else:
         messages.success(request, f'Order {order.number} placed. We will contact you to arrange payment and delivery.')
 
     return redirect('order_detail', number=order.number)
 
 
+<<<<<<< HEAD
 def _record_payment_start_failure(order, reason):
     """Mark the payment attempt failed without cancelling the order.
 
@@ -731,6 +813,8 @@ def order_retry_payment(request, number):
     return redirect('order_detail', number=order.number)
 
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def _cancel_order(order, note='Cancelled by system'):
     with transaction.atomic():
         services.release_stock(order)
@@ -767,6 +851,7 @@ def number_in_session(request, number):
 
 @require_POST
 def newsletter(request):
+<<<<<<< HEAD
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1'
     email = request.POST.get('email', '').strip().lower()
     try:
@@ -843,6 +928,20 @@ def newsletter_unsubscribe(request, token):
     })
 
 
+=======
+    email = request.POST.get('email', '').strip()
+    try:
+        validate_email(email)
+    except ValidationError:
+        messages.error(request, 'Please enter a valid email address.')
+        return redirect(services.safe_next(request, 'home'))
+    if email:
+        NewsletterSubscriber.objects.get_or_create(email=email)
+        messages.success(request, 'You are subscribed to our newsletter.')
+    return redirect(services.safe_next(request, 'home'))
+
+
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def contact(request):
     form = ContactForm()
     if request.method == 'POST':
@@ -866,6 +965,7 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
+<<<<<<< HEAD
             user = form.save(commit=False)
             user.is_active = False  # Account remains inactive until approved by Super Admin
             user.save()
@@ -959,6 +1059,30 @@ def login_view(request):
 
 
 
+=======
+            user = form.save()
+            login(request, user)
+            notify.new_customer(user)
+            messages.success(request, f'Welcome, {user.username}! Your account is ready.')
+            return redirect('account')
+    return render(request, 'account/register.html', {'form': form})
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('account')
+    form = AuthenticationForm()
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            logger.info('User logged in: %s', user.username)
+            return redirect(services.safe_next(request, 'account'))
+    return render(request, 'account/login.html', {'form': form})
+
+
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 @login_required_view
 def account(request):
     recent_orders = request.user.orders.order_by('-created_at')[:5]
@@ -1055,6 +1179,7 @@ def account_notifications_clear(request):
     return redirect('account_notifications')
 
 
+<<<<<<< HEAD
 @require_POST
 @login_required_view
 def account_notification_read(request, pk):
@@ -1102,18 +1227,28 @@ def account_subscription(request):
     })
 
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 # --------------------------------------------------------------------------- #
 # M-Pesa callback (public, Safaricom -> us)
 # --------------------------------------------------------------------------- #
 
+<<<<<<< HEAD
+=======
+@login_required_view
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def order_status_json(request, number):
     """JSON endpoint for e-commerce order status polling (M-Pesa checkout).
 
     Returns the payment status so the browser can update without a page
+<<<<<<< HEAD
     refresh, matching the POS polling experience. Access is gated by
     ``_can_view_order`` (same rule as ``order_detail``) so guest customers who
     can view their order — including via the session-based guest list — can
     also poll for M-Pesa confirmation.
+=======
+    refresh, matching the POS polling experience.
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     """
     order = get_object_or_404(Order, number=number)
     if not _can_view_order(request, order):
@@ -1160,6 +1295,7 @@ _CANCELLED_RESULT_CODES = {'1031', '1032'}
 
 
 @csrf_exempt
+<<<<<<< HEAD
 @require_POST
 def mpesa_callback(request):
     import json
@@ -1169,6 +1305,15 @@ def mpesa_callback(request):
         raw_body = request.body.decode('utf-8', errors='replace')
         logger.info('M-Pesa Callback received: %s', raw_body)
         data = json.loads(raw_body)
+=======
+def mpesa_callback(request):
+    import json
+
+    from decimal import InvalidOperation
+
+    try:
+        data = json.loads(request.body)
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         body = data.get('Body', {}).get('stkCallback', {})
         checkout_id = body.get('CheckoutRequestID', '')
         if not checkout_id:
@@ -1207,12 +1352,19 @@ def mpesa_callback(request):
                 return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
             order = tx.order
 
+<<<<<<< HEAD
             # The server decides whether to trust the callback. Compare the
             # gateway amount with the amount actually requested from Daraja
             # (whole shillings) rather than the raw order total, which can
             # include cents that STK Push cannot charge.
             callback_amount = meta.get('Amount')
             expected = (tx.amount or order.total).quantize(Decimal('0.01'))
+=======
+            # The server decides whether to trust the callback. The amount
+            # charged by the gateway must match what the server calculated.
+            callback_amount = meta.get('Amount')
+            expected = order.total.quantize(Decimal('0.01'))
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
             amount_ok = False
             if callback_amount is not None:
                 try:
@@ -1262,4 +1414,8 @@ def mpesa_callback(request):
         return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
     except Exception:
         logger.exception('Error handling M-Pesa callback')
+<<<<<<< HEAD
         return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+=======
+        return JsonResponse({'ResultCode': 1, 'ResultDesc': 'Internal error'})
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

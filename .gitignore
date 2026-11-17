@@ -1,8 +1,11 @@
 .env
 .venv/
+<<<<<<< HEAD
 .venv_cache_dir/
 .poolside/
 logs/
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 __pycache__/
 *.pyc
 db.sqlite3

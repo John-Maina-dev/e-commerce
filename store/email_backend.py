@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import logging
 from django.conf import settings
 from django.core.mail.backends.smtp import EmailBackend as DjangoSMTPBackend
@@ -7,12 +8,20 @@ logger = logging.getLogger('store')
 
 class DatabaseSMTPEmailBackend(DjangoSMTPBackend):
     """Reads SMTP settings from the SiteSettings table or settings.py/env."""
+=======
+from django.core.mail.backends.smtp import EmailBackend as DjangoSMTPBackend
+
+
+class DatabaseSMTPEmailBackend(DjangoSMTPBackend):
+    """Reads SMTP settings from the SiteSettings table when configured."""
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
     def __init__(self, *args, **kwargs):
         try:
             from .models import SiteSettings
             s = SiteSettings.objects.first()
             if s and s.smtp_enabled:
+<<<<<<< HEAD
                 if s.smtp_host and s.smtp_username and s.smtp_password:
                     kwargs.update(
                         host=s.smtp_host.strip(),
@@ -61,3 +70,16 @@ class DatabaseSMTPEmailBackend(DjangoSMTPBackend):
             self.use_ssl = True
             self.use_tls = False
         return super().open()
+=======
+                kwargs.update(
+                    host=s.smtp_host,
+                    port=s.smtp_port,
+                    username=s.smtp_username or None,
+                    password=s.smtp_password or None,
+                    use_tls=s.smtp_use_tls and not s.smtp_use_ssl,
+                    use_ssl=s.smtp_use_ssl,
+                )
+        except Exception:
+            pass
+        super().__init__(*args, **kwargs)
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

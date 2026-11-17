@@ -2,7 +2,11 @@ import re
 from unittest import mock
 
 from django.contrib.auth.models import User
+<<<<<<< HEAD
 from django.test import Client, TestCase, override_settings
+=======
+from django.test import Client, TestCase
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from django.urls import reverse
 
 from store.models import SiteSettings
@@ -259,7 +263,10 @@ class EmailBackendTests(TestCase):
         self.assertTrue(backend.use_ssl)
         self.assertFalse(backend.use_tls)
 
+<<<<<<< HEAD
     @override_settings(EMAIL_HOST_USER='', EMAIL_HOST_PASSWORD='')
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     def test_backend_falls_back_to_settings_when_disabled(self):
         s = SiteSettings.get()
         s.smtp_enabled = False

@@ -1,21 +1,34 @@
 {% extends 'email/_base_email.html' %}
+<<<<<<< HEAD
 {% load store_extras %}
 {% block body %}
 <h2>We received your order</h2>
 <p>Hi {{ order.customer_name }}, thanks for shopping with {{ site.store_name }}.
 We've received your order ({{ order.get_payment_method_display }}) and will email you once it ships.</p>
+=======
+{% block body %}
+<h2>We received your order</h2>
+<p>Hi {{ order.customer_name }}, thanks for shopping with {{ site.store_name }}. We're getting your order ready.</p>
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 <div class="card">
   <table>
     <tr><td>Order number</td><td align="right"><b>{{ order.number }}</b></td></tr>
     <tr><td>Placed</td><td align="right">{{ order.created_at|date:'d M Y H:i' }}</td></tr>
+<<<<<<< HEAD
     <tr><td>Status</td><td align="right">{{ order.get_status_display }}</td></tr>
   </table>
   <table style="margin-top:16px;">
     <tr><th style="text-align:left; padding-top:8px;">Item</th><th style="text-align:right; padding-top:8px;">Qty</th><th style="text-align:right; padding-top:8px;">Line</th></tr>
+=======
+  </table>
+  <table>
+    <tr><th style="text-align:left; padding-top:8px;">Item</th><th style="text-align:right; padding-top:8px;">Qty</th><th style="text-align:right; padding-top:8px;">Price</th></tr>
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     {% for i in order.items.all %}
     <tr>
       <td>{{ i.product_name }}</td>
       <td align="right">{{ i.quantity }}</td>
+<<<<<<< HEAD
       <td align="right">{{ i.subtotal|money:currency }}</td>
     </tr>
     {% endfor %}
@@ -31,4 +44,14 @@ We've received your order ({{ order.get_payment_method_display }}) and will emai
 </div>
 <p>We'll email you again once your payment is confirmed and your order ships.</p>
 <p><a class="btn" href="{{ protocol }}://{{ domain }}{{ order_url }}">Track order {{ order.number }}</a></p>
+=======
+      <td align="right">{{ site.currency }} {{ i.subtotal }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div class="total" style="text-align:right;">Total: {{ site.currency }} {{ order.total }}</div>
+</div>
+<p>We'll email you again once your payment is confirmed and your order ships.</p>
+<p><a class="btn" href="{{ protocol }}://{{ domain }}{{ order_url }}">Track your order</a></p>
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 {% endblock %}

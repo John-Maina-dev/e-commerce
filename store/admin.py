@@ -1,11 +1,18 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
+<<<<<<< HEAD
 from .models import (AccountAuditLog, Address, Category, ContactMessage, Coupon, CouponUsage,
                      DataDeletionAuditLog, InventoryAlert,
                      InventoryChange, MpesaTransaction, NewsletterSubscriber, Notification, Order,
                      OrderItem, OrderReturn, OrderStatusHistory, Payment, PosSession, Product,
                      ProductImage, Review, SiteSettings, UserProfile, WishlistItem)
+=======
+from .models import (Address, Category, ContactMessage, Coupon, CouponUsage, InventoryAlert,
+                     InventoryChange, MpesaTransaction, NewsletterSubscriber, Notification, Order,
+                     OrderItem, OrderReturn, OrderStatusHistory, Payment, PosSession, Product,
+                     ProductImage, Review, SiteSettings, WishlistItem)
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 admin.site.site_header = 'Reeves Boutique Administration'
 admin.site.site_title = 'Reeves Boutique'
@@ -250,12 +257,17 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                                      'smtp_password_masked', 'smtp_use_tls', 'smtp_use_ssl',
                                      'smtp_from_email', 'smtp_sender_name',
                                      'password_reset_timeout_seconds')}),
+<<<<<<< HEAD
         ('M-Pesa STK Push', {'fields': ('mpesa_enabled', 'mpesa_environment', 'mpesa_account_type',
                                         'mpesa_business_name', 'mpesa_consumer_key_masked',
+=======
+        ('M-Pesa STK Push', {'fields': ('mpesa_enabled', 'mpesa_environment', 'mpesa_consumer_key_masked',
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
                                         'mpesa_consumer_secret_masked', 'mpesa_shortcode',
                                         'mpesa_passkey_masked', 'mpesa_callback_url',
                                         'mpesa_account_reference', 'mpesa_transaction_desc')}),
     )
+<<<<<<< HEAD
 
 
 @admin.register(UserProfile)
@@ -289,3 +301,5 @@ class DataDeletionAuditLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

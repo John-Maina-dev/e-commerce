@@ -22,11 +22,15 @@
 <div class="alert-panel">
   <div>
     <h2>⚠ Payment requires review</h2>
+<<<<<<< HEAD
     {% if payment.manual_code %}
     <p>The customer submitted M-Pesa code <b class="mono">{{ payment.manual_code }}</b>. Match it against the M-Pesa statement before approving. Do not treat this as paid until the funds are confirmed.</p>
     {% else %}
     <p>The gateway result could not be trusted automatically. Do not treat this as paid until you verify the funds independently.</p>
     {% endif %}
+=======
+    <p>The gateway result could not be trusted automatically. Do not treat this as paid until you verify the funds independently.</p>
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   </div>
 </div>
 {% endif %}
@@ -42,8 +46,11 @@
       <div><span>Method</span><b>{{ payment.get_method_display }}</b></div>
       <div><span>Transaction ID</span><b class="mono">{{ payment.transaction_id|default:'—' }}</b></div>
       <div><span>Reference / receipt</span><b class="mono">{{ payment.reference|default:'—' }}</b></div>
+<<<<<<< HEAD
       <div><span>Customer M-Pesa code</span><b class="mono">{{ payment.manual_code|default:'—' }}</b></div>
       {% if payment.manual_submitted_at %}<div><span>Code submitted</span><b>{{ payment.manual_submitted_at|date:'d M Y H:i' }}</b></div>{% endif %}
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       <div><span>Created</span><b>{{ payment.created_at|date:'d M Y H:i' }}</b></div>
       <div><span>Result code</span><b class="mono">{{ payment.result_code|default:'—' }}</b></div>
       <div><span>Result description</span><b>{{ payment.result_description|default:'—' }}</b></div>

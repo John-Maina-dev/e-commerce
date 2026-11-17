@@ -4,7 +4,11 @@ from django.contrib.auth.models import User
 from django.template import loader
 from django.urls import reverse
 
+<<<<<<< HEAD
 from .models import Address, ContactMessage, Coupon, Product, Review, SiteSettings
+=======
+from .models import Address, ContactMessage, Coupon, Product, Review
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 
 class RegistrationForm(UserCreationForm):
@@ -47,6 +51,7 @@ class SitePasswordResetForm(PasswordResetForm):
         password_reset_sent(context['user'], to_email)
 
 
+<<<<<<< HEAD
 class MpesaSettingsForm(forms.Form):
     """Server-side validation for the M-Pesa Daraja configuration page.
 
@@ -121,6 +126,8 @@ class MpesaSettingsForm(forms.Form):
         return cleaned
 
 
+=======
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = User

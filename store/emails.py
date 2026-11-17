@@ -16,6 +16,7 @@ def order_url(order):
 
 def send_html_email(subject, to, template, context=None, from_email=None):
     s = SiteSettings.get()
+<<<<<<< HEAD
     is_console = 'console' in getattr(settings, 'EMAIL_BACKEND', '')
     if not s.smtp_enabled and not is_console:
         logger.info('Email not sent (%s) because SMTP is disabled in store settings.', subject)
@@ -35,6 +36,23 @@ def send_html_email(subject, to, template, context=None, from_email=None):
             sender = f'{s.smtp_sender_name} <{sender}>'
         email = EmailMultiAlternatives(subject, text or '', sender, [to])
         email.attach_alternative(html, 'text/html')
+=======
+    if not s.smtp_enabled:
+        logger.info('Email not sent (%s) because SMTP is disabled in settings.', subject)
+        return False
+    context = context or {}
+    context.setdefault('site', s)
+    context.setdefault('protocol', 'https' if not settings.DEBUG else 'http')
+    context.setdefault('domain', settings.ALLOWED_HOSTS[0] if settings.ALLOWED_HOSTS else 'localhost')
+    html = render_to_string(template, context)
+    text = render_to_string(template.replace('.html', '.txt'), context) if _txt_exists(template) else None
+    sender = from_email or (s.smtp_from_email or settings.DEFAULT_FROM_EMAIL)
+    if s.smtp_sender_name and sender and '<' not in sender:
+        sender = f'{s.smtp_sender_name} <{sender}>'
+    email = EmailMultiAlternatives(subject, text or '', sender, [to])
+    email.attach_alternative(html, 'text/html')
+    try:
+>>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         email.send(fail_silently=False)
         logger.info('Email sent to %s: %s', to, subject)
         return True
