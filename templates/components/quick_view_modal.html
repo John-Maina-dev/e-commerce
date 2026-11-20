@@ -1,0 +1,37 @@
+<div class="modal-backdrop rb-qv-backdrop" id="rbQuickViewModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rbQvTitle">
+  <div class="modal rb-qv-modal" role="document">
+    <button type="button" class="rb-qv-close" data-qv-close aria-label="Close quick view">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="rb-qv-grid">
+      <div class="rb-qv-media">
+        <img id="rbQvImg" src="" alt="" width="600" height="600" hidden>
+        <div id="rbQvPlaceholder" class="rb-card-placeholder" hidden><span>RB</span></div>
+        <span id="rbQvDiscount" class="badge badge-sale rb-qv-badge" hidden></span>
+      </div>
+      <div class="rb-qv-body">
+        <span id="rbQvCategory" class="muted rb-card-cat"></span>
+        <h2 id="rbQvTitle" class="rb-qv-title"></h2>
+        <div class="price-row rb-qv-prices">
+          <strong id="rbQvPrice"></strong>
+          <del id="rbQvOldPrice" hidden></del>
+        </div>
+        <p id="rbQvStock" class="rb-qv-stock"></p>
+        <p id="rbQvDesc" class="muted rb-qv-desc"></p>
+        <form method="post" id="rbQvCartForm" action="" class="rb-qv-form" data-submit-loading>
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <div class="rb-qv-actions">
+            <div class="qty-box rb-qv-qty">
+              <button type="button" class="qty-minus" aria-label="Decrease quantity">−</button>
+              <input type="number" name="quantity" id="rbQvQty" value="1" min="1" max="99" aria-label="Quantity">
+              <button type="button" class="qty-plus" aria-label="Increase quantity">+</button>
+            </div>
+            <button type="submit" class="btn btn-lg" id="rbQvAddBtn" data-loading-text="Adding…">Add to cart</button>
+          </div>
+        </form>
+        <a id="rbQvFullLink" href="#" class="rb-qv-link">View full product details →</a>
+      </div>
+    </div>
+  </div>
+</div>

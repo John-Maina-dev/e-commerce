@@ -21,8 +21,9 @@ if not SECRET_KEY:
     else:
         raise ImproperlyConfigured(
             'SECRET_KEY must be set in the environment (or .env) when DEBUG=False.')
+
+# Hosts and domain configuration
 ALLOWED_HOSTS = [x.strip() for x in os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if x.strip()]
-<<<<<<< HEAD
 for _d in ('.ngrok-free.app', '.ngrok-free.dev', '.ngrok.io'):
     if _d not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(_d)
@@ -47,9 +48,6 @@ if _ngrok_base:
         CSRF_TRUSTED_ORIGINS.append(_origin)
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-=======
-CSRF_TRUSTED_ORIGINS = [x.strip() for x in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if x.strip()]
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -133,7 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-<<<<<<< HEAD
+# Email configuration
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '').strip()
@@ -156,16 +154,16 @@ if DEBUG and not EMAIL_HOST_USER:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'store.email_backend.DatabaseSMTPEmailBackend'
-=======
-EMAIL_BACKEND = 'store.email_backend.DatabaseSMTPEmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL') or EMAIL_HOST_USER or 'no-reply@reevesboutique.local'
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
+
+# M-Pesa Daraja Settings (Environment variables take precedence over in-app settings)
+MPESA_ENV = os.getenv('MPESA_ENV', os.getenv('DARAJA_ENVIRONMENT', 'sandbox')).strip().lower()
+MPESA_ACCOUNT_TYPE = os.getenv('MPESA_ACCOUNT_TYPE', os.getenv('DARAJA_ACCOUNT_TYPE', 'paybill')).strip().lower()
+MPESA_CONSUMER_KEY = os.getenv('MPESA_CONSUMER_KEY', os.getenv('DARAJA_CONSUMER_KEY', '')).strip()
+MPESA_CONSUMER_SECRET = os.getenv('MPESA_CONSUMER_SECRET', os.getenv('DARAJA_CONSUMER_SECRET', '')).strip()
+MPESA_SHORTCODE = os.getenv('MPESA_SHORTCODE', os.getenv('DARAJA_SHORTCODE', '')).strip()
+MPESA_PASSKEY = os.getenv('MPESA_PASSKEY', os.getenv('DARAJA_PASSKEY', '')).strip()
+MPESA_CALLBACK_BASE_URL = os.getenv('MPESA_CALLBACK_BASE_URL', '').strip().rstrip('/')
+MPESA_CALLBACK_URL = os.getenv('MPESA_CALLBACK_URL', os.getenv('DARAJA_CALLBACK_URL', '')).strip()
 
 # Security hardening (enabled automatically when DEBUG=False)
 SECURE_SSL_REDIRECT = not DEBUG and os.getenv('SECURE_SSL_REDIRECT', 'True').lower() == 'true'

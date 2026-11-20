@@ -12,21 +12,7 @@
 </nav>
 
 <div class="product-detail">
-  <div class="gallery">
-    {% if product.images.all %}
-    <div class="gallery-main">
-      <img src="{{ product.image_src }}" alt="{{ product.name }}" id="mainImage">
-    </div>
-    <div class="gallery-thumbs">
-      {% if product.image_src %}<button type="button" class="thumb active" data-src="{{ product.image_src }}" aria-label="Main image"><img src="{{ product.image_src }}" alt=""></button>{% endif %}
-      {% for img in product.images.all %}<button type="button" class="thumb" data-src="{{ img.image.url }}" aria-label="Additional image"><img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}"></button>{% endfor %}
-    </div>
-    {% else %}
-    <div class="gallery-main">
-      {% if product.image_src %}<img src="{{ product.image_src }}" alt="{{ product.name }}">{% else %}<div class="placeholder">RB</div>{% endif %}
-    </div>
-    {% endif %}
-  </div>
+  {% include 'components/product_gallery.html' with product=product %}
 
   <div class="product-info">
     <span class="muted">{{ product.category.name }}{% if product.brand %} · {{ product.brand }}{% endif %}</span>
@@ -100,9 +86,7 @@
 {% if related %}
 <section class="section">
   <div class="section-head"><h2>You may also like</h2><a href="{% url 'catalogue' %}?category={{ product.category.slug }}">More in {{ product.category.name }} →</a></div>
-  <div class="product-grid">
-    {% for p in related %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
-  </div>
+  {% include 'components/reveal_grid.html' with products=related style=site_settings.catalogue_style %}
 </section>
 {% endif %}
 
@@ -153,14 +137,6 @@
 
 {% block extra_js %}
 <script>
-  document.querySelectorAll('.gallery-thumbs .thumb').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      document.querySelectorAll('.gallery-thumbs .thumb').forEach(function (b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      var main = document.getElementById('mainImage');
-      if (main) main.src = btn.dataset.src;
-    });
-  });
   document.querySelectorAll('.qty-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var input = document.getElementById('qty');

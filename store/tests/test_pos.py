@@ -63,7 +63,6 @@ class PosSearchTests(StaffUserMixin, TestCase):
         resp = Client().get(reverse('pos_search'), {'q': 'cola'})
         self.assertEqual(resp.status_code, 302)
 
-<<<<<<< HEAD
     def test_catalogue_grid_lists_visible_products_and_categories(self):
         make_product(name='Archived Item', category=self.cola.category,
                      sku='ARCH-1', price='10.00', stock=5, active=False)
@@ -86,8 +85,6 @@ class PosSearchTests(StaffUserMixin, TestCase):
         resp = Client().get(reverse('pos_catalogue'))
         self.assertEqual(resp.status_code, 302)
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     def test_service_layer_barcode_exact_match(self):
         found = pos.search_products('1234567890123')
         self.assertEqual([p.pk for p in found], [self.cola.pk])
@@ -223,7 +220,6 @@ class PosCheckoutTests(StaffUserMixin, TestCase):
         order.refresh_from_db()
         self.assertEqual(order.payment_status, 'paid')
 
-<<<<<<< HEAD
     @mock.patch('store.pos.mpesa.stk_push', side_effect=RuntimeError('Daraja down'))
     def test_mpesa_stk_failure_response_reflects_real_state(self, _push):
         # Run the post-commit STK hook inline so the response reflects the
@@ -236,8 +232,6 @@ class PosCheckoutTests(StaffUserMixin, TestCase):
         order = Order.objects.get(number=sale['number'])
         self.assertEqual(order.status, 'cancelled')
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     def test_mpesa_stk_failure_cancels_sale(self):
         resp = self._checkout(items=[{'id': self.bread.pk, 'quantity': 1}],
                               payment_method='mpesa', phone='0712345678',
@@ -284,7 +278,6 @@ class PosSessionTests(StaffUserMixin, TestCase):
         page = self.client.get(reverse('pos_terminal'))
         self.assertContains(page, 'Open your shift')
 
-<<<<<<< HEAD
     def test_open_till_renders_supermarket_grid(self):
         self.client.post(reverse('pos_session_open'), {'opening_cash': '0'})
         page = self.client.get(reverse('pos_terminal'))
@@ -292,8 +285,6 @@ class PosSessionTests(StaffUserMixin, TestCase):
                        'Prompt customer', 'id="payModal"', 'id="customerDisplay"'):
             self.assertContains(page, marker)
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     def test_open_close_session_flow(self):
         self.client.post(reverse('pos_session_open'), {'opening_cash': '500'})
         session = PosSession.objects.get(user=self.user,

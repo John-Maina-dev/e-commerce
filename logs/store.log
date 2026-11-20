@@ -3245,3 +3245,430 @@ INFO 2026-09-07 10:52:00,745 log 8124 11824 "GET / HTTP/1.1" 200 61814
 INFO 2026-09-07 10:52:01,055 log 8124 14980 "GET /static/store.js HTTP/1.1" 200 16737
 INFO 2026-09-07 10:52:01,064 log 8124 11824 "GET /static/store.css HTTP/1.1" 200 73296
 WARNING 2026-09-07 10:52:01,578 log 8124 11824 "GET /favicon.ico HTTP/1.1" 404 25955
+INFO 2026-11-20 17:43:13,463 data_management 19276 468 DATA DELETION: boss deleted 2 mpesa_transactions records from IP 127.0.0.1. Filters: Selected IDs: 2 items
+INFO 2026-11-20 17:43:18,261 data_management 19276 468 DATA DELETION: boss deleted 1 orders records from IP 127.0.0.1. Filters: Selected IDs: 1 items
+INFO 2026-11-20 17:43:24,974 data_management 19276 468 DATA DELETION: boss deleted 2 notifications records from IP 127.0.0.1. Filters: Selected IDs: 2 items
+INFO 2026-11-20 17:43:36,295 data_management 19276 468 DATA DELETION: boss deleted 1 users records from IP 127.0.0.1. Filters: Selected IDs: 1 items
+INFO 2026-11-20 17:43:36,418 services 19276 468 Restored 6 units of stock for cancelled/refunded order RB-261120-88980F
+INFO 2026-11-20 17:43:59,125 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+INFO 2026-11-20 17:43:59,133 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+INFO 2026-11-20 17:43:59,138 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+ERROR 2026-11-20 17:43:59,139 mpesa 19276 468 M-PESA_CONNECTION_TEST failed | category=MPESA_INVALID_TOKEN environment=sandbox endpoint=/mpesa/stkpush/v1/processrequest order=- status=404 code=404.001.03 requestId=req-1 description=Invalid Access Token elapsed=0.00s
+ERROR 2026-11-20 17:43:59,146 mpesa 19276 468 M-PESA_OAUTH failed | category=MPESA_TIMEOUT environment=sandbox endpoint=/oauth/v1/generate?grant_type=client_credentials order=- status=None code=- requestId=- description=boom elapsed=0.00s
+ERROR 2026-11-20 17:43:59,147 mpesa 19276 468 M-PESA_CONNECTION_TEST failed | category=MPESA_TIMEOUT environment=sandbox endpoint=/oauth/v1/generate?grant_type=client_credentials order=- status=None code=- requestId=- description=Unable to reach the M-Pesa service. Please try again. elapsed=-1.00s
+INFO 2026-11-20 17:43:59,152 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+INFO 2026-11-20 17:43:59,179 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+WARNING 2026-11-20 17:43:59,179 mpesa 19276 468 STK push rejected with 404 (404.001.03). Retrying once with fresh token...
+INFO 2026-11-20 17:43:59,180 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+ERROR 2026-11-20 17:43:59,181 mpesa 19276 468 M-PESA_STK_PUSH failed | category=MPESA_INVALID_TOKEN environment=sandbox endpoint=/mpesa/stkpush/v1/processrequest order=RB-T-ENTITLE status=404 code=404.001.03 requestId=req-abc-123 description=Invalid Access Token elapsed=0.00s
+INFO 2026-11-20 17:43:59,203 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+ERROR 2026-11-20 17:44:01,004 mpesa 19276 468 M-PESA_STK_PUSH failed | category=MPESA_STK_FAILED environment=sandbox endpoint=/mpesa/stkpush/v1/processrequest order=RB-T-ENTITLE3 status=500 code=500.001.01 requestId=- description=Server error elapsed=1.80s
+INFO 2026-11-20 17:44:10,968 manage_views 19276 468 Payment 1 approved manually for order RB-MANUAL-2 by admin
+INFO 2026-11-20 17:44:27,805 emails 19276 468 Email not sent (Order RB-261120-1B1E19 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:44:27,810 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token', 'expires_in'])
+INFO 2026-11-20 17:44:27,811 mpesa 19276 468 STK push sent for order RB-261120-1B1E19 (254712345678) checkout id ws_CO_1 in 0.00s
+INFO 2026-11-20 17:44:27,839 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token'])
+ERROR 2026-11-20 17:44:29,641 mpesa 19276 468 M-PESA_STK_PUSH failed | category=MPESA_TIMEOUT environment=sandbox endpoint=/mpesa/stkpush/v1/processrequest order=RB-T-ROBUST status=None code=- requestId=- description=boom elapsed=1.80s
+INFO 2026-11-20 17:44:29,659 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token'])
+ERROR 2026-11-20 17:44:29,660 mpesa 19276 468 M-PESA_STK_PUSH failed | category=MPESA_STK_FAILED environment=sandbox endpoint=/mpesa/stkpush/v1/processrequest order=RB-T-ROBUST status=403 code=- requestId=- description=Safaricom returned an unexpected response (possible edge/WAF block). elapsed=0.00s
+INFO 2026-11-20 17:44:29,671 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token'])
+WARNING 2026-11-20 17:44:29,672 mpesa 19276 468 STK push rejected with 404 (404.001.03). Retrying once with fresh token...
+INFO 2026-11-20 17:44:29,672 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token'])
+ERROR 2026-11-20 17:44:29,673 mpesa 19276 468 M-PESA_STK_PUSH failed | category=MPESA_INVALID_TOKEN environment=sandbox endpoint=/mpesa/stkpush/v1/processrequest order=RB-T-ROBUST status=404 code=404.001.03 requestId=- description=Invalid Access Token elapsed=0.00s
+INFO 2026-11-20 17:44:29,682 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token'])
+ERROR 2026-11-20 17:44:31,483 mpesa 19276 468 M-PESA_STATUS_QUERY failed | category=- environment=sandbox endpoint=/mpesa/transactionstatus/v1/query order=- status=500 code=- requestId=- description=Safaricom returned an unexpected response (possible edge/WAF block). elapsed=1.80s
+INFO 2026-11-20 17:44:31,498 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token'])
+INFO 2026-11-20 17:44:31,499 mpesa 19276 468 STK push sent for order RB-T-ROUND (254712345678) checkout id cid-1 in 0.00s
+INFO 2026-11-20 17:44:31,505 mpesa 19276 468 Daraja OAuth HTTP status=200 (keys=['access_token'])
+ERROR 2026-11-20 17:44:36,614 mpesa 19276 468 M-PESA_CONNECTION_TEST failed | category=MPESA_INVALID_TOKEN environment=sandbox endpoint=/mpesa/stkpush/v1/processrequest order=- status=404 code=404.001.03 requestId=ac7b-470b-8df7-23ab3cef38272369672 description=Invalid Access Token elapsed=1.58s
+INFO 2026-11-20 17:44:58,258 manage_views 19276 468 M-Pesa settings updated by admin
+INFO 2026-11-20 17:45:02,357 mpesa 19276 468 STK push sent for order T-1 (254712345678) checkout id ws in 0.00s
+INFO 2026-11-20 17:45:10,514 manage_views 19276 468 Payment 1 approved manually for order RB-261120-71C4FB by admin
+INFO 2026-11-20 17:45:18,706 manage_views 19276 468 Payment 1 rejected for order RB-261120-1484FD by admin
+INFO 2026-11-20 17:45:27,023 manage_views 19276 468 Order RB-261120-B0558C status changed to shipped by admin
+INFO 2026-11-20 17:46:31,591 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 1}]}}}}
+WARNING 2026-11-20 17:46:31,611 views 19276 468 M-Pesa callback amount mismatch for order RB-261120-53F275: got 1 expected 2150.00
+INFO 2026-11-20 17:46:35,602 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "1032", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:46:35,606 views 19276 468 M-Pesa payment failed for req-1: The service request is processed successfully.
+INFO 2026-11-20 17:46:39,749 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "1", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:46:39,754 views 19276 468 M-Pesa payment failed for req-1: The service request is processed successfully.
+INFO 2026-11-20 17:46:43,793 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:46:43,816 views 19276 468 M-Pesa payment confirmed for req-1 receipt PJX123ABC amount 2150.00
+ERROR 2026-11-20 17:47:16,727 manage_views 19276 468 SMTP test failed for who@example.com: connection refused
+INFO 2026-11-20 17:47:24,821 manage_views 19276 468 SMTP test email sent to who@example.com via smtp.gmail.com
+INFO 2026-11-20 17:47:37,336 emails 19276 468 Email sent to jane@example.com: Password reset for Reeves Boutique
+INFO 2026-11-20 17:47:57,346 emails 19276 468 Email not sent (Password reset for Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:47:59,784 emails 19276 468 Email sent to jane@example.com: Password reset for Reeves Boutique
+INFO 2026-11-20 17:48:22,674 emails 19276 468 Email sent to jane@example.com: Password reset for Reeves Boutique
+INFO 2026-11-20 17:48:22,937 services 19276 468 Restored 2 units of stock for cancelled/refunded order RB-261120-06108C
+INFO 2026-11-20 17:48:23,032 views 19276 468 M-Pesa Callback received: not json
+ERROR 2026-11-20 17:48:23,032 views 19276 468 Error handling M-Pesa callback
+Traceback (most recent call last):
+  File "C:\Users\mash\OneDrive\Desktop\e-commerce\store\views.py", line 1171, in mpesa_callback
+    data = json.loads(raw_body)
+  File "C:\Users\mash\AppData\Local\Programs\Python\Python314\Lib\json\__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "C:\Users\mash\AppData\Local\Programs\Python\Python314\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\mash\AppData\Local\Programs\Python\Python314\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+INFO 2026-11-20 17:48:23,090 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "1", "ResultDesc": "processed", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:48:23,102 views 19276 468 M-Pesa payment failed for req-1: processed
+INFO 2026-11-20 17:48:23,117 services 19276 468 Restored 2 units of stock for cancelled/refunded order RB-261120-99A175
+INFO 2026-11-20 17:48:23,127 emails 19276 468 Email not sent (Payment failed for order RB-261120-99A175) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:48:23,233 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-paid", "ResultCode": "0", "ResultDesc": "processed", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJXPAID1"}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:48:23,287 views 19276 468 M-Pesa payment confirmed for req-paid receipt PJXPAID1 amount 2150.00
+INFO 2026-11-20 17:48:23,306 emails 19276 468 Email not sent (Payment confirmed for order RB-261120-0E7E09) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:48:23,356 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "processed", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:48:23,370 views 19276 468 M-Pesa payment confirmed for req-1 receipt PJX123ABC amount 2150.00
+INFO 2026-11-20 17:48:23,381 emails 19276 468 Email not sent (Payment confirmed for order RB-261120-1BEEFA) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:48:23,431 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "nope", "ResultCode": "0"}}}
+WARNING 2026-11-20 17:48:23,434 views 19276 468 M-Pesa callback for unknown CheckoutRequestID nope
+INFO 2026-11-20 17:48:28,910 manage_views 19276 468 Payment 1 approved manually for order RB-261120-08974F by admin
+INFO 2026-11-20 17:48:28,918 emails 19276 468 Email not sent (Payment confirmed for order RB-261120-08974F) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:48:33,916 services 19276 468 Restored 2 units of stock for cancelled/refunded order RB-261120-9023A6
+INFO 2026-11-20 17:48:33,921 manage_views 19276 468 Payment 1 rejected for order RB-261120-9023A6 by admin
+INFO 2026-11-20 17:48:33,931 emails 19276 468 Email not sent (Payment failed for order RB-261120-9023A6) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:49:28,660 services 19276 468 Restored 2 units of stock for cancelled/refunded order RB-261120-44D7D4
+INFO 2026-11-20 17:49:28,808 mpesa 19276 468 STK push sent for order RB-261120-C3E85E (254712345678) checkout id ws_CO_123 in 0.00s
+INFO 2026-11-20 17:49:32,661 manage_views 19276 468 M-Pesa settings updated by admin
+INFO 2026-11-20 17:49:38,052 manage_views 19276 468 M-Pesa settings updated by admin
+WARNING 2026-11-20 17:50:17,478 pos 19276 468 POS M-Pesa start failed for RB-261120-3DA879: Daraja down
+WARNING 2026-11-20 17:50:21,390 pos 19276 468 POS M-Pesa start failed for RB-261120-90C380: Daraja down
+INFO 2026-11-20 17:51:10,113 autoreload 15624 13992 Watching for file changes with StatReloader
+INFO 2026-11-20 17:51:11,626 pos_views 19276 468 POS shift 1 closed by cashier1
+INFO 2026-11-20 17:51:25,054 log 15624 4824 "GET / HTTP/1.1" 200 14046
+INFO 2026-11-20 17:51:25,819 log 15624 17092 "GET /static/store.js HTTP/1.1" 200 18841
+INFO 2026-11-20 17:51:25,838 log 15624 4824 "GET /static/store.css HTTP/1.1" 200 99349
+INFO 2026-11-20 17:51:26,188 log 15624 19580 "GET /media/categories/maish.jpg HTTP/1.1" 200 2122654
+INFO 2026-11-20 17:51:26,432 log 15624 4824 "GET /media/products/20260607_OBGA.AdobeStock_306188356_bing.jpg HTTP/1.1" 200 2228056
+WARNING 2026-11-20 17:51:26,571 log 15624 4824 "GET /favicon.ico HTTP/1.1" 404 33735
+INFO 2026-11-20 17:51:29,083 manage_views 19276 468 Return on RB-261120-70232D: Returnable x 1 by ret-mgr
+INFO 2026-11-20 17:51:31,402 log 15624 4824 "GET /account/login/ HTTP/1.1" 200 9709
+INFO 2026-11-20 17:51:34,812 manage_views 19276 468 Return on RB-261120-A5976F: Returnable x 1 by ret-mgr
+INFO 2026-11-20 17:51:39,732 log 15624 4824 "POST /account/login/ HTTP/1.1" 200 10141
+INFO 2026-11-20 17:51:50,987 log 15624 4824 "POST /account/login/ HTTP/1.1" 200 10141
+INFO 2026-11-20 17:52:04,072 views 15624 4824 User logged in: mash (role: super_admin)
+INFO 2026-11-20 17:52:04,090 log 15624 4824 "POST /account/login/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:52:04,314 log 15624 4824 "GET /manage/ HTTP/1.1" 200 34777
+INFO 2026-11-20 17:52:18,189 log 15624 4824 "GET /manage/notifications/ HTTP/1.1" 200 31120
+INFO 2026-11-20 17:52:19,521 log 15624 4824 "GET /manage/pos/ HTTP/1.1" 200 44811
+INFO 2026-11-20 17:52:19,596 log 15624 4824 "GET /static/pos.js HTTP/1.1" 200 57999
+INFO 2026-11-20 17:52:20,006 log 15624 4824 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 516
+INFO 2026-11-20 17:52:20,862 log 15624 4824 "GET /manage/pos/dashboard/ HTTP/1.1" 200 28249
+INFO 2026-11-20 17:52:22,205 log 15624 4824 "GET /manage/products/ HTTP/1.1" 200 28348
+INFO 2026-11-20 17:52:28,561 log 15624 4824 "POST /manage/products/2/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:52:28,667 log 15624 4824 "GET /manage/products/ HTTP/1.1" 200 26514
+INFO 2026-11-20 17:52:28,766 log 15624 4824 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 17:52:28,772 log 15624 19580 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 17:52:31,489 services 19276 468 Inventory alert raised for Summer Dress (low) by admin
+INFO 2026-11-20 17:52:32,238 log 15624 19580 "GET /manage/categories/ HTTP/1.1" 200 21434
+INFO 2026-11-20 17:52:35,345 log 15624 19580 "GET /manage/categories/3/delete/ HTTP/1.1" 200 21179
+INFO 2026-11-20 17:52:36,577 log 15624 19580 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:52:36,693 log 15624 19580 "GET /manage/categories/ HTTP/1.1" 200 21893
+INFO 2026-11-20 17:52:43,208 log 15624 19580 "GET /manage/categories/3/delete/ HTTP/1.1" 200 21179
+INFO 2026-11-20 17:52:44,269 log 15624 19580 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:52:44,362 log 15624 19580 "GET /manage/categories/ HTTP/1.1" 200 21893
+INFO 2026-11-20 17:52:50,318 log 15624 19580 "GET /manage/data/ HTTP/1.1" 200 65225
+INFO 2026-11-20 17:52:56,260 emails 19276 468 Email not sent (Welcome to Reeves Boutique Updates!) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:53:15,652 log 15624 19580 "POST /manage/data/notifications/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:53:15,824 log 15624 19580 "GET /manage/data/?tab=notifications HTTP/1.1" 200 65709
+INFO 2026-11-20 17:53:29,042 services 19276 468 Restored 2 units of stock for cancelled/refunded order RB-261120-54E372
+INFO 2026-11-20 17:53:34,773 services 19276 468 Dispatched new arrival notifications for "Designer Heels" to 1 subscribers.
+INFO 2026-11-20 17:53:34,781 services 19276 468 Product "Designer Heels" (1) already notified subscribers. Skipping.
+INFO 2026-11-20 17:53:36,624 emails 19276 468 Email not sent (Welcome to Reeves Boutique Updates!) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:53:36,688 emails 19276 468 Email not sent (Welcome to Reeves Boutique Updates!) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:53:42,221 data_management 15624 19580 DATA DELETION: mash deleted 61 notifications records from IP 127.0.0.1. Filters: Filtered delete (status=, period=, q=)
+INFO 2026-11-20 17:53:42,267 log 15624 19580 "POST /manage/data/notifications/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:53:42,390 log 15624 19580 "GET /manage/data/?tab=notifications HTTP/1.1" 200 50231
+INFO 2026-11-20 17:53:42,470 log 15624 19580 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 17:53:42,471 log 15624 4824 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 17:53:55,862 log 15624 19580 "GET /manage/settings/payments/ HTTP/1.1" 200 26894
+INFO 2026-11-20 17:54:04,489 log 15624 19580 "GET /manage/ HTTP/1.1" 200 27257
+INFO 2026-11-20 17:54:12,646 log 15624 19580 "GET / HTTP/1.1" 200 11723
+INFO 2026-11-20 17:54:17,861 log 15624 19580 "GET /products/?category=dresses HTTP/1.1" 200 10723
+INFO 2026-11-20 17:54:19,780 log 15624 19580 "GET /products/ HTTP/1.1" 200 10608
+INFO 2026-11-20 17:54:25,785 log 15624 19580 "GET / HTTP/1.1" 200 11723
+INFO 2026-11-20 17:54:27,825 log 15624 19580 "GET / HTTP/1.1" 200 11723
+INFO 2026-11-20 17:54:35,567 log 15624 19580 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:54:37,199 log 15624 19580 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:54:39,526 log 15624 19580 "GET /manage/categories/3/delete/ HTTP/1.1" 200 17994
+INFO 2026-11-20 17:54:40,642 log 15624 19580 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:54:40,764 log 15624 19580 "GET /manage/categories/ HTTP/1.1" 200 18708
+INFO 2026-11-20 17:54:51,641 log 15624 19580 "GET /manage/inventory/ HTTP/1.1" 200 22425
+INFO 2026-11-20 17:54:53,318 log 15624 19580 "GET /manage/subscribers/ HTTP/1.1" 200 23341
+INFO 2026-11-20 17:54:53,385 log 15624 19580 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 17:54:53,385 log 15624 4824 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 17:54:55,850 emails 19276 468 Email not sent (Order RB-261120-16E9F4 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:56,123 emails 19276 468 Email not sent (Order RB-261120-1E61EC received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:56,183 emails 19276 468 Email not sent (Order RB-261120-F8DD26 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:56,282 emails 19276 468 Email not sent (Order RB-261120-18DC7B received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:56,430 emails 19276 468 Email not sent (Order RB-261120-2B6E8C received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:56,703 emails 19276 468 Email not sent (Order RB-261120-195526 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:56,868 emails 19276 468 Email not sent (Order RB-261120-B5DEE9 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:57,020 emails 19276 468 Email not sent (Order RB-261120-024ED3 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:57,150 emails 19276 468 Email not sent (Order RB-261120-5447F3 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:57,256 emails 19276 468 Email not sent (Order RB-261120-A3AEE9 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:57,512 emails 19276 468 Email not sent (Order RB-261120-DEFA93 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:54:59,068 log 15624 4824 "POST /manage/subscribers/1/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:54:59,351 log 15624 4824 "GET /manage/subscribers/ HTTP/1.1" 200 22342
+INFO 2026-11-20 17:55:02,004 log 15624 4824 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:55:03,910 log 15624 4824 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:55:05,467 log 15624 4824 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:55:08,712 log 15624 4824 "GET /manage/pos/dashboard/ HTTP/1.1" 200 25064
+INFO 2026-11-20 17:55:10,329 log 15624 4824 "GET /manage/pos/ HTTP/1.1" 200 41626
+INFO 2026-11-20 17:55:10,395 log 15624 4824 "GET /static/pos.js HTTP/1.1" 304 0
+INFO 2026-11-20 17:55:10,647 log 15624 4824 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 72
+INFO 2026-11-20 17:55:13,013 log 15624 4824 "GET /manage/pos/catalogue/?q=&category=dresses HTTP/1.1" 200 72
+INFO 2026-11-20 17:55:13,929 log 15624 4824 "GET /manage/pos/catalogue/?q=&category=dresses HTTP/1.1" 200 72
+INFO 2026-11-20 17:55:15,242 log 15624 4824 "GET /manage/pos/catalogue/?q=&category=dresses HTTP/1.1" 200 72
+INFO 2026-11-20 17:55:16,937 log 15624 4824 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:55:17,838 log 15624 4824 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:55:21,471 log 15624 4824 "GET /manage/categories/3/edit/ HTTP/1.1" 200 18744
+INFO 2026-11-20 17:55:25,326 log 15624 4824 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:55:29,296 log 15624 4824 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:55:31,083 log 15624 4824 "GET /manage/categories/3/delete/ HTTP/1.1" 200 17994
+INFO 2026-11-20 17:55:33,580 log 15624 4824 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:55:33,693 log 15624 4824 "GET /manage/categories/ HTTP/1.1" 200 18708
+INFO 2026-11-20 17:55:40,291 log 15624 4824 "GET /manage/categories/3/delete/ HTTP/1.1" 200 17994
+INFO 2026-11-20 17:55:41,770 log 15624 4824 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:55:41,855 log 15624 4824 "GET /manage/categories/ HTTP/1.1" 200 18708
+INFO 2026-11-20 17:55:43,551 services 19276 468 Restored 2 units of stock for cancelled/refunded order RB-261120-73A51D
+INFO 2026-11-20 17:55:43,555 manage_views 19276 468 Order RB-261120-73A51D status changed to cancelled by admin
+INFO 2026-11-20 17:55:48,057 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "Amount", "Value": 1}]}}}}
+WARNING 2026-11-20 17:55:48,081 views 19276 468 M-Pesa callback amount mismatch for order RB-261120-71405E: got 1 expected 2150.00
+INFO 2026-11-20 17:55:48,096 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:55:48,113 views 19276 468 M-Pesa payment confirmed for req-1 receipt PJX123ABC amount 2150.00
+INFO 2026-11-20 17:55:48,118 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:55:48,120 views 19276 468 M-Pesa callback already processed for req-1 (status completed)
+INFO 2026-11-20 17:55:48,134 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "1032", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:55:48,138 views 19276 468 M-Pesa payment failed for req-1: The service request is processed successfully.
+INFO 2026-11-20 17:55:48,172 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "1", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:55:48,180 views 19276 468 M-Pesa payment failed for req-1: The service request is processed successfully.
+INFO 2026-11-20 17:55:48,215 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:55:48,237 views 19276 468 M-Pesa payment confirmed for req-1 receipt PJX123ABC amount 2150.00
+INFO 2026-11-20 17:55:48,257 views 19276 468 M-Pesa Callback received: {"Body": {"stkCallback": {"CheckoutRequestID": "req-1", "ResultCode": "0", "ResultDesc": "The service request is processed successfully.", "CallbackMetadata": {"Item": [{"Name": "MpesaReceiptNumber", "Value": "PJX123ABC"}, {"Name": "PhoneNumber", "Value": 254712345678}, {"Name": "Amount", "Value": 2150}]}}}}
+INFO 2026-11-20 17:55:48,281 views 19276 468 M-Pesa payment confirmed for req-1 receipt PJX123ABC amount 2150.00
+INFO 2026-11-20 17:55:48,385 emails 19276 468 Email not sent (Order RB-261120-D414D0 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:55:48,532 emails 19276 468 Email not sent (Order RB-261120-05BB75 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:55:48,713 emails 19276 468 Email not sent (Order RB-261120-3F98ED received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:55:48,939 emails 19276 468 Email not sent (Order RB-261120-F2A552 received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:55:49,198 emails 19276 468 Email not sent (Order RB-261120-A4FDAF received at Reeves Boutique) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:55:51,254 log 15624 7532 "GET /manage/categories/3/edit/ HTTP/1.1" 200 18744
+INFO 2026-11-20 17:55:55,661 log 15624 7532 "GET /manage/inventory/ HTTP/1.1" 200 22425
+INFO 2026-11-20 17:55:59,756 log 15624 7532 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:56:00,649 log 15624 7532 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:56:01,557 log 15624 7532 "GET /manage/pos/dashboard/ HTTP/1.1" 200 25064
+INFO 2026-11-20 17:56:02,359 log 15624 7532 "GET /manage/pos/ HTTP/1.1" 200 41626
+INFO 2026-11-20 17:56:02,581 log 15624 7532 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 72
+INFO 2026-11-20 17:56:03,488 log 15624 7532 "GET /manage/notifications/ HTTP/1.1" 200 17820
+INFO 2026-11-20 17:56:04,556 log 15624 7532 "GET /manage/ HTTP/1.1" 200 27257
+INFO 2026-11-20 17:56:08,760 log 15624 7532 "GET /manage/products/add/ HTTP/1.1" 200 22886
+INFO 2026-11-20 17:56:15,693 log 15624 7532 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:56:15,769 log 15624 7532 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 17:56:15,770 log 15624 848 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 17:56:16,618 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:56:22,868 log 15624 848 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:56:38,173 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:56:39,458 log 15624 848 "GET /manage/inventory/ HTTP/1.1" 200 22425
+INFO 2026-11-20 17:56:40,684 log 15624 848 "GET /manage/inventory/history/ HTTP/1.1" 200 20774
+INFO 2026-11-20 17:56:49,608 log 15624 848 "GET /manage/payments/ HTTP/1.1" 200 40071
+INFO 2026-11-20 17:56:53,129 log 15624 848 "GET /manage/pos/dashboard/ HTTP/1.1" 200 25064
+INFO 2026-11-20 17:56:54,127 log 15624 848 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:56:55,223 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:56:57,658 log 15624 848 "GET /manage/categories/3/delete/ HTTP/1.1" 200 17994
+INFO 2026-11-20 17:56:58,654 log 15624 848 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:56:58,728 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 18708
+INFO 2026-11-20 17:57:01,985 services 19276 468 Inventory alert raised for Elegant Gown (low) by admin2
+INFO 2026-11-20 17:57:10,562 log 15624 848 "GET /manage/pos/ HTTP/1.1" 200 41626
+INFO 2026-11-20 17:57:10,671 log 15624 848 "GET /static/pos.js HTTP/1.1" 304 0
+INFO 2026-11-20 17:57:10,934 log 15624 848 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 72
+INFO 2026-11-20 17:57:12,862 log 15624 848 "GET /manage/pos/catalogue/?q=&category=dresses HTTP/1.1" 200 72
+INFO 2026-11-20 17:57:14,409 log 15624 848 "GET /manage/pos/dashboard/ HTTP/1.1" 200 25064
+INFO 2026-11-20 17:57:16,013 log 15624 848 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 17:57:16,895 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 17:57:17,833 emails 19276 468 Email not sent (We received your message) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:57:17,945 emails 19276 468 Email not sent (Welcome to Reeves Boutique Updates!) because SMTP is disabled in store settings.
+INFO 2026-11-20 17:57:19,726 log 15624 848 "GET /manage/categories/3/delete/ HTTP/1.1" 200 17994
+INFO 2026-11-20 17:57:20,896 log 15624 848 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:57:20,975 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 18708
+INFO 2026-11-20 17:57:28,150 log 15624 848 "GET /manage/categories/3/delete/ HTTP/1.1" 200 17994
+INFO 2026-11-20 17:57:29,069 log 15624 848 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 17:57:29,141 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 18708
+INFO 2026-11-20 18:00:03,224 log 15624 848 "GET /manage/categories/3/delete/ HTTP/1.1" 200 17994
+INFO 2026-11-20 18:00:03,261 log 15624 848 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:00:03,289 log 15624 7532 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:00:04,335 log 15624 7532 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:00:04,417 log 15624 7532 "GET /manage/categories/ HTTP/1.1" 200 18708
+INFO 2026-11-20 18:00:07,675 log 15624 7532 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 18:00:10,787 log 15624 7532 "GET /manage/products/add/ HTTP/1.1" 200 22886
+INFO 2026-11-20 18:00:35,258 log 15624 7532 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 18:00:37,014 log 15624 7532 "GET /manage/categories/add/ HTTP/1.1" 200 18522
+INFO 2026-11-20 18:00:41,470 log 15624 7532 "GET /manage/categories/ HTTP/1.1" 200 18249
+INFO 2026-11-20 18:00:43,032 log 15624 7532 "GET /manage/products/ HTTP/1.1" 200 22914
+INFO 2026-11-20 18:00:46,662 log 15624 7532 "POST /manage/products/bulk/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:00:46,731 log 15624 7532 "GET /manage/products/ HTTP/1.1" 200 23320
+INFO 2026-11-20 18:00:55,673 log 15624 7532 "POST /manage/products/bulk/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:00:55,757 log 15624 7532 "GET /manage/products/ HTTP/1.1" 200 23320
+INFO 2026-11-20 18:00:59,206 log 15624 7532 "POST /manage/products/bulk/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:00:59,287 log 15624 7532 "GET /manage/products/ HTTP/1.1" 200 23320
+INFO 2026-11-20 18:01:04,033 log 15624 7532 "GET /manage/products/add/ HTTP/1.1" 200 22886
+INFO 2026-11-20 18:03:01,187 log 15624 7532 "GET /manage/ HTTP/1.1" 200 27257
+INFO 2026-11-20 18:03:01,215 log 15624 7532 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:03:01,249 log 15624 7532 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:03:16,319 log 15624 7532 "GET /manage/payments/ HTTP/1.1" 200 40071
+INFO 2026-11-20 18:03:23,800 manage_views 15624 7532 Payment 28 rejected for order RB-261117-4C90FE by mash
+INFO 2026-11-20 18:03:23,828 log 15624 7532 "POST /manage/payments/28/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:03:23,978 log 15624 7532 "GET /manage/payments/ HTTP/1.1" 200 40677
+INFO 2026-11-20 18:03:28,137 manage_views 15624 7532 Payment 25 rejected for order RB-261117-C569AA by mash
+INFO 2026-11-20 18:03:28,236 log 15624 7532 "POST /manage/payments/25/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:03:28,511 log 15624 7532 "GET /manage/payments/ HTTP/1.1" 200 40641
+INFO 2026-11-20 18:03:31,744 manage_views 15624 7532 Payment 24 rejected for order RB-261117-BEFDB2 by mash
+INFO 2026-11-20 18:03:31,777 log 15624 7532 "POST /manage/payments/24/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:03:31,890 log 15624 7532 "GET /manage/payments/ HTTP/1.1" 200 40605
+INFO 2026-11-20 18:03:35,145 manage_views 15624 7532 Payment 23 rejected for order RB-261117-552F94 by mash
+INFO 2026-11-20 18:03:35,176 log 15624 7532 "POST /manage/payments/23/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:03:35,290 log 15624 7532 "GET /manage/payments/ HTTP/1.1" 200 40569
+INFO 2026-11-20 18:03:37,684 manage_views 15624 7532 Payment 19 rejected for order RB-261117-33081B by mash
+INFO 2026-11-20 18:03:37,719 log 15624 7532 "POST /manage/payments/19/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:03:37,849 log 15624 7532 "GET /manage/payments/ HTTP/1.1" 200 40533
+INFO 2026-11-20 18:03:41,271 manage_views 15624 7532 Payment 21 rejected for order RB-261117-73F719 by mash
+INFO 2026-11-20 18:03:41,302 log 15624 7532 "POST /manage/payments/21/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:03:41,470 log 15624 7532 "GET /manage/payments/ HTTP/1.1" 200 40497
+INFO 2026-11-20 18:03:41,567 log 15624 848 "POST /manage/payments/21/action/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:03:41,699 log 15624 848 "GET /manage/payments/21/ HTTP/1.1" 200 23949
+INFO 2026-11-20 18:03:58,850 log 15624 848 "GET /manage/ HTTP/1.1" 200 32463
+INFO 2026-11-20 18:04:08,771 log 15624 848 "GET /manage/notifications/ HTTP/1.1" 200 23622
+INFO 2026-11-20 18:04:09,587 log 15624 848 "GET /manage/pos/ HTTP/1.1" 200 44833
+INFO 2026-11-20 18:04:09,621 log 15624 848 "GET /static/pos.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:04:09,855 log 15624 848 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 72
+INFO 2026-11-20 18:04:10,734 log 15624 848 "GET /manage/pos/dashboard/ HTTP/1.1" 200 28271
+INFO 2026-11-20 18:04:11,512 log 15624 848 "GET /manage/products/ HTTP/1.1" 200 26121
+INFO 2026-11-20 18:04:12,317 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 21456
+INFO 2026-11-20 18:04:13,079 log 15624 848 "GET /manage/inventory/history/ HTTP/1.1" 200 23981
+INFO 2026-11-20 18:04:13,809 log 15624 848 "GET /manage/inventory/ HTTP/1.1" 200 25632
+INFO 2026-11-20 18:04:15,092 log 15624 848 "GET /manage/orders/ HTTP/1.1" 200 36989
+INFO 2026-11-20 18:04:15,745 log 15624 848 "GET /manage/customers/ HTTP/1.1" 200 21658
+INFO 2026-11-20 18:04:16,946 log 15624 848 "GET /manage/orders/ HTTP/1.1" 200 36989
+INFO 2026-11-20 18:04:23,221 log 15624 848 "GET /manage/customers/ HTTP/1.1" 200 21658
+INFO 2026-11-20 18:04:28,975 log 15624 848 "GET /manage/settings/ HTTP/1.1" 200 26925
+INFO 2026-11-20 18:04:31,782 log 15624 848 "GET /manage/ HTTP/1.1" 200 32458
+INFO 2026-11-20 18:04:43,848 log 15624 848 "GET /manage/orders/ HTTP/1.1" 200 36983
+INFO 2026-11-20 18:05:01,846 log 15624 848 "GET /manage/customers/ HTTP/1.1" 200 21652
+INFO 2026-11-20 18:05:06,927 log 15624 848 "GET /manage/notifications/ HTTP/1.1" 200 23610
+INFO 2026-11-20 18:05:27,286 log 15624 848 "GET /manage/pos/ HTTP/1.1" 200 44828
+INFO 2026-11-20 18:05:27,318 log 15624 6040 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:05:27,330 log 15624 848 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:05:27,538 log 15624 848 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 72
+INFO 2026-11-20 18:05:29,701 log 15624 848 "GET /manage/pos/catalogue/?q=&category=dresses HTTP/1.1" 200 72
+INFO 2026-11-20 18:05:31,329 log 15624 848 "GET /manage/pos/dashboard/ HTTP/1.1" 200 28267
+INFO 2026-11-20 18:05:53,039 log 15624 848 "GET /manage/products/ HTTP/1.1" 200 26121
+INFO 2026-11-20 18:05:55,413 log 15624 848 "GET /manage/categories/ HTTP/1.1" 200 21456
+INFO 2026-11-20 18:05:58,015 log 15624 848 "GET /manage/inventory/ HTTP/1.1" 200 25632
+INFO 2026-11-20 18:06:14,438 log 15624 848 "GET /manage/inventory/history/ HTTP/1.1" 200 23981
+INFO 2026-11-20 18:06:32,144 log 15624 848 "GET /manage/orders/ HTTP/1.1" 200 36989
+INFO 2026-11-20 18:06:49,085 log 15624 848 "GET /manage/customers/ HTTP/1.1" 200 21658
+INFO 2026-11-20 18:07:03,907 log 15624 848 "GET /manage/subscribers/ HTTP/1.1" 200 25107
+INFO 2026-11-20 18:07:06,634 log 15624 848 "GET /manage/accounts/ HTTP/1.1" 200 29063
+INFO 2026-11-20 18:07:24,676 log 15624 848 "GET /manage/data/ HTTP/1.1" 200 57016
+INFO 2026-11-20 18:07:37,446 log 15624 848 "GET /manage/coupons/ HTTP/1.1" 200 21115
+INFO 2026-11-20 18:10:46,984 autoreload 15624 13992 C:\Users\mash\OneDrive\Desktop\e-commerce\store\manage_views.py changed, reloading.
+INFO 2026-11-20 18:10:51,305 autoreload 19180 15792 Watching for file changes with StatReloader
+INFO 2026-11-20 18:11:43,879 autoreload 19180 15792 C:\Users\mash\OneDrive\Desktop\e-commerce\store\manage_views.py changed, reloading.
+INFO 2026-11-20 18:11:46,577 autoreload 5320 12036 Watching for file changes with StatReloader
+INFO 2026-11-20 18:13:48,217 autoreload 5320 12036 C:\Users\mash\OneDrive\Desktop\e-commerce\store\manage_views.py changed, reloading.
+INFO 2026-11-20 18:13:51,258 autoreload 13616 15896 Watching for file changes with StatReloader
+INFO 2026-11-20 18:25:54,954 autoreload 13616 15896 C:\Users\mash\OneDrive\Desktop\e-commerce\store\models.py changed, reloading.
+INFO 2026-11-20 18:25:58,802 autoreload 6036 17756 Watching for file changes with StatReloader
+INFO 2026-11-20 18:26:03,330 autoreload 6036 17756 C:\Users\mash\OneDrive\Desktop\e-commerce\store\models.py changed, reloading.
+INFO 2026-11-20 18:26:05,345 autoreload 9060 11768 Watching for file changes with StatReloader
+INFO 2026-11-20 18:26:08,724 autoreload 9060 11768 C:\Users\mash\OneDrive\Desktop\e-commerce\store\models.py changed, reloading.
+INFO 2026-11-20 18:26:11,175 autoreload 19636 6624 Watching for file changes with StatReloader
+INFO 2026-11-20 18:26:14,206 autoreload 19636 6624 C:\Users\mash\OneDrive\Desktop\e-commerce\store\forms.py changed, reloading.
+INFO 2026-11-20 18:26:16,102 autoreload 4760 12292 Watching for file changes with StatReloader
+INFO 2026-11-20 18:26:22,153 autoreload 4760 12292 C:\Users\mash\OneDrive\Desktop\e-commerce\store\admin.py changed, reloading.
+INFO 2026-11-20 18:26:25,504 autoreload 16876 18560 Watching for file changes with StatReloader
+INFO 2026-11-20 18:26:29,298 autoreload 16876 18560 C:\Users\mash\OneDrive\Desktop\e-commerce\store\admin.py changed, reloading.
+INFO 2026-11-20 18:26:32,409 autoreload 13136 2348 Watching for file changes with StatReloader
+INFO 2026-11-20 18:27:44,353 autoreload 13136 2348 C:\Users\mash\OneDrive\Desktop\e-commerce\store\views.py changed, reloading.
+INFO 2026-11-20 18:27:46,701 autoreload 18208 9596 Watching for file changes with StatReloader
+INFO 2026-11-20 18:27:51,978 autoreload 18208 9596 C:\Users\mash\OneDrive\Desktop\e-commerce\store\manage_views.py changed, reloading.
+INFO 2026-11-20 18:27:54,686 autoreload 15312 16744 Watching for file changes with StatReloader
+INFO 2026-11-20 18:29:54,261 autoreload 15312 16744 C:\Users\mash\OneDrive\Desktop\e-commerce\store\services.py changed, reloading.
+INFO 2026-11-20 18:29:57,043 autoreload 18512 18032 Watching for file changes with StatReloader
+INFO 2026-11-20 18:40:44,054 autoreload 11732 17476 Watching for file changes with StatReloader
+INFO 2026-11-20 18:40:58,298 log 11732 16564 "GET /manage/coupons/ HTTP/1.1" 200 23493
+INFO 2026-11-20 18:40:58,378 log 11732 19960 "GET /static/store.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:40:59,004 log 11732 5740 "GET /static/js/product-animations.js HTTP/1.1" 200 29523
+INFO 2026-11-20 18:40:59,007 log 11732 16564 "GET /static/css/animations.css HTTP/1.1" 200 28899
+INFO 2026-11-20 18:40:59,103 log 11732 12736 "GET /static/store.js HTTP/1.1" 200 18967
+INFO 2026-11-20 18:41:15,977 log 11732 12736 "GET / HTTP/1.1" 200 14394
+INFO 2026-11-20 18:41:28,423 log 11732 12736 "GET /manage/ HTTP/1.1" 200 34792
+INFO 2026-11-20 18:41:28,492 log 11732 12736 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:41:31,258 log 11732 12736 "GET /manage/products/ HTTP/1.1" 200 28500
+INFO 2026-11-20 18:41:33,817 log 11732 12736 "GET /manage/categories/ HTTP/1.1" 200 23837
+INFO 2026-11-20 18:41:36,406 log 11732 12736 "GET /manage/categories/3/delete/ HTTP/1.1" 200 23781
+INFO 2026-11-20 18:41:36,461 log 11732 12736 "GET /static/js/product-animations.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:41:37,647 log 11732 12736 "POST /manage/categories/3/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:41:37,707 log 11732 12736 "GET /manage/categories/ HTTP/1.1" 200 23895
+INFO 2026-11-20 18:41:37,785 log 11732 12736 "GET /static/css/animations.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:41:40,654 log 11732 12736 "GET /manage/inventory/ HTTP/1.1" 200 25000
+INFO 2026-11-20 18:41:42,560 log 11732 12736 "GET /manage/inventory/history/ HTTP/1.1" 200 24396
+INFO 2026-11-20 18:41:46,215 log 11732 12736 "GET /manage/settings/payments/ HTTP/1.1" 200 32489
+INFO 2026-11-20 18:41:51,397 log 11732 12736 "GET /manage/pos/ HTTP/1.1" 200 47207
+INFO 2026-11-20 18:41:51,447 log 11732 12736 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:41:51,458 log 11732 5740 "GET /static/pos.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:41:51,811 log 11732 5740 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 34
+INFO 2026-11-20 18:41:55,623 log 11732 5740 "GET /manage/ HTTP/1.1" 200 34792
+INFO 2026-11-20 18:42:01,400 log 11732 5740 "GET /manage/orders/ HTTP/1.1" 200 39366
+INFO 2026-11-20 18:42:20,017 log 11732 5740 "GET /manage/customers/ HTTP/1.1" 200 24038
+INFO 2026-11-20 18:42:20,062 log 11732 5740 "GET /static/css/animations.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:42:20,062 log 11732 12736 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:42:20,062 log 11732 16564 "GET /static/js/product-animations.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:42:22,018 log 11732 16564 "GET /manage/orders/ HTTP/1.1" 200 39366
+INFO 2026-11-20 18:42:25,471 log 11732 16564 "GET /manage/settings/payments/ HTTP/1.1" 200 32489
+INFO 2026-11-20 18:42:38,377 log 11732 16564 "GET /manage/ HTTP/1.1" 200 34792
+INFO 2026-11-20 18:42:39,431 log 11732 16564 "GET /manage/notifications/ HTTP/1.1" 200 26012
+INFO 2026-11-20 18:42:42,262 log 11732 16564 "GET /manage/pos/ HTTP/1.1" 200 47207
+INFO 2026-11-20 18:42:42,427 log 11732 16564 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 34
+INFO 2026-11-20 18:42:46,221 log 11732 16564 "GET /manage/pos/dashboard/ HTTP/1.1" 200 30655
+INFO 2026-11-20 18:42:46,261 log 11732 16564 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:42:48,419 log 11732 16564 "GET /manage/products/ HTTP/1.1" 200 28459
+INFO 2026-11-20 18:42:50,068 log 11732 16564 "GET /manage/categories/ HTTP/1.1" 200 23471
+INFO 2026-11-20 18:42:51,592 log 11732 16564 "GET /manage/inventory/ HTTP/1.1" 200 25000
+INFO 2026-11-20 18:42:53,222 log 11732 16564 "GET /manage/inventory/history/ HTTP/1.1" 200 24396
+INFO 2026-11-20 18:42:54,616 log 11732 16564 "GET /manage/orders/ HTTP/1.1" 200 39366
+INFO 2026-11-20 18:42:59,426 log 11732 16564 "GET /manage/customers/ HTTP/1.1" 200 24038
+INFO 2026-11-20 18:43:01,514 log 11732 16564 "GET /manage/subscribers/ HTTP/1.1" 200 27489
+INFO 2026-11-20 18:43:06,676 log 11732 16564 "GET /manage/accounts/ HTTP/1.1" 200 31442
+INFO 2026-11-20 18:43:06,712 log 11732 16564 "GET /static/css/animations.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:43:06,714 log 11732 5740 "GET /static/js/product-animations.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:43:11,855 log 11732 5740 "GET /manage/data/ HTTP/1.1" 200 59407
+INFO 2026-11-20 18:43:32,705 data_management 11732 5740 DATA DELETION: mash deleted 6 notifications records from IP 127.0.0.1. Filters: Filtered delete (status=, period=, q=)
+INFO 2026-11-20 18:43:32,714 log 11732 5740 "POST /manage/data/notifications/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:43:32,806 log 11732 5740 "GET /manage/data/?tab=notifications HTTP/1.1" 200 53140
+INFO 2026-11-20 18:43:32,832 log 11732 5740 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:43:39,319 log 11732 5740 "GET /manage/data/?tab=inventory_history&status=sale HTTP/1.1" 200 52982
+INFO 2026-11-20 18:43:51,284 data_management 11732 5740 DATA DELETION: mash deleted 27 mpesa_transactions records from IP 127.0.0.1. Filters: Filtered delete (status=, period=, q=)
+INFO 2026-11-20 18:43:51,302 log 11732 5740 "POST /manage/data/mpesa_transactions/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:43:51,418 log 11732 5740 "GET /manage/data/?tab=mpesa_transactions HTTP/1.1" 200 53787
+INFO 2026-11-20 18:44:02,109 data_management 11732 5740 DATA DELETION: mash deleted 28 orders records from IP 127.0.0.1. Filters: Filtered delete (status=, period=, q=)
+INFO 2026-11-20 18:44:02,131 log 11732 5740 "POST /manage/data/orders/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:44:02,258 log 11732 5740 "GET /manage/data/?tab=orders HTTP/1.1" 200 54403
+INFO 2026-11-20 18:44:02,320 log 11732 5740 "GET /static/css/animations.css HTTP/1.1" 304 0
+INFO 2026-11-20 18:44:02,322 log 11732 16564 "GET /static/js/product-animations.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:44:14,111 data_management 11732 16564 DATA DELETION: mash deleted 0 orders records from IP 127.0.0.1. Filters: Filtered delete (status=, period=, q=)
+INFO 2026-11-20 18:44:14,120 log 11732 16564 "POST /manage/data/orders/delete/ HTTP/1.1" 302 0
+INFO 2026-11-20 18:44:14,217 log 11732 16564 "GET /manage/data/?tab=orders HTTP/1.1" 200 54912
+INFO 2026-11-20 18:44:14,287 log 11732 16564 "GET /static/store.js HTTP/1.1" 304 0
+INFO 2026-11-20 18:44:20,360 log 11732 16564 "GET /manage/coupons/ HTTP/1.1" 200 20280
+INFO 2026-11-20 18:44:24,907 log 11732 16564 "GET /manage/settings/payments/ HTTP/1.1" 200 29276
+INFO 2026-11-20 18:44:28,279 log 11732 16564 "GET /manage/analytics/ HTTP/1.1" 200 25669
+INFO 2026-11-20 18:44:30,354 log 11732 16564 "GET /manage/system-health/ HTTP/1.1" 200 22647
+INFO 2026-11-20 18:44:35,955 log 11732 16564 "GET /manage/notifications/ HTTP/1.1" 200 20198
+INFO 2026-11-20 18:44:36,981 log 11732 16564 "GET /manage/pos/ HTTP/1.1" 200 43994
+INFO 2026-11-20 18:44:37,125 log 11732 16564 "GET /manage/pos/catalogue/?q=&category= HTTP/1.1" 200 34
+INFO 2026-11-20 18:44:41,500 log 11732 16564 "GET /manage/ HTTP/1.1" 200 26715

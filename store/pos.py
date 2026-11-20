@@ -7,7 +7,6 @@ from the database; a total sent from the browser is never trusted.
 import logging
 from decimal import Decimal, ROUND_HALF_UP
 
-<<<<<<< HEAD
 from django.contrib.auth.models import User
 from django.db import close_old_connections, models, transaction
 from django.db.models import Count, Q, Sum
@@ -16,14 +15,6 @@ from django.db.models.functions import Coalesce
 from . import mpesa, services
 from .models import (Category, Notification, Order, OrderItem, OrderStatusHistory,
                      Payment, PosSession, Product, SiteSettings)
-=======
-from django.db import close_old_connections, models, transaction
-from django.db.models import Count, Q, Sum
-
-from . import mpesa, services
-from .models import (Notification, Order, OrderItem, OrderStatusHistory, Payment,
-                     PosSession, Product, SiteSettings)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 logger = logging.getLogger('store')
 
@@ -35,11 +26,8 @@ PAYMENT_METHODS = {
     'cash': ('cod', 'manual'),
     'mpesa': ('mpesa', 'mpesa'),
     'card': ('card', 'card'),
-<<<<<<< HEAD
     'bank': ('bank', 'bank'),
     'split': ('split', 'manual'),
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     'other': ('cod', 'manual'),
 }
 
@@ -52,7 +40,6 @@ def money(value):
 # Search / scan
 # --------------------------------------------------------------------------- #
 
-<<<<<<< HEAD
 def lookup_barcode(code):
     """Find a single product by exact barcode or SKU.
 
@@ -68,10 +55,6 @@ def lookup_barcode(code):
 
 def search_products(query, limit=16):
     """Products matching name, partial name, SKU, barcode, brand, category, or description.
-=======
-def search_products(query, limit=12):
-    """Products matching a name / SKU / barcode fragment.
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
     Exact SKU or barcode hits come first so a hardware scanner (which types
     the full code and presses Enter) lands on exactly one product.
@@ -79,7 +62,6 @@ def search_products(query, limit=12):
     q = (query or '').strip()
     if not q:
         return []
-<<<<<<< HEAD
     qs = Product.objects.visible().select_related('category')
     exact = qs.filter(Q(barcode__iexact=q) | Q(sku__iexact=q))
     if exact.exists():
@@ -138,17 +120,6 @@ def active_categories():
     return list(Category.objects.filter(active=True).order_by('name'))
 
 
-=======
-    qs = Product.objects.select_related('category')
-    exact = qs.filter(Q(barcode__iexact=q) | Q(sku__iexact=q))
-    if exact.exists():
-        return list(exact[:limit])
-    return list(qs.filter(
-        Q(name__icontains=q) | Q(sku__icontains=q) | Q(barcode__icontains=q) | Q(brand__icontains=q)
-    ).order_by('name')[:limit])
-
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def serialize_product(p):
     return {
         'id': p.pk,
@@ -156,7 +127,6 @@ def serialize_product(p):
         'sku': p.sku,
         'barcode': p.barcode or '',
         'price': str(p.effective_price),
-<<<<<<< HEAD
         'regular_price': str(p.price),
         'sale_price': str(p.sale_price) if p.sale_price is not None else None,
         'has_discount': p.has_discount,
@@ -170,12 +140,6 @@ def serialize_product(p):
         'brand': p.brand or '',
         'out_of_stock': p.out_of_stock,
         'low_stock': p.low_stock,
-=======
-        'stock': p.stock,
-        'image': p.image_src or '',
-        'category': p.category.name if p.category_id else '',
-        'out_of_stock': p.out_of_stock,
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     }
 
 
@@ -231,7 +195,6 @@ def price_lines(lines):
 
 @transaction.atomic
 def create_pos_sale(*, user, items_payload, payment_method, discount=None,
-<<<<<<< HEAD
                     cash_received=None, phone='', customer_name='', customer_id=None,
                     token=None, discount_authorised=False, bank_reference='',
                     card_reference='', tenders_payload=None):
@@ -246,17 +209,6 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
                                    If M-Pesa is part of the split, STK push fires
                                    and order completes on callback. If only synchronous
                                    tenders (Cash, Card, Bank), settles immediately.
-=======
-                    cash_received=None, phone='', customer_name='', token=None,
-                    discount_authorised=False):
-    """Create and (where applicable) immediately settle an in-store sale.
-
-    Cash / card / other -> settled synchronously; stock leaves the shared
-                          inventory inside this transaction.
-    M-Pesa              -> STK Push fires after commit; the order stays
-                           pending until Safaricom's callback confirms it
-                           (stock deducts at that point, never before).
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
     Idempotent on `token`: a retried request can never double-sell.
     """
@@ -284,16 +236,12 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
         discount = subtotal
     if discount > 0 and not discount_authorised:
         raise PermissionError('Only managers can apply discounts.')
-<<<<<<< HEAD
 
     # Calculate tax based on SiteSettings
     settings = SiteSettings.get()
     taxable_amount = max(ZERO, subtotal - discount)
     tax = settings.tax_for(taxable_amount) if settings.tax_enabled else ZERO
     total = money(taxable_amount + tax)
-=======
-    total = money(subtotal - discount)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
     if payment_method not in PAYMENT_METHODS:
         raise ValueError('Unknown payment method.')
@@ -301,7 +249,6 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
     if payment_method == 'mpesa' and not (phone or '').strip():
         raise ValueError('A customer phone number is required for M-Pesa.')
 
-<<<<<<< HEAD
     # Associate customer if specified
     customer_user = None
     if customer_id:
@@ -311,17 +258,11 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
         if customer_user and not phone and hasattr(customer_user, 'profile'):
             phone = getattr(customer_user.profile, 'phone', '')
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     session = PosSession.objects.filter(user=user, status=PosSession.STATUS_OPEN).first()
 
     order = Order.objects.create(
         number=Order.next_number(),
-<<<<<<< HEAD
         user=customer_user,
-=======
-        user=None,
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         sales_channel='pos',
         served_by=user,
         pos_session=session,
@@ -331,11 +272,7 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
         subtotal=subtotal,
         discount=discount,
         shipping=ZERO,
-<<<<<<< HEAD
         tax=tax,
-=======
-        tax=ZERO,
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         total=total,
         payment_method=order_method,
         status='pending',
@@ -344,10 +281,7 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
     )
     order.pos_payment_method = payment_method
     order.save(update_fields=['pos_payment_method'])
-<<<<<<< HEAD
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     for line in lines:
         OrderItem.objects.create(
             order=order,
@@ -359,10 +293,7 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
             quantity=line['quantity'],
             subtotal=line['total'],
         )
-<<<<<<< HEAD
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     OrderStatusHistory.objects.create(order=order, status='pending',
                                       note=f'POS sale · {payment_method.upper()}',
                                       created_by=user)
@@ -370,7 +301,6 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
                         message=f'{order.customer_name} — {total}',
                         category='order', link=f'/manage/orders/{order.number}/')
 
-<<<<<<< HEAD
     # Payment execution
     if payment_method == 'mpesa':
         Payment.objects.create(order=order, method='mpesa', amount=total,
@@ -379,23 +309,11 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
         return order, True
 
     elif payment_method == 'cash':
-=======
-    if payment_method == 'mpesa':
-        Payment.objects.create(order=order, method='mpesa', amount=total,
-                               status='pending', phone=(phone or '').strip())
-        transaction.on_commit(lambda: _start_mpesa(order.pk))
-        return order, True
-
-    # Cash / card / other: settled right now, verified manually by cashier.
-    received = change = None
-    if payment_method == 'cash':
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         received = money(cash_received if cash_received is not None else total)
         if received < total:
             raise ValueError(f'Cash received ({received}) is less than the total ({total}).')
         change = money(received - total)
 
-<<<<<<< HEAD
         services.mark_order_paid(
             order, method='manual', reference=f'CASH-{order.number}',
             verification='manual', verified_by=user,
@@ -510,40 +428,19 @@ def create_pos_sale(*, user, items_payload, payment_method, discount=None,
 
 
 def _start_mpesa(order_pk, amount=None, phone=None):
-=======
-    services.mark_order_paid(
-        order, method=pay_method, reference=f'POS-{order.number}',
-        verification='manual', verified_by=user,
-        note=f'In-store {payment_method} sale by {user.get_full_name() or user.username}')
-    payment = get_payment(order)
-    payment.amount_paid = received
-    payment.change_given = change
-    payment.save(update_fields=['amount_paid', 'change_given', 'updated_at'])
-    return order, True
-
-
-def _start_mpesa(order_pk):
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     """Runs post-commit: fire the real STK push; on failure cancel the sale."""
     close_old_connections()
     order = Order.objects.filter(pk=order_pk).first()
     if not order:
         return
-<<<<<<< HEAD
     push_phone = phone or order.phone
     try:
         tx, resp = mpesa.stk_push(order, push_phone, amount=amount)
         payment = order.payments.filter(method='mpesa').order_by('-created_at').first()
-=======
-    try:
-        tx, resp = mpesa.stk_push(order, order.phone)
-        payment = get_payment(order)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         if payment:
             payment.status = 'processing'
             payment.transaction_id = tx.checkout_request_id
             payment.reference = tx.transaction_id
-<<<<<<< HEAD
             payment.phone = push_phone
             payment.save(update_fields=['status', 'transaction_id', 'reference', 'phone', 'updated_at'])
     except RuntimeError as e:
@@ -558,20 +455,6 @@ def _start_mpesa(order_pk):
             if payment and payment.status != 'paid':
                 payment.status = 'failed'
                 payment.result_description = reason[:300]
-=======
-            payment.save(update_fields=['status', 'transaction_id', 'reference', 'updated_at'])
-    except RuntimeError as e:
-        logger.warning('POS M-Pesa start failed for %s: %s', order.number, e)
-        with transaction.atomic():
-            services.release_stock(order)
-            order.record_status('cancelled', note=f'M-Pesa could not be started: {e}')
-            order.payment_status = 'failed'
-            order.save(update_fields=['payment_status', 'updated_at'])
-            payment = get_payment(order)
-            if payment and payment.status != 'paid':
-                payment.status = 'failed'
-                payment.result_description = str(e)[:300]
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
                 payment.save(update_fields=['status', 'result_description', 'updated_at'])
 
 
@@ -583,11 +466,8 @@ PAYMENT_LABELS = {
     'cash': 'CASH',
     'mpesa': 'M-PESA',
     'card': 'CARD',
-<<<<<<< HEAD
     'bank': 'BANK TRANSFER',
     'split': 'SPLIT PAYMENT',
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     'other': 'OTHER',
 }
 
@@ -595,7 +475,6 @@ PAYMENT_LABELS = {
 def serialize_order_status(order):
     """Compact JSON state for receipt polling / the POS confirmation panel."""
     tx = order.mpesa_transactions.order_by('-created_at').first()
-<<<<<<< HEAD
     payment = order.payments.order_by('-created_at').first()
     reason = ((getattr(payment, 'result_description', '') or
                getattr(tx, 'result_description', '') or '')[:200])
@@ -603,15 +482,12 @@ def serialize_order_status(order):
     for p in order.payments.all():
         if p.change_given and p.change_given > change:
             change = p.change_given
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     return {
         'number': order.number,
         'status': order.status,
         'payment_status': order.payment_status,
         'method_display': PAYMENT_LABELS.get(order.pos_payment_method)
                           or order.get_payment_method_display(),
-<<<<<<< HEAD
         'subtotal': str(order.subtotal),
         'discount': str(order.discount),
         'tax': str(order.tax),
@@ -620,11 +496,6 @@ def serialize_order_status(order):
         'customer_name': order.customer_name,
         'mpesa_receipt': getattr(tx, 'mpesa_receipt', '') or '',
         'result_description': reason,
-=======
-        'total': str(order.total),
-        'mpesa_receipt': getattr(tx, 'mpesa_receipt', '') or '',
-        'result_description': (getattr(tx, 'result_description', '') or '')[:200],
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     }
 
 
@@ -653,7 +524,6 @@ def close_session(session, closing_cash, notes=''):
 
 
 def session_report(session):
-<<<<<<< HEAD
     """Cash-up figures for one shift — computed from real orders and payments."""
     orders = session.orders.all()
     paid = orders.filter(payment_status='paid')
@@ -703,18 +573,6 @@ def session_report(session):
         },
     }
     expected_cash = session.opening_cash + cash_total
-=======
-    """Cash-up figures for one shift — computed from real orders only."""
-    orders = session.orders.all()
-    paid = orders.filter(payment_status='paid')
-    totals = paid.aggregate(count=Count('id'), total=Sum('total'))
-    by_method = {}
-    for label, om in (('cash', 'cod'), ('mpesa', 'mpesa'), ('card', 'card')):
-        qs = paid.filter(payment_method=om)
-        agg = qs.aggregate(count=Count('id'), total=Sum('total'))
-        by_method[label] = {'count': agg['count'], 'total': agg['total'] or ZERO}
-    expected_cash = session.opening_cash + by_method['cash']['total']
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     return {
         'orders': totals['count'],
         'total': totals['total'] or ZERO,

@@ -1,0 +1,14 @@
+{% if products %}
+<div class="product-grid {% if site_settings.animations_enabled and style != 'off' %}rb-reveal-grid{% endif %}"
+     {% if site_settings.animations_enabled and style != 'off' %}data-reveal-grid{% endif %}>
+  {% for p in products %}
+  <div class="rb-reveal-item" style="--stagger-index: {{ forloop.counter0 }};" data-reveal-item>
+    {% include 'components/product_card.html' with p=p %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="rb-empty-showcase panel">
+  <p class="muted">No products to display in this section yet.</p>
+</div>
+{% endif %}

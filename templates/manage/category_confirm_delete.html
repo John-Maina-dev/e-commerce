@@ -1,0 +1,69 @@
+{% extends 'manage/base_manage.html' %}
+{% block title %}Delete category · {{ site_settings.store_name }}{% endblock %}
+{% block manage_content %}
+<div class="manage-head">
+  <div><span class="muted">CONFIRM</span><h1>Delete category</h1></div>
+</div>
+
+<div class="auth-wrap">
+  <div class="auth-card panel" style="max-width: 540px;">
+    <h2>Delete category "{{ category.name }}"?</h2>
+    
+    {% if total_products == 0 %}
+      <p class="muted">This category has no products assigned to it. Once deleted, it will be removed permanently.</p>
+      <form method="post" class="confirm-actions" style="margin-top: 20px;">
+        {% csrf_token %}
+        <a class="btn btn-ghost" href="{% url 'manage_categories' %}">Cancel</a>
+        <button class="btn btn-danger" type="submit">Confirm delete</button>
+      </form>
+    {% else %}
+      <div style="background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 16px 0;">
+        <p style="margin: 0 0 6px; font-weight: 600;">
+          This category currently contains {{ total_products }} product{{ total_products|pluralize }}:
+        </p>
+        <span class="muted small">
+          {{ active_products }} active · {{ archived_products }} archived
+        </span>
+      </div>
+
+      <form method="post" style="margin-top: 16px;">
+        {% csrf_token %}
+        
+        {% if other_categories %}
+          <div class="form-row" style="margin-bottom: 14px;">
+            <label for="move_to" style="font-weight: 600; display: block; margin-bottom: 6px;">Move products to another category:</label>
+            <select name="move_to" id="move_to" class="input" style="width: 100%;">
+              <option value="">-- Select category (or delete them below) --</option>
+              {% for oc in other_categories %}
+                <option value="{{ oc.id }}">{{ oc.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="text-align: center; margin: 10px 0; color: var(--muted); font-size: 0.85rem;">— OR —</div>
+        {% else %}
+          <p class="muted small" style="margin-bottom: 12px;">
+            There are no other categories available to move products to.
+          </p>
+        {% endif %}
+
+        <div style="margin-bottom: 20px;">
+          <label class="check" style="display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+            <input type="checkbox" name="delete_products" value="1" id="delete_products" {% if not other_categories %}checked{% endif %}>
+            <span>
+              <b>Also permanently delete the {{ total_products }} product{{ total_products|pluralize }} in this category</b>
+              <small class="muted" style="display: block; margin-top: 2px;">
+                Past order records and receipts will safely preserve product names and prices.
+              </small>
+            </span>
+          </label>
+        </div>
+
+        <div class="confirm-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+          <a class="btn btn-ghost" href="{% url 'manage_categories' %}">Cancel</a>
+          <button class="btn btn-danger" type="submit">Delete category</button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

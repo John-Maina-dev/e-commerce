@@ -1,16 +1,76 @@
 {% load store_extras %}
-<article class="product-card">
-  <a class="product-media" href="{% url 'product_detail' p.slug %}">
-    {% if p.image_src %}
-    <img src="{{ p.image_src }}" alt="{{ p.name }}" loading="lazy" class="lazy-img">
-    {% else %}
-    <div class="placeholder">RB</div>
+<article class="product-card rb-tilt-card" data-tilt-card>
+  <span class="rb-tilt-glare" aria-hidden="true"></span>
+  <div class="product-media rb-card-media">
+    <a class="rb-media-link" href="{% url 'product_detail' p.slug %}" aria-label="View {{ p.name }}">
+      {% if p.image_src %}
+      <img src="{{ p.image_src }}"
+           alt="{{ p.name }}"
+           width="600"
+           height="600"
+           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+           loading="lazy"
+           decoding="async"
+           class="lazy-img rb-card-img rb-card-img--primary">
+      {% if p.secondary_image_src %}
+      <img src="{{ p.secondary_image_src }}"
+           alt=""
+           width="600"
+           height="600"
+           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+           loading="lazy"
+           decoding="async"
+           aria-hidden="true"
+           class="rb-card-img rb-card-img--secondary">
+      {% endif %}
+      {% else %}
+      <div class="placeholder rb-card-placeholder" aria-hidden="true"><span>RB</span></div>
+      {% endif %}
+    </a>
+
+    <div class="rb-card-badges">
+      {% if p.has_discount %}<span class="badge badge-sale">-{{ p.discount_percent }}%</span>{% endif %}
+      {% if p.is_new %}<span class="badge rb-badge-new">New</span>{% endif %}
+      {% if p.out_of_stock %}<span class="badge badge-out">Out of stock</span>{% elif p.low_stock %}<span class="badge badge-low">Low stock</span>{% endif %}
+    </div>
+
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'wishlist_toggle' p.id %}" class="wishlist-btn rb-wish-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit"
+              aria-label="{% if p.id in wishlist_ids %}Remove {{ p.name }} from{% else %}Add {{ p.name }} to{% endif %} wishlist"
+              class="rb-wish-btn {% if p.id in wishlist_ids %}active{% endif %}"
+              data-wish-btn>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="{% if p.id in wishlist_ids %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </button>
+    </form>
     {% endif %}
-    {% if p.has_discount %}<span class="badge badge-sale">-{{ p.discount_percent }}%</span>{% endif %}
-    {% if p.out_of_stock %}<span class="badge badge-out">Out of stock</span>{% elif p.low_stock %}<span class="badge badge-low">Low stock</span>{% endif %}
-  </a>
+
+    <div class="rb-card-overlay" aria-label="Quick actions for {{ p.name }}">
+      <button type="button"
+              class="rb-quick-btn"
+              data-quick-view
+              data-qv-name="{{ p.name }}"
+              data-qv-category="{{ p.category.name|default:'Boutique' }}"
+              data-qv-price="{{ p.effective_price|money:currency }}"
+              data-qv-old-price="{% if p.old_price and p.old_price > p.effective_price %}{{ p.old_price|money:currency }}{% endif %}"
+              data-qv-discount="{% if p.has_discount %}{{ p.discount_percent }}{% endif %}"
+              data-qv-image="{{ p.image_src|default:'' }}"
+              data-qv-url="{% url 'product_detail' p.slug %}"
+              data-qv-cart-url="{% url 'cart_add' p.id %}"
+              data-qv-stock="{{ p.stock }}"
+              data-qv-out="{% if p.out_of_stock %}1{% else %}0{% endif %}"
+              data-qv-desc="{{ p.short_description|default:p.description|truncatechars:180 }}"
+              aria-label="Quick view {{ p.name }}">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Quick view</span>
+      </button>
+    </div>
+  </div>
+
   <div class="product-body">
-    <span class="muted">{{ p.category.name }}</span>
+    <span class="muted rb-card-cat">{{ p.category.name }}</span>
     <h3><a href="{% url 'product_detail' p.slug %}">{{ p.name }}</a></h3>
     <div class="rating-row" aria-label="Rated {{ p.rating }} out of 5">
       {% include 'partials/stars.html' with rating=p.rating %}
@@ -20,22 +80,13 @@
       <strong>{{ p.effective_price|money:currency }}</strong>
       {% if p.old_price and p.old_price > p.effective_price %}<del>{{ p.old_price|money:currency }}</del>{% endif %}
     </div>
-    <form method="post" action="{% url 'cart_add' p.id %}" data-submit-loading>{% csrf_token %}
+    <form method="post" action="{% url 'cart_add' p.id %}" class="rb-card-cart-form" data-submit-loading>
+      {% csrf_token %}
       <input type="hidden" name="quantity" value="1">
       <input type="hidden" name="next" value="{{ request.path }}">
-      <button class="btn btn-full" data-loading-text="Adding…" {% if p.out_of_stock %}disabled{% endif %}>
+      <button class="btn btn-full rb-cart-btn" data-loading-text="Adding…" {% if p.out_of_stock %}disabled{% endif %}>
         {% if p.out_of_stock %}Out of stock{% else %}Add to cart{% endif %}
       </button>
     </form>
   </div>
-  {% if user.is_authenticated %}
-  <form method="post" action="{% url 'wishlist_toggle' p.id %}" class="wishlist-btn">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.path }}">
-    <button type="submit" aria-label="{% if p.id in wishlist_ids %}Remove from{% else %}Add to{% endif %} wishlist"
-            class="{% if p.id in wishlist_ids %}active{% endif %}">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="{% if p.id in wishlist_ids %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-    </button>
-  </form>
-  {% endif %}
 </article>

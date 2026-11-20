@@ -1,0 +1,141 @@
+{% load store_extras %}
+{% if products and site_settings.animations_enabled and site_settings.hero_style == 'hero_slider' %}
+<section class="hero rb-hero-slider"
+         id="rbHeroSlider"
+         role="region"
+         aria-roledescription="carousel"
+         aria-label="Featured boutique showcase"
+         data-hero-slider
+         data-count="{{ products|length }}">
+  <div class="rb-hero-slides">
+    {% for p in products %}
+    <article class="rb-hero-slide {% if forloop.first %}is-active{% endif %}"
+             role="group"
+             aria-roledescription="slide"
+             aria-label="Slide {{ forloop.counter }} of {{ products|length }}: {{ p.name }}"
+             aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+             data-slide-index="{{ forloop.counter0 }}">
+      <div class="rb-hero-bg" aria-hidden="true">
+        {% if p.image_src %}
+        <img src="{{ p.image_src }}"
+             alt=""
+             width="1400"
+             height="860"
+             sizes="100vw"
+             {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+             decoding="async"
+             class="rb-hero-bg-img">
+        {% else %}
+        <div class="rb-hero-bg-fallback"></div>
+        {% endif %}
+        <div class="rb-hero-scrim"></div>
+      </div>
+
+      <div class="rb-hero-grid">
+        <div class="rb-hero-copy">
+          <div class="rb-hero-stagger rb-stagger-1">
+            <span class="rb-hero-pill">
+              {% if p.is_new %}New Season{% elif p.is_bestseller %}Bestseller{% else %}Featured Piece{% endif %}
+              {% if p.category %} · {{ p.category.name }}{% endif %}
+            </span>
+            {% if p.has_discount %}
+            <span class="rb-hero-pill rb-hero-pill--sale">Save {{ p.discount_percent }}%</span>
+            {% endif %}
+          </div>
+
+          <h1 class="rb-hero-title rb-hero-stagger rb-stagger-2">{{ p.name }}</h1>
+
+          <p class="rb-hero-desc rb-hero-stagger rb-stagger-3">
+            {{ p.short_description|default:site_settings.hero_subtitle|truncatechars:140 }}
+          </p>
+
+          <div class="rb-hero-price-row rb-hero-stagger rb-stagger-4">
+            <span class="rb-hero-price">{{ p.effective_price|money:currency }}</span>
+            {% if p.old_price and p.old_price > p.effective_price %}
+            <del class="rb-hero-old-price">{{ p.old_price|money:currency }}</del>
+            {% endif %}
+          </div>
+
+          <div class="hero-actions rb-hero-stagger rb-stagger-5">
+            <a class="btn btn-lg rb-hero-cta" href="{% url 'product_detail' p.slug %}">
+              <span>Shop now</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <a class="btn btn-outline btn-lg rb-hero-secondary" href="{% url 'catalogue' %}">Explore collection</a>
+          </div>
+        </div>
+
+        <div class="rb-hero-visual">
+          <a href="{% url 'product_detail' p.slug %}" class="rb-hero-frame" tabindex="{% if forloop.first %}0{% else %}-1{% endif %}" aria-label="Inspect {{ p.name }}">
+            {% if p.image_src %}
+            <img src="{{ p.image_src }}"
+                 alt="{{ p.name }}"
+                 width="720"
+                 height="860"
+                 sizes="(max-width: 768px) 86vw, 40vw"
+                 {% if forloop.first %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                 decoding="async"
+                 class="rb-hero-product-img">
+            {% else %}
+            <div class="rb-hero-monogram" aria-hidden="true">RB</div>
+            {% endif %}
+          </a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+
+  {% if products|length > 1 %}
+  <div class="rb-hero-controls">
+    <div class="rb-hero-dots" role="tablist" aria-label="Choose featured slide">
+      {% for p in products %}
+      <button type="button"
+              class="rb-hero-dot {% if forloop.first %}is-active{% endif %}"
+              role="tab"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              aria-label="Go to slide {{ forloop.counter }}: {{ p.name }}"
+              data-hero-dot="{{ forloop.counter0 }}">
+        <span class="rb-hero-dot-progress" aria-hidden="true"></span>
+      </button>
+      {% endfor %}
+    </div>
+
+    <div class="rb-hero-nav">
+      <span class="rb-hero-counter" aria-live="polite" data-hero-counter>01 / {{ products|length|stringformat:"02d" }}</span>
+      <button type="button" class="rb-circle-btn" data-hero-pause aria-label="Pause showcase rotation" aria-pressed="false">
+        <svg class="icon-pause" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <svg class="icon-play" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+      </button>
+      <button type="button" class="rb-circle-btn" data-hero-prev aria-label="Previous slide">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button type="button" class="rb-circle-btn" data-hero-next aria-label="Next slide">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% else %}
+<section class="hero rb-hero-static">
+  <div class="hero-copy">
+    <span class="eyebrow">Curated for you</span>
+    <h1>{{ site_settings.hero_title }}</h1>
+    <p>{{ site_settings.hero_subtitle }}</p>
+    <div class="hero-actions">
+      <a class="btn btn-lg" href="{% url 'catalogue' %}">Shop collection</a>
+      <a class="btn btn-outline btn-lg" href="{% url 'catalogue' %}?sort=newest">New arrivals</a>
+    </div>
+  </div>
+  <div class="hero-art" aria-hidden="true">
+    {% if products and products.0.image_src %}
+    <div class="rb-hero-static-frame">
+      <img src="{{ products.0.image_src }}" alt="" width="480" height="560" loading="eager" decoding="async">
+    </div>
+    {% else %}
+    <div class="hero-card">RB<span>01</span></div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}

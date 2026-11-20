@@ -29,9 +29,13 @@
     })();
   </script>
   <link rel="stylesheet" href="{% static 'store.css' %}">
+  <link rel="stylesheet" href="{% static 'css/animations.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}" data-primary="{{ site_settings.primary_color }}">
+<body class="{% block body_class %}{% endblock %}"
+      data-primary="{{ site_settings.primary_color }}"
+      data-animations="{% if site_settings.animations_enabled %}on{% else %}off{% endif %}"
+      data-anim-speed="{{ site_settings.animation_speed|default:'normal' }}">
 <a class="skip-link" href="#main">Skip to content</a>
 {% if site_settings.announcement %}<div class="announcement">{{ site_settings.announcement }}</div>{% endif %}
 {% block header %}
@@ -182,7 +186,9 @@
   </div>
   <div class="footer-bottom">© {% now 'Y' %} {{ site_settings.store_name }}. All rights reserved.</div>
 </footer>
+{% include 'components/quick_view_modal.html' %}
 <script src="{% static 'store.js' %}" defer></script>
+<script src="{% static 'js/product-animations.js' %}" defer></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

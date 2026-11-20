@@ -1,0 +1,107 @@
+{% load store_extras %}
+<section class="section rb-coverflow-section"
+         id="{{ section_id|default:'rbCoverflowSection' }}"
+         aria-label="{{ title|default:'Featured collection' }}">
+  <div class="section-head">
+    <div>
+      {% if eyebrow %}<span class="rb-section-eyebrow">{{ eyebrow }}</span>{% endif %}
+      <h2>{{ title|default:'Featured showcase' }}</h2>
+    </div>
+    {% if view_all_url %}<a href="{{ view_all_url }}">View all →</a>{% endif %}
+  </div>
+
+  {% if products %}
+  <div class="rb-coverflow {% if products|length == 1 %}is-single{% endif %}"
+       role="region"
+       aria-roledescription="carousel"
+       aria-label="{{ title|default:'3D Product Showcase' }}"
+       tabindex="0"
+       data-coverflow
+       data-count="{{ products|length }}">
+    <div class="rb-cf-stage">
+      {% for p in products %}
+      <article class="rb-cf-slide {% if forloop.first %}is-center{% endif %}"
+               data-cf-index="{{ forloop.counter0 }}"
+               aria-label="{{ p.name }}">
+        <div class="rb-cf-card">
+          <a href="{% url 'product_detail' p.slug %}" class="rb-cf-media" aria-label="View {{ p.name }}">
+            {% if p.image_src %}
+            <img src="{{ p.image_src }}"
+                 alt="{{ p.name }}"
+                 width="520"
+                 height="620"
+                 sizes="(max-width: 640px) 75vw, 340px"
+                 loading="lazy"
+                 decoding="async"
+                 class="lazy-img">
+            {% else %}
+            <div class="rb-card-placeholder" aria-hidden="true"><span>RB</span></div>
+            {% endif %}
+            <div class="rb-card-badges">
+              {% if p.has_discount %}<span class="badge badge-sale">-{{ p.discount_percent }}%</span>{% endif %}
+              {% if p.is_new %}<span class="badge rb-badge-new">New</span>{% endif %}
+            </div>
+          </a>
+          <div class="rb-cf-info">
+            <span class="muted rb-card-cat">{{ p.category.name }}</span>
+            <h3><a href="{% url 'product_detail' p.slug %}">{{ p.name }}</a></h3>
+            <div class="rb-cf-bottom">
+              <div class="price-row">
+                <strong>{{ p.effective_price|money:currency }}</strong>
+                {% if p.old_price and p.old_price > p.effective_price %}<del>{{ p.old_price|money:currency }}</del>{% endif %}
+              </div>
+              <div class="rb-cf-actions">
+                <button type="button"
+                        class="btn btn-ghost btn-sm"
+                        data-quick-view
+                        data-qv-name="{{ p.name }}"
+                        data-qv-category="{{ p.category.name|default:'Boutique' }}"
+                        data-qv-price="{{ p.effective_price|money:currency }}"
+                        data-qv-old-price="{% if p.old_price and p.old_price > p.effective_price %}{{ p.old_price|money:currency }}{% endif %}"
+                        data-qv-discount="{% if p.has_discount %}{{ p.discount_percent }}{% endif %}"
+                        data-qv-image="{{ p.image_src|default:'' }}"
+                        data-qv-url="{% url 'product_detail' p.slug %}"
+                        data-qv-cart-url="{% url 'cart_add' p.id %}"
+                        data-qv-stock="{{ p.stock }}"
+                        data-qv-out="{% if p.out_of_stock %}1{% else %}0{% endif %}"
+                        data-qv-desc="{{ p.short_description|default:p.description|truncatechars:180 }}">
+                  Quick view
+                </button>
+                <a class="btn btn-sm" href="{% url 'product_detail' p.slug %}">Shop</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+
+    {% if products|length > 1 %}
+    <div class="rb-cf-controls">
+      <button type="button" class="rb-circle-btn rb-circle-btn--surface" data-cf-prev aria-label="Previous item">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <div class="rb-cf-dots" role="tablist" aria-label="Select carousel item">
+        {% for p in products %}
+        <button type="button"
+                class="rb-cf-dot {% if forloop.first %}is-active{% endif %}"
+                role="tab"
+                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                aria-label="Center {{ p.name }}"
+                data-cf-dot="{{ forloop.counter0 }}"></button>
+        {% endfor %}
+      </div>
+      <button type="button" class="rb-circle-btn rb-circle-btn--surface" data-cf-next aria-label="Next item">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+    </div>
+    <p class="rb-cf-hint muted small">Drag, swipe, or use arrow keys to rotate</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="rb-empty-showcase panel">
+    <p class="muted">Featured pieces will appear here once products are published.</p>
+    <a class="btn btn-outline btn-sm" href="{% url 'catalogue' %}">Browse shop</a>
+  </div>
+  {% endif %}
+</section>

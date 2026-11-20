@@ -1,31 +1,43 @@
 {% extends 'base.html' %}
 {% load store_extras %}
 {% block content %}
-<section class="hero">
-  <div class="hero-copy">
-    <span class="eyebrow">Curated for you</span>
-    <h1>{{ site_settings.hero_title }}</h1>
-    <p>{{ site_settings.hero_subtitle }}</p>
-    <div class="hero-actions">
-      <a class="btn btn-lg" href="{% url 'catalogue' %}">Shop collection</a>
-      <a class="btn btn-outline btn-lg" href="{% url 'catalogue' %}?sort=newest">New arrivals</a>
+{# 1. HERO SHOWCASE (Ken Burns Auto-Rotating Slider / configurable via Store Settings) #}
+{% if site_settings.hero_style == 'coverflow' and site_settings.animations_enabled %}
+  {% include 'components/hero_slider.html' with products=None %}
+  {% include 'components/coverflow.html' with products=hero_products section_id='heroCoverflow' eyebrow='Curated spotlight' title=site_settings.hero_title view_all_url='/products/' %}
+{% elif site_settings.hero_style == 'grid' and site_settings.animations_enabled %}
+  {% include 'components/hero_slider.html' with products=None %}
+  {% if hero_products %}
+  <section class="section">
+    <div class="section-head">
+      <div><span class="rb-section-eyebrow">Curated spotlight</span><h2>Featured highlights</h2></div>
+      <a href="{% url 'catalogue' %}">View all →</a>
     </div>
-  </div>
-  <div class="hero-art" aria-hidden="true">
-    <div class="hero-card">RB<span>01</span></div>
-  </div>
-</section>
+    {% include 'components/reveal_grid.html' with products=hero_products style='grid' %}
+  </section>
+  {% endif %}
+{% else %}
+  {% include 'components/hero_slider.html' with products=hero_products %}
+{% endif %}
 
+{# 2. SHOP BY CATEGORY (Staggered Reveal Tiles) #}
 {% if categories %}
 <section class="section">
   <div class="section-head">
-    <h2>Shop by category</h2>
+    <div>
+      <span class="rb-section-eyebrow">Browse by edit</span>
+      <h2>Shop by category</h2>
+    </div>
     <a href="{% url 'catalogue' %}">View all →</a>
   </div>
-  <div class="category-grid">
+  <div class="category-grid {% if site_settings.animations_enabled %}rb-reveal-grid{% endif %}" {% if site_settings.animations_enabled %}data-reveal-grid{% endif %}>
     {% for c in categories %}
-    <a class="category-card" href="{% url 'catalogue' %}?category={{ c.slug }}">
-      {% if c.image %}<img src="{{ c.image.url }}" alt="{{ c.name }}">{% else %}<div class="category-placeholder">{{ c.name }}</div>{% endif %}
+    <a class="category-card rb-reveal-item rb-cat-card" style="--stagger-index: {{ forloop.counter0 }};" data-reveal-item href="{% url 'catalogue' %}?category={{ c.slug }}">
+      {% if c.image %}
+      <img src="{{ c.image.url }}" alt="{{ c.name }}" width="400" height="400" loading="lazy" decoding="async" class="lazy-img">
+      {% else %}
+      <div class="category-placeholder">{{ c.name }}</div>
+      {% endif %}
       <span>{{ c.name }}</span>
     </a>
     {% endfor %}
@@ -33,47 +45,81 @@
 </section>
 {% endif %}
 
-{% if new_arrivals %}
-<section class="section">
-  <div class="section-head">
-    <h2>New arrivals</h2>
-    <a href="{% url 'catalogue' %}?sort=newest">View all →</a>
-  </div>
-  <div class="slider" id="newArrivalsSlider">
-    <button type="button" class="slider-nav prev" data-dir="-1" aria-label="Previous products">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-    </button>
-    <div class="slider-track" tabindex="0" aria-label="New arrivals carousel">
-      {% for p in new_arrivals %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
-    </div>
-    <button type="button" class="slider-nav next" data-dir="1" aria-label="Next products">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
-    </button>
-  </div>
-</section>
+{# 3. FEATURED SHOWCASE (3D Rotating Coverflow by default, configurable per section) #}
+{% if coverflow_products %}
+  {% if site_settings.animations_enabled and site_settings.featured_style == 'coverflow' %}
+    {% include 'components/coverflow.html' with products=coverflow_products section_id='featuredCoverflow' eyebrow='Signature edit' title='Featured showcase' view_all_url='/products/' %}
+  {% elif site_settings.animations_enabled and site_settings.featured_style == 'marquee' %}
+    {% include 'components/marquee.html' with row1_products=coverflow_products row1_title='Featured showcase' row1_url='/products/' row2_products=None %}
+  {% else %}
+    <section class="section">
+      <div class="section-head">
+        <div><span class="rb-section-eyebrow">Signature edit</span><h2>Featured showcase</h2></div>
+        <a href="{% url 'catalogue' %}">View all →</a>
+      </div>
+      {% include 'components/reveal_grid.html' with products=coverflow_products style=site_settings.featured_style %}
+    </section>
+  {% endif %}
 {% endif %}
 
-{% if best_sellers %}
-<section class="section">
-  <div class="section-head">
-    <h2>Best sellers</h2>
-    <a href="{% url 'catalogue' %}?sort=bestseller">View all →</a>
-  </div>
-  <div class="product-grid">
-    {% for p in best_sellers %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
-  </div>
-</section>
+{# 4. NEW ARRIVALS & BEST SELLERS (Dual Opposite-Direction Infinite Marquee by default) #}
+{% if new_arrivals or marquee_bestsellers %}
+  {% if site_settings.animations_enabled and site_settings.arrivals_style == 'marquee' %}
+    {% include 'components/marquee.html' with row1_products=new_arrivals row1_title='New arrivals' row1_url='/products/?sort=newest' row2_products=marquee_bestsellers row2_title='Best sellers' row2_url='/products/?sort=bestseller' %}
+  {% elif site_settings.animations_enabled and site_settings.arrivals_style == 'coverflow' %}
+    {% include 'components/coverflow.html' with products=new_arrivals section_id='arrivalsCoverflow' eyebrow='Fresh drops' title='New arrivals' view_all_url='/products/?sort=newest' %}
+    {% if best_sellers %}
+    <section class="section">
+      <div class="section-head">
+        <div><span class="rb-section-eyebrow">Most loved</span><h2>Best sellers</h2></div>
+        <a href="{% url 'catalogue' %}?sort=bestseller">View all →</a>
+      </div>
+      {% include 'components/reveal_grid.html' with products=best_sellers style='grid' %}
+    </section>
+    {% endif %}
+  {% else %}
+    {% if new_arrivals %}
+    <section class="section">
+      <div class="section-head">
+        <h2>New arrivals</h2>
+        <a href="{% url 'catalogue' %}?sort=newest">View all →</a>
+      </div>
+      <div class="slider" id="newArrivalsSlider">
+        <button type="button" class="slider-nav prev" data-dir="-1" aria-label="Previous products">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="slider-track" tabindex="0" aria-label="New arrivals carousel">
+          {% for p in new_arrivals %}{% include 'components/product_card.html' with p=p %}{% endfor %}
+        </div>
+        <button type="button" class="slider-nav next" data-dir="1" aria-label="Next products">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </section>
+    {% endif %}
+    {% if best_sellers %}
+    <section class="section">
+      <div class="section-head">
+        <h2>Best sellers</h2>
+        <a href="{% url 'catalogue' %}?sort=bestseller">View all →</a>
+      </div>
+      {% include 'components/reveal_grid.html' with products=best_sellers style=site_settings.arrivals_style %}
+    </section>
+    {% endif %}
+  {% endif %}
 {% endif %}
 
+{# 5. CURATED COLLECTION (Scroll-Reveal Staggered Grid with 3D Tilt Cards) #}
 {% if featured %}
 <section class="section">
   <div class="section-head">
-    <h2>Featured products</h2>
+    <div>
+      <span class="rb-section-eyebrow">Boutique edit</span>
+      <h2>Featured products</h2>
+    </div>
     <a href="{% url 'catalogue' %}">View all →</a>
   </div>
-  <div class="product-grid">
-    {% for p in featured %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
-  </div>
+  {% include 'components/reveal_grid.html' with products=featured style=site_settings.catalogue_style %}
 </section>
 {% endif %}
 

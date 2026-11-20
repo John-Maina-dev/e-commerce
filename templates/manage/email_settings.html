@@ -20,7 +20,6 @@
         <input type="password" name="smtp_password" id="smtp_password" value="{% if s.smtp_password %}********{% endif %}" placeholder="{% if s.smtp_password %}Saved — leave blank to keep{% else %}Not configured{% endif %}" autocomplete="new-password">
       </div>
     </div>
-<<<<<<< HEAD
     <div style="margin: 10px 0; display: flex; gap: 8px; flex-wrap: wrap;">
       <button type="button" class="btn btn-sm btn-ghost" id="preset-gmail">Preset: Gmail / TLS (Port 587)</button>
       <button type="button" class="btn btn-sm btn-ghost" id="preset-ssl">Preset: SSL (Port 465)</button>
@@ -28,11 +27,6 @@
     <label class="check"><input type="checkbox" name="smtp_use_tls" id="smtp_use_tls" {% if s.smtp_use_tls %}checked{% endif %}> Use TLS (STARTTLS — recommended for Port 587)</label>
     <label class="check"><input type="checkbox" name="smtp_use_ssl" id="smtp_use_ssl" {% if s.smtp_use_ssl %}checked{% endif %}> Use SSL (Direct SSL — required for Port 465)</label>
     <p class="muted small">TLS and SSL are mutually exclusive connection protocols. Port 587 requires TLS, while Port 465 requires SSL.</p>
-=======
-    <label class="check"><input type="checkbox" name="smtp_use_tls" {% if s.smtp_use_tls %}checked{% endif %}> Use TLS</label>
-    <label class="check"><input type="checkbox" name="smtp_use_ssl" {% if s.smtp_use_ssl %}checked{% endif %}> Use SSL</label>
-    <p class="muted small">TLS and SSL are mutually exclusive — if both are selected, TLS wins.</p>
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     <hr>
 
     <h2>Sender identity &amp; branding</h2>
@@ -77,7 +71,6 @@
       environment / <code class="mono">.env</code>. Those values are never written to the database.</p>
   </div>
 </div>
-<<<<<<< HEAD
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   var portInput = document.getElementById('smtp_port');
@@ -133,6 +126,4 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 {% endblock %}

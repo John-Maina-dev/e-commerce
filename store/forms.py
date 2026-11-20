@@ -4,11 +4,7 @@ from django.contrib.auth.models import User
 from django.template import loader
 from django.urls import reverse
 
-<<<<<<< HEAD
 from .models import Address, ContactMessage, Coupon, Product, Review, SiteSettings
-=======
-from .models import Address, ContactMessage, Coupon, Product, Review
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 
 class RegistrationForm(UserCreationForm):
@@ -51,7 +47,6 @@ class SitePasswordResetForm(PasswordResetForm):
         password_reset_sent(context['user'], to_email)
 
 
-<<<<<<< HEAD
 class MpesaSettingsForm(forms.Form):
     """Server-side validation for the M-Pesa Daraja configuration page.
 
@@ -126,8 +121,6 @@ class MpesaSettingsForm(forms.Form):
         return cleaned
 
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = User
@@ -174,6 +167,10 @@ class CouponForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     low_stock_threshold = forms.IntegerField(required=False, min_value=0)
     desired_stock_level = forms.IntegerField(required=False, min_value=0)
+    display_order = forms.IntegerField(
+        required=False, min_value=0, initial=0,
+        help_text='Lower numbers appear first in storefront showcase sections (0 = default).'
+    )
     cost_price = forms.DecimalField(required=False, min_value=0, max_digits=12, decimal_places=2,
                                     widget=forms.NumberInput(attrs={'step': '0.01', 'min': '0'}))
 
@@ -182,6 +179,7 @@ class ProductForm(forms.ModelForm):
         fields = ('name', 'sku', 'barcode', 'category', 'brand', 'short_description', 'description',
                   'price', 'sale_price', 'old_price', 'cost_price', 'stock', 'low_stock_threshold',
                   'desired_stock_level', 'active', 'hidden', 'featured', 'is_new', 'is_bestseller',
+                  'showcase_hero', 'showcase_coverflow', 'display_order',
                   'image', 'image_url')
         widgets = {
             'description': forms.Textarea(attrs={'rows': 6}),
@@ -212,6 +210,10 @@ class ProductForm(forms.ModelForm):
 
     def clean_desired_stock_level(self):
         return self.cleaned_data.get('desired_stock_level') or 10
+
+    def clean_display_order(self):
+        val = self.cleaned_data.get('display_order')
+        return val if val is not None else 0
 
     def clean(self):
         cleaned = super().clean()

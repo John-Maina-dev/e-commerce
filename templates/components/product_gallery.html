@@ -1,0 +1,59 @@
+{% with imgs=product.all_image_srcs %}
+<div class="gallery rb-gallery"
+     data-product-gallery
+     data-frame-count="{{ imgs|length }}"
+     {% if imgs|length >= 3 %}data-spin-ready="true"{% endif %}>
+
+  <div class="gallery-main rb-gallery-stage" data-gallery-stage tabindex="0" aria-label="Product image viewer">
+    {% if imgs %}
+    <img src="{{ imgs.0 }}"
+         alt="{{ product.name }}"
+         id="mainImage"
+         width="900"
+         height="900"
+         sizes="(max-width: 768px) 94vw, 48vw"
+         loading="eager"
+         decoding="async"
+         class="rb-gallery-main-img"
+         data-gallery-main>
+    <div class="rb-gallery-hud">
+      {% if imgs|length >= 3 %}
+      <button type="button" class="rb-hud-pill" data-spin-toggle aria-pressed="false" title="Toggle interactive 360° angle spin">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+        <span data-spin-label>360° Spin</span>
+      </button>
+      <button type="button" class="rb-hud-pill" data-spin-auto hidden aria-pressed="false" aria-label="Auto-rotate product">
+        <span data-spin-auto-label>Auto-spin</span>
+      </button>
+      {% endif %}
+      <span class="rb-hud-pill rb-hud-pill--muted" data-gallery-indicator>
+        {% if imgs|length > 1 %}1 / {{ imgs|length }}{% else %}Hover to zoom{% endif %}
+      </span>
+    </div>
+    {% if imgs|length >= 3 %}
+    <div class="rb-spin-badge" data-spin-hint hidden aria-live="polite">
+      Drag left or right to rotate 360°
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="placeholder rb-card-placeholder" aria-hidden="true"><span>RB</span></div>
+    {% endif %}
+  </div>
+
+  {% if imgs|length > 1 %}
+  <div class="gallery-thumbs rb-gallery-thumbs" role="tablist" aria-label="Product gallery thumbnails">
+    {% for src in imgs %}
+    <button type="button"
+            class="thumb rb-thumb {% if forloop.first %}active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            data-src="{{ src }}"
+            data-frame-index="{{ forloop.counter0 }}"
+            aria-label="View angle {{ forloop.counter }} of {{ imgs|length }} for {{ product.name }}">
+      <img src="{{ src }}" alt="" width="120" height="120" loading="lazy" decoding="async">
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endwith %}

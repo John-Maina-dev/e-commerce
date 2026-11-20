@@ -27,9 +27,7 @@
   </div>
 
   {% if page.object_list %}
-  <div class="product-grid">
-    {% for p in page.object_list %}{% include 'partials/product_card.html' with p=p %}{% endfor %}
-  </div>
+  {% include 'components/reveal_grid.html' with products=page.object_list style=site_settings.catalogue_style %}
   {% else %}
   <div class="empty-state">
     <div class="empty-icon">

@@ -55,6 +55,58 @@
     <div class="form-row"><label for="restock_min_sales_orders">Min sales orders to predict</label><input type="number" name="restock_min_sales_orders" id="restock_min_sales_orders" min="1" value="{{ s.restock_min_sales_orders }}"><small class="muted">Below this many paid orders in the window, the target stock level is used instead of a sales forecast.</small></div>
   </div>
 
+  <h2 id="animations">Storefront Showcase &amp; Animations</h2>
+  <p class="muted small" style="margin-top:-8px; margin-bottom:14px;">Control animation styles per homepage section, adjust motion speed, or disable animations globally.</p>
+  <input type="hidden" name="animations_enabled_present" value="1">
+  <div class="form-grid">
+    <div class="form-row form-wide">
+      <label class="check">
+        <input type="checkbox" name="animations_enabled" {% if s.animations_enabled %}checked{% endif %}>
+        Enable storefront animations (auto-rotation, 3D coverflow, marquee, tilt &amp; scroll reveal)
+      </label>
+    </div>
+    <div class="form-row">
+      <label for="animation_speed">Animation pace</label>
+      <select name="animation_speed" id="animation_speed">
+        {% for val, label in speed_choices %}
+        <option value="{{ val }}" {% if s.animation_speed == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="hero_style">Hero section style</label>
+      <select name="hero_style" id="hero_style">
+        {% for val, label in hero_style_choices %}
+        <option value="{{ val }}" {% if s.hero_style == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="featured_style">Featured showcase style</label>
+      <select name="featured_style" id="featured_style">
+        {% for val, label in section_style_choices %}
+        <option value="{{ val }}" {% if s.featured_style == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="arrivals_style">New arrivals &amp; best sellers style</label>
+      <select name="arrivals_style" id="arrivals_style">
+        {% for val, label in section_style_choices %}
+        <option value="{{ val }}" {% if s.arrivals_style == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="catalogue_style">Shop / catalogue grid style</label>
+      <select name="catalogue_style" id="catalogue_style">
+        {% for val, label in catalogue_style_choices %}
+        <option value="{{ val }}" {% if s.catalogue_style == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
   <h2>Logo &amp; media</h2>
   <div class="form-grid">
     <div class="form-row"><label for="logo">Logo</label><input type="file" name="logo" id="logo" accept="image/*">
@@ -67,4 +119,63 @@
 
   <button class="btn" type="submit">Save settings</button>
 </form>
+
+<section id="showcase-products" class="panel" style="margin-top: 24px;">
+  <div class="panel-head" style="margin-bottom: 12px;">
+    <div>
+      <h2 style="margin:0;">Homepage Showcase Products &amp; Order</h2>
+      <p class="muted small" style="margin:4px 0 0;">Pick which products appear in each animated section and set their display order (lower numbers appear first).</p>
+    </div>
+  </div>
+  {% if showcase_products %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="form_section" value="showcase_products">
+    <div class="table-wrap">
+      <table class="table-hover">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th style="width:96px;">Order</th>
+            <th style="text-align:center;">Hero Slider</th>
+            <th style="text-align:center;">3D Coverflow</th>
+            <th style="text-align:center;">Featured</th>
+            <th style="text-align:center;">New Arrival</th>
+            <th style="text-align:center;">Best Seller</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in showcase_products %}
+          <tr>
+            <td>
+              <input type="hidden" name="showcase_pid" value="{{ p.pk }}">
+              <div style="display:flex; align-items:center; gap:10px;">
+                {% if p.image_src %}<img src="{{ p.image_src }}" alt="" class="thumb-img" loading="lazy">{% else %}<span class="thumb-img placeholder-sm">RB</span>{% endif %}
+                <div>
+                  <b><a href="{% url 'product_edit' p.pk %}">{{ p.name }}</a></b>
+                  <div class="muted small">{{ p.category.name }} · {{ p.sku }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <input type="number" name="display_order_{{ p.pk }}" value="{{ p.display_order }}" min="0" style="width:76px; padding:6px 8px;" aria-label="Display order for {{ p.name }}">
+            </td>
+            <td style="text-align:center;"><input type="checkbox" name="showcase_hero_{{ p.pk }}" {% if p.showcase_hero %}checked{% endif %} aria-label="Show {{ p.name }} in Hero slider"></td>
+            <td style="text-align:center;"><input type="checkbox" name="showcase_coverflow_{{ p.pk }}" {% if p.showcase_coverflow %}checked{% endif %} aria-label="Show {{ p.name }} in 3D Coverflow"></td>
+            <td style="text-align:center;"><input type="checkbox" name="featured_{{ p.pk }}" {% if p.featured %}checked{% endif %} aria-label="Feature {{ p.name }}"></td>
+            <td style="text-align:center;"><input type="checkbox" name="is_new_{{ p.pk }}" {% if p.is_new %}checked{% endif %} aria-label="Mark {{ p.name }} as New arrival"></td>
+            <td style="text-align:center;"><input type="checkbox" name="is_bestseller_{{ p.pk }}" {% if p.is_bestseller %}checked{% endif %} aria-label="Mark {{ p.name }} as Best seller"></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top: 16px;">
+      <button class="btn" type="submit">Save showcase order &amp; sections</button>
+    </div>
+  </form>
+  {% else %}
+  <p class="muted">No active products yet. <a href="{% url 'product_add' %}">Add your first product →</a></p>
+  {% endif %}
+</section>
 {% endblock %}

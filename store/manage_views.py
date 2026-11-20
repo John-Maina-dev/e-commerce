@@ -3,15 +3,11 @@ import os
 from datetime import timedelta
 from decimal import Decimal
 
-<<<<<<< HEAD
 from django.conf import settings
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-<<<<<<< HEAD
 from django.db import transaction
 from django.db.models import Case, Count, F, Q, Sum, When
 from django.http import HttpResponseBadRequest
@@ -27,19 +23,6 @@ from .forms import CouponForm, MpesaSettingsForm, ProductForm
 from .models import (AccountAuditLog, Category, Coupon, InventoryAlert, InventoryChange, Notification,
                      Order, OrderItem, OrderStatusHistory, Payment, Product,
                      ProductImage, Review, SiteSettings, UserProfile)
-=======
-from django.db.models import Case, Count, F, Q, Sum, When
-from django.http import HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
-
-from . import mpesa, notify, services
-from .decorators import ROLE_ADMIN, has_role, manager_required, role_required, staff_required
-from .forms import CouponForm, ProductForm
-from .models import (Category, Coupon, InventoryAlert, InventoryChange, Notification,
-                     Order, OrderItem, OrderStatusHistory, Payment, Product,
-                     ProductImage, Review, SiteSettings)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 logger = logging.getLogger('store')
 
@@ -226,7 +209,6 @@ def product_add(request):
             services.record_inventory_change(product, 'create', old_qty=0, new_qty=product.stock,
                                              note='Product created', user=request.user)
             services.evaluate_product_stock(product, user=request.user)
-<<<<<<< HEAD
 
             # Automatic or requested subscriber notifications for new items
             notify_subscribers = request.POST.get('notify_subscribers') == 'on' or (product.is_new and product.is_visible)
@@ -235,8 +217,6 @@ def product_add(request):
                 if count:
                     messages.info(request, f'New arrival alert sent to {count} active subscriber(s).')
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
             if product.is_visible:
                 messages.success(request, f'Product "{product.name}" created and is live on the storefront.')
             else:
@@ -272,14 +252,11 @@ def product_edit(request, pk):
                 except OSError:
                     logger.exception('Failed to remove replaced main image %s', old_image_name)
             services.evaluate_product_stock(product, user=request.user)
-<<<<<<< HEAD
             if request.POST.get('notify_subscribers') == 'on':
                 product.subscribers_notified = False  # allow manual re-dispatch if checked
                 count = services.notify_subscribers_new_arrival(product, admin_user=request.user)
                 if count:
                     messages.info(request, f'Product alert sent to {count} active subscriber(s).')
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
             messages.success(request, 'Product updated.')
             return redirect('manage_products')
     return render(request, 'manage/product_form.html', {'form': form, 'title': 'Edit product', 'product': product})
@@ -362,15 +339,12 @@ def product_bulk_action(request):
         return redirect(next_url)
     products = Product.objects.filter(pk__in=ids)
     if action == 'delete':
-        deletable = list(products.filter(order_items__isnull=True))
-        blocked = products.count() - len(deletable)
-        if deletable:
-            for product in deletable:
-                delete_product_media(product)
-            Product.objects.filter(pk__in=[p.pk for p in deletable]).delete()
-            messages.success(request, f'{len(deletable)} product(s) deleted.')
-        if blocked:
-            messages.warning(request, f'{blocked} product(s) with order history were kept — archive them instead.')
+        deleted_count = 0
+        for product in list(products):
+            delete_product_media(product)
+            product.delete()
+            deleted_count += 1
+        messages.success(request, f'{deleted_count} product(s) deleted.')
     else:
         handler = PRODUCT_ACTIONS[action]
         count = 0
@@ -384,17 +358,21 @@ def product_bulk_action(request):
 @manager_required
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    if product.order_items.exists():
-        messages.error(request, f'"{product.name}" has order history and cannot be deleted. Archive it instead.')
-        return redirect('manage_products')
+    has_orders = product.order_items.exists()
     if request.method == 'POST':
         name = product.name
         delete_product_media(product)
         product.delete()
         messages.success(request, f'Product "{name}" deleted.')
         return redirect('manage_products')
+    msg = f'Delete "{product.name}"?'
+    if has_orders:
+        msg = (f'Delete "{product.name}"? This product was purchased in '
+               f'{product.order_items.count()} past order(s). Order records '
+               'and receipts will safely preserve product names and prices, '
+               'but the product will be permanently removed from the catalog.')
     return render(request, 'manage/confirm.html', {'title': 'Delete product', 'object': product,
-                                                   'message': f'Delete "{product.name}"? Order history keeps product names.'})
+                                                   'message': msg})
 
 
 # --------------------------------------------------------------------------- #
@@ -403,7 +381,11 @@ def product_delete(request, pk):
 
 @staff_required
 def manage_categories(request):
-    categories = Category.objects.annotate(product_count=Count('products'))
+    categories = Category.objects.annotate(
+        product_count=Count('products'),
+        active_count=Count('products', filter=Q(products__is_archived=False)),
+        archived_count=Count('products', filter=Q(products__is_archived=True)),
+    )
     return render(request, 'manage/categories.html', {'categories': categories})
 
 
@@ -439,15 +421,53 @@ def _category_form(request, pk=None):
 @manager_required
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
+    total_products = category.products.count()
+    active_products = category.products.filter(is_archived=False).count()
+    archived_products = category.products.filter(is_archived=True).count()
+    other_categories = Category.objects.exclude(pk=category.pk)
+
     if request.method == 'POST':
-        if category.products.exists():
-            messages.error(request, f'Cannot delete "{category.name}": it still has products. Move them first.')
-        else:
+        move_to_id = request.POST.get('move_to')
+        delete_products = request.POST.get('delete_products') == '1'
+
+        if move_to_id and other_categories.filter(pk=move_to_id).exists():
+            dest = other_categories.get(pk=move_to_id)
+            category.products.all().update(category=dest)
             category.delete()
-            messages.success(request, 'Category deleted.')
-        return redirect('manage_categories')
-    return render(request, 'manage/confirm.html', {'title': 'Delete category', 'object': category,
-                                                   'message': f'Delete category "{category.name}"?'})
+            messages.success(request, f'Category "{category.name}" deleted and products moved to "{dest.name}".')
+            return redirect('manage_categories')
+
+        if delete_products or total_products == 0:
+            for p in list(category.products.all()):
+                delete_product_media(p)
+                p.delete()
+            category.delete()
+            messages.success(request, f'Category "{category.name}" deleted.')
+            return redirect('manage_categories')
+
+        if not other_categories.exists():
+            messages.error(
+                request,
+                f'Cannot delete "{category.name}": it has {total_products} product(s) ({archived_products} archived), '
+                'and there are no other categories to move them to. '
+                'Please check "Also permanently delete" to confirm deletion.'
+            )
+        else:
+            messages.error(
+                request,
+                f'Cannot delete "{category.name}": it still has {total_products} product(s). '
+                'Please select a destination category or check "Also permanently delete".'
+            )
+        return redirect('category_delete', pk=category.pk)
+
+    return render(request, 'manage/category_confirm_delete.html', {
+        'title': 'Delete category',
+        'category': category,
+        'total_products': total_products,
+        'active_products': active_products,
+        'archived_products': archived_products,
+        'other_categories': other_categories,
+    })
 
 
 # --------------------------------------------------------------------------- #
@@ -718,11 +738,7 @@ def order_return_item(request, number):
 # Customers
 # --------------------------------------------------------------------------- #
 
-<<<<<<< HEAD
 @admin_required
-=======
-@staff_required
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def manage_customers(request):
     users = User.objects.annotate(order_count=Count('orders')).order_by('-date_joined')
     guest_phones = (Order.objects.filter(user__isnull=True)
@@ -732,7 +748,6 @@ def manage_customers(request):
 
 
 # --------------------------------------------------------------------------- #
-<<<<<<< HEAD
 # Super Admin: Account Approval & User Management
 # --------------------------------------------------------------------------- #
 
@@ -998,8 +1013,6 @@ def account_audit_logs(request):
 
 
 # --------------------------------------------------------------------------- #
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 # Reviews
 # --------------------------------------------------------------------------- #
 
@@ -1258,20 +1271,35 @@ def _query_payment_timeout(request, payment):
 
 
 # --------------------------------------------------------------------------- #
-<<<<<<< HEAD
 # Settings (Super Admin Only)
 # --------------------------------------------------------------------------- #
 
 @super_admin_required
-=======
-# Settings
-# --------------------------------------------------------------------------- #
-
-@role_required(ROLE_ADMIN)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def manage_settings(request):
     s = SiteSettings.get()
     if request.method == 'POST':
+        if request.POST.get('form_section') == 'showcase_products':
+            product_ids = [int(pid) for pid in request.POST.getlist('showcase_pid') if pid.isdigit()]
+            with transaction.atomic():
+                for prod in Product.objects.filter(pk__in=product_ids):
+                    pid = str(prod.pk)
+                    try:
+                        order_val = max(0, int(request.POST.get(f'display_order_{pid}', prod.display_order) or 0))
+                    except (TypeError, ValueError):
+                        order_val = prod.display_order
+                    prod.display_order = order_val
+                    prod.showcase_hero = request.POST.get(f'showcase_hero_{pid}') == 'on'
+                    prod.showcase_coverflow = request.POST.get(f'showcase_coverflow_{pid}') == 'on'
+                    prod.featured = request.POST.get(f'featured_{pid}') == 'on'
+                    prod.is_new = request.POST.get(f'is_new_{pid}') == 'on'
+                    prod.is_bestseller = request.POST.get(f'is_bestseller_{pid}') == 'on'
+                    prod.save(update_fields=[
+                        'display_order', 'showcase_hero', 'showcase_coverflow',
+                        'featured', 'is_new', 'is_bestseller', 'updated_at'
+                    ])
+            messages.success(request, 'Storefront showcase assignments and display order saved.')
+            return redirect(f"{reverse('manage_settings')}#showcase-products")
+
         s.store_name = request.POST.get('store_name', s.store_name)
         s.tagline = request.POST.get('tagline', s.tagline)
         s.description = request.POST.get('description', s.description)
@@ -1304,6 +1332,26 @@ def manage_settings(request):
         except Exception:
             pass
         s.tax_enabled = request.POST.get('tax_enabled') == 'on'
+
+        # Storefront animations settings
+        if 'animations_enabled_present' in request.POST:
+            s.animations_enabled = request.POST.get('animations_enabled') == 'on'
+        speed = request.POST.get('animation_speed', '').strip()
+        if speed in dict(SiteSettings.ANIMATION_SPEED_CHOICES):
+            s.animation_speed = speed
+        hero_style = request.POST.get('hero_style', '').strip()
+        if hero_style in dict(SiteSettings.HERO_STYLE_CHOICES):
+            s.hero_style = hero_style
+        featured_style = request.POST.get('featured_style', '').strip()
+        if featured_style in dict(SiteSettings.SECTION_STYLE_CHOICES):
+            s.featured_style = featured_style
+        arrivals_style = request.POST.get('arrivals_style', '').strip()
+        if arrivals_style in dict(SiteSettings.SECTION_STYLE_CHOICES):
+            s.arrivals_style = arrivals_style
+        catalogue_style = request.POST.get('catalogue_style', '').strip()
+        if catalogue_style in dict(SiteSettings.CATALOGUE_STYLE_CHOICES):
+            s.catalogue_style = catalogue_style
+
         for field in ('logo', 'favicon', 'banner'):
             upload = request.FILES.get(field)
             if upload:
@@ -1316,14 +1364,23 @@ def manage_settings(request):
         s.save()
         messages.success(request, 'Store settings saved.')
         return redirect('manage_settings')
-    return render(request, 'manage/settings.html', {'s': s})
+
+    showcase_products = (
+        Product.objects.filter(is_archived=False)
+        .select_related('category')
+        .order_by('display_order', '-created_at')[:50]
+    )
+    return render(request, 'manage/settings.html', {
+        's': s,
+        'showcase_products': showcase_products,
+        'speed_choices': SiteSettings.ANIMATION_SPEED_CHOICES,
+        'hero_style_choices': SiteSettings.HERO_STYLE_CHOICES,
+        'section_style_choices': SiteSettings.SECTION_STYLE_CHOICES,
+        'catalogue_style_choices': SiteSettings.CATALOGUE_STYLE_CHOICES,
+    })
 
 
-<<<<<<< HEAD
 @super_admin_required
-=======
-@role_required(ROLE_ADMIN)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def manage_email_settings(request):
     s = SiteSettings.get()
     if request.method == 'POST':
@@ -1336,7 +1393,6 @@ def manage_email_settings(request):
         s.smtp_username = request.POST.get('smtp_username', s.smtp_username).strip()
         s.smtp_from_email = request.POST.get('smtp_from_email', s.smtp_from_email).strip()
         s.smtp_sender_name = request.POST.get('smtp_sender_name', s.smtp_sender_name).strip()
-<<<<<<< HEAD
 
         sec_mode = request.POST.get('smtp_security_mode')
         if sec_mode == 'ssl':
@@ -1364,16 +1420,6 @@ def manage_email_settings(request):
         s.smtp_use_ssl = use_ssl
 
         new_password = request.POST.get('smtp_password', '').strip()
-=======
-        use_tls = request.POST.get('smtp_use_tls') == 'on'
-        use_ssl = request.POST.get('smtp_use_ssl') == 'on'
-        # TLS and SSL are mutually exclusive connection modes.
-        if use_tls and use_ssl:
-            use_ssl = False
-        s.smtp_use_tls = use_tls
-        s.smtp_use_ssl = use_ssl
-        new_password = request.POST.get('smtp_password', '')
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         if new_password and new_password != '********':
             s.smtp_password = new_password
         try:
@@ -1391,11 +1437,7 @@ def manage_email_settings(request):
     })
 
 
-<<<<<<< HEAD
 @super_admin_required
-=======
-@role_required(ROLE_ADMIN)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def test_email(request):
     s = SiteSettings.get()
     recipient = request.POST.get('email', '').strip()
@@ -1404,13 +1446,9 @@ def test_email(request):
         return redirect('manage_email_settings')
     try:
         from django.core.mail import send_mail
-<<<<<<< HEAD
         sender = s.smtp_from_email or s.smtp_username or getattr(settings, 'DEFAULT_FROM_EMAIL', None) or 'no-reply@reevesboutique.local'
         if 'your-email@' in sender or 'example.com' in sender:
             sender = s.smtp_username or getattr(settings, 'EMAIL_HOST_USER', None) or 'no-reply@reevesboutique.local'
-=======
-        sender = s.smtp_from_email or s.smtp_username or 'no-reply@reevesboutique.local'
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         if s.smtp_sender_name and sender and '<' not in sender:
             sender = f'{s.smtp_sender_name} <{sender}>'
         send_mail(
@@ -1424,7 +1462,6 @@ def test_email(request):
         logger.info('SMTP test email sent to %s via %s', recipient, s.smtp_host)
     except Exception as e:
         logger.error('SMTP test failed for %s: %s', recipient, e)
-<<<<<<< HEAD
         err = str(e)
         if 'WRONG_VERSION_NUMBER' in err:
             err += ' (Port 587 requires TLS/STARTTLS, while Port 465 requires SSL)'
@@ -1506,41 +1543,6 @@ def manage_payment_settings(request):
 
 
 @super_admin_required
-=======
-        messages.error(request, f'SMTP test failed: {e}')
-    return redirect('manage_email_settings')
-
-
-@role_required(ROLE_ADMIN)
-def manage_payment_settings(request):
-    s = SiteSettings.get()
-    if request.method == 'POST':
-        s.mpesa_enabled = request.POST.get('mpesa_enabled') == 'on'
-        s.mpesa_environment = request.POST.get('mpesa_environment', s.mpesa_environment)
-        s.mpesa_shortcode = request.POST.get('mpesa_shortcode', s.mpesa_shortcode)
-        s.mpesa_callback_url = request.POST.get('mpesa_callback_url', s.mpesa_callback_url)
-        s.mpesa_account_reference = request.POST.get('mpesa_account_reference', s.mpesa_account_reference)
-        s.mpesa_transaction_desc = request.POST.get('mpesa_transaction_desc', s.mpesa_transaction_desc)
-        strategy = request.POST.get('inventory_strategy', '')
-        if strategy in dict(SiteSettings.INVENTORY_STRATEGY_CHOICES):
-            s.inventory_strategy = strategy
-        new_key = request.POST.get('mpesa_consumer_key', '').strip()
-        if new_key and new_key != '********':
-            s.mpesa_consumer_key = new_key
-        new_secret = request.POST.get('mpesa_consumer_secret', '')
-        if new_secret and new_secret != '********':
-            s.mpesa_consumer_secret = new_secret
-        new_passkey = request.POST.get('mpesa_passkey', '')
-        if new_passkey and new_passkey != '********':
-            s.mpesa_passkey = new_passkey
-        s.save()
-        messages.success(request, 'M-Pesa settings saved.')
-        return redirect('manage_payment_settings')
-    return render(request, 'manage/payment_settings.html', {'s': s})
-
-
-@role_required(ROLE_ADMIN)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def test_mpesa(request):
     s = SiteSettings.get()
     ok, message = mpesa.test_connection(s)
@@ -1681,7 +1683,6 @@ def manage_notifications(request):
     paginator = Paginator(qs, 25)
     page = paginator.get_page(request.GET.get('page'))
     return render(request, 'manage/notifications.html', {'page': page, 'state': state})
-<<<<<<< HEAD
 
 
 # --------------------------------------------------------------------------- #
@@ -1854,5 +1855,3 @@ def subscriber_delete(request, pk):
     sub.delete()
     messages.success(request, f'Subscriber "{email}" removed.')
     return redirect('manage_subscribers')
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

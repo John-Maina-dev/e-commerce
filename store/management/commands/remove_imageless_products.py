@@ -1,15 +1,3 @@
-"""Remove products that have no usable image.
-
-Safety-first by design:
-  * default run is a DRY RUN — it only reports;
-  * `--apply` performs the deletion, but only after exporting a JSON backup
-    of every product it is about to remove (written to logs/);
-  * a product counts as "imageless" only when it has no main image file,
-    no external image_url AND no gallery images — i.e. nothing displayable.
-
-Going forward the admin forms already refuse to publish an imageless
-product; this command cleans up anything that predates that rule.
-"""
 import json
 import logging
 from pathlib import Path

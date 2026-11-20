@@ -1,18 +1,11 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-<<<<<<< HEAD
 from .models import (AccountAuditLog, Address, Category, ContactMessage, Coupon, CouponUsage,
                      DataDeletionAuditLog, InventoryAlert,
                      InventoryChange, MpesaTransaction, NewsletterSubscriber, Notification, Order,
                      OrderItem, OrderReturn, OrderStatusHistory, Payment, PosSession, Product,
                      ProductImage, Review, SiteSettings, UserProfile, WishlistItem)
-=======
-from .models import (Address, Category, ContactMessage, Coupon, CouponUsage, InventoryAlert,
-                     InventoryChange, MpesaTransaction, NewsletterSubscriber, Notification, Order,
-                     OrderItem, OrderReturn, OrderStatusHistory, Payment, PosSession, Product,
-                     ProductImage, Review, SiteSettings, WishlistItem)
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
 admin.site.site_header = 'Reeves Boutique Administration'
 admin.site.site_title = 'Reeves Boutique'
@@ -27,8 +20,10 @@ class ProductImageInline(admin.TabularInline):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('thumb', 'name', 'sku', 'barcode', 'category', 'price', 'stock', 'stock_badge',
-                    'low_stock_threshold', 'featured', 'active', 'updated_at')
-    list_filter = ('category', 'active', 'featured', 'is_new', 'is_bestseller')
+                    'display_order', 'showcase_hero', 'showcase_coverflow', 'featured', 'is_new',
+                    'is_bestseller', 'active', 'updated_at')
+    list_editable = ('display_order', 'showcase_hero', 'showcase_coverflow', 'featured', 'is_new', 'is_bestseller')
+    list_filter = ('category', 'active', 'featured', 'is_new', 'is_bestseller', 'showcase_hero', 'showcase_coverflow')
     search_fields = ('name', 'sku', 'barcode', 'brand', 'description')
     prepopulated_fields = {'slug': ('name',)}
     list_select_related = ('category',)
@@ -39,7 +34,10 @@ class ProductAdmin(admin.ModelAdmin):
         ('Pricing', {'fields': ('price', 'sale_price', 'old_price', 'cost_price')}),
         ('Description', {'fields': ('short_description', 'description')}),
         ('Inventory', {'fields': ('stock', 'low_stock_threshold', 'desired_stock_level', 'sales_count')}),
-        ('Status', {'fields': ('active', 'featured', 'is_new', 'is_bestseller')}),
+        ('Storefront showcase & status', {
+            'fields': ('active', 'hidden', 'is_archived', 'featured', 'is_new', 'is_bestseller',
+                       'showcase_hero', 'showcase_coverflow', 'display_order')
+        }),
         ('Media', {'fields': ('image', 'image_url')}),
         ('Rating cache', {'fields': ('rating', 'reviews_count')}),
         ('Timestamps', {'fields': ('created_at', 'updated_at')}),
@@ -257,17 +255,16 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                                      'smtp_password_masked', 'smtp_use_tls', 'smtp_use_ssl',
                                      'smtp_from_email', 'smtp_sender_name',
                                      'password_reset_timeout_seconds')}),
-<<<<<<< HEAD
         ('M-Pesa STK Push', {'fields': ('mpesa_enabled', 'mpesa_environment', 'mpesa_account_type',
                                         'mpesa_business_name', 'mpesa_consumer_key_masked',
-=======
-        ('M-Pesa STK Push', {'fields': ('mpesa_enabled', 'mpesa_environment', 'mpesa_consumer_key_masked',
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
                                         'mpesa_consumer_secret_masked', 'mpesa_shortcode',
                                         'mpesa_passkey_masked', 'mpesa_callback_url',
                                         'mpesa_account_reference', 'mpesa_transaction_desc')}),
+        ('Storefront Showcase & Animations', {
+            'fields': ('animations_enabled', 'animation_speed', 'hero_style',
+                       'featured_style', 'arrivals_style', 'catalogue_style')
+        }),
     )
-<<<<<<< HEAD
 
 
 @admin.register(UserProfile)
@@ -301,5 +298,3 @@ class DataDeletionAuditLogAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

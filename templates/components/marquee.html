@@ -1,0 +1,58 @@
+{% load store_extras %}
+<section class="section rb-marquee-section" aria-label="New arrivals and best sellers showcase">
+  {% if row1_products %}
+  <div class="rb-marquee-block">
+    <div class="section-head">
+      <div>
+        <span class="rb-section-eyebrow">Fresh drops</span>
+        <h2>{{ row1_title|default:'New arrivals' }}</h2>
+      </div>
+      <a href="{{ row1_url|default:'/products/?sort=newest' }}">View all →</a>
+    </div>
+
+    <div class="rb-marquee-viewport {% if row1_products|length < 2 %}is-static{% endif %}"
+         data-marquee
+         data-direction="left"
+         tabindex="0"
+         aria-label="{{ row1_title|default:'New arrivals' }} scrolling strip">
+      <div class="rb-marquee-track slider-track" data-marquee-track>
+        <div class="rb-marquee-group" data-marquee-group>
+          {% for p in row1_products %}
+          <div class="rb-marquee-item">
+            {% include 'components/product_card.html' with p=p %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if row2_products %}
+  <div class="rb-marquee-block rb-marquee-block--secondary">
+    <div class="section-head">
+      <div>
+        <span class="rb-section-eyebrow">Most loved</span>
+        <h2>{{ row2_title|default:'Best sellers' }}</h2>
+      </div>
+      <a href="{{ row2_url|default:'/products/?sort=bestseller' }}">View all →</a>
+    </div>
+
+    <div class="rb-marquee-viewport {% if row2_products|length < 2 %}is-static{% endif %}"
+         data-marquee
+         data-direction="right"
+         tabindex="0"
+         aria-label="{{ row2_title|default:'Best sellers' }} scrolling strip">
+      <div class="rb-marquee-track" data-marquee-track>
+        <div class="rb-marquee-group" data-marquee-group>
+          {% for p in row2_products %}
+          <div class="rb-marquee-item">
+            {% include 'components/product_card.html' with p=p %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</section>

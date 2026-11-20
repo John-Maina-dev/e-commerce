@@ -123,7 +123,6 @@ def order_status_changed(order):
         emails.order_status_change(order)
 
 
-<<<<<<< HEAD
 def new_registration(user):
     """A new user registered and awaits Super Admin approval."""
     link = reverse('manage_accounts')
@@ -150,8 +149,6 @@ def account_approved(user):
     )
 
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 def new_customer(user):
     """A customer account was created."""
     s = SiteSettings.get()

@@ -5,11 +5,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-<<<<<<< HEAD
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -81,13 +78,23 @@ class Product(models.Model):
     featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     is_bestseller = models.BooleanField(default=False)
-<<<<<<< HEAD
+    showcase_hero = models.BooleanField(
+        default=False,
+        help_text='Feature this product in the homepage Hero Showcase slider.'
+    )
+    showcase_coverflow = models.BooleanField(
+        default=False,
+        help_text='Include this product in the 3D Rotating Coverflow carousel.'
+    )
+    display_order = models.PositiveIntegerField(
+        default=0,
+        db_index=True,
+        help_text='Lower numbers appear first in storefront showcase sections (0 = default).'
+    )
     subscribers_notified = models.BooleanField(
         default=False,
         help_text='Whether new arrival notifications have already been dispatched for this product.'
     )
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     image_url = models.URLField(blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=Decimal('0.0'),
@@ -133,6 +140,34 @@ class Product(models.Model):
     @property
     def image_src(self):
         return self.image.url if self.image else self.image_url
+
+    @property
+    def is_featured(self):
+        return self.featured
+
+    @is_featured.setter
+    def is_featured(self, value):
+        self.featured = bool(value)
+
+    @property
+    def secondary_image_src(self):
+        """First gallery image URL for hover crossfade (uses prefetched images when present)."""
+        imgs = list(self.images.all())
+        for img in imgs:
+            if img.image and img.image.url != self.image_src:
+                return img.image.url
+        return ''
+
+    @property
+    def all_image_srcs(self):
+        """Ordered list of unique image URLs (main + gallery) for 360° spin and detail gallery."""
+        srcs = []
+        if self.image_src:
+            srcs.append(self.image_src)
+        for img in self.images.all():
+            if img.image and img.image.url not in srcs:
+                srcs.append(img.image.url)
+        return srcs
 
     @property
     def stock_status(self):
@@ -445,11 +480,8 @@ class Order(models.Model):
         ('mpesa', 'M-Pesa STK Push'),
         ('cod', 'Cash / manual payment'),
         ('card', 'Card payment'),
-<<<<<<< HEAD
         ('bank', 'Bank transfer'),
         ('split', 'Split payment'),
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     ]
     SALES_CHANNEL_CHOICES = [
         ('online', 'Online store'),
@@ -463,7 +495,6 @@ class Order(models.Model):
     pos_token = models.CharField(max_length=64, blank=True, null=True, unique=True,
                                  help_text='Client-supplied idempotency token for POS sales so a '
                                            'retried request can never create a duplicate sale.')
-<<<<<<< HEAD
     checkout_token = models.CharField(max_length=64, blank=True, null=True, unique=True,
                                       help_text='Idempotency token for online checkout so a double '
                                                 'submit can never create two orders.')
@@ -471,11 +502,6 @@ class Order(models.Model):
                                           choices=[('cash', 'Cash'), ('mpesa', 'M-Pesa'),
                                                    ('card', 'Card'), ('bank', 'Bank transfer'),
                                                    ('split', 'Split payment'), ('other', 'Other')],
-=======
-    pos_payment_method = models.CharField(max_length=10, blank=True, default='',
-                                          choices=[('cash', 'Cash'), ('mpesa', 'M-Pesa'),
-                                                   ('card', 'Card'), ('other', 'Other')],
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
                                           help_text='Exact till payment option chosen by the cashier.')
     served_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                                   null=True, blank=True, related_name='served_orders',
@@ -600,16 +626,12 @@ class OrderReturn(models.Model):
 
 
 class Payment(models.Model):
-<<<<<<< HEAD
     METHOD_CHOICES = [
         ('mpesa', 'M-Pesa STK Push'),
         ('manual', 'Cash / manual'),
         ('card', 'Card payment'),
         ('bank', 'Bank transfer'),
     ]
-=======
-    METHOD_CHOICES = [('mpesa', 'M-Pesa STK Push'), ('manual', 'Cash / manual'), ('card', 'Card payment')]
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     STATUS_CHOICES = Order.PAYMENT_STATUS_CHOICES
     VERIFICATION_CHOICES = [
         ('', 'Not verified'),
@@ -627,15 +649,12 @@ class Payment(models.Model):
     result_code = models.CharField(max_length=20, blank=True, default='')
     result_description = models.TextField(blank=True)
     verification = models.CharField(max_length=20, choices=VERIFICATION_CHOICES, blank=True, default='')
-<<<<<<< HEAD
     manual_code = models.CharField(
         max_length=40, blank=True, default='',
         help_text='M-Pesa transaction code the customer entered for manual verification.')
     manual_submitted_at = models.DateTimeField(
         null=True, blank=True,
         help_text='When the customer submitted their manual M-Pesa code.')
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     amount_paid = models.DecimalField(**MONEY, null=True, blank=True,
                                       help_text='Cash actually handed over at the till (POS cash sales).')
     change_given = models.DecimalField(**MONEY, null=True, blank=True,
@@ -665,14 +684,11 @@ class Payment(models.Model):
     def is_manually_reviewed(self):
         return self.verification == 'manual'
 
-<<<<<<< HEAD
     @property
     def awaits_manual_code_review(self):
         """True when a customer has submitted an M-Pesa code we still must check."""
         return bool(self.manual_code) and self.status == 'requires_review'
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     @classmethod
     def record(cls, order, method, amount, status='pending', reference=''):
         return cls.objects.create(order=order, method=method, amount=amount, status=status, reference=reference)
@@ -704,7 +720,6 @@ class MpesaTransaction(models.Model):
 
 class NewsletterSubscriber(models.Model):
     email = models.EmailField(unique=True)
-<<<<<<< HEAD
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='newsletter_subscriptions'
@@ -725,11 +740,6 @@ class NewsletterSubscriber(models.Model):
             self.unsubscribe_token = uuid.uuid4().hex
         super().save(*args, **kwargs)
 
-=======
-    active = models.BooleanField(default=True)
-    subscribed_at = models.DateTimeField(auto_now_add=True)
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     def __str__(self):
         return self.email
 
@@ -758,10 +768,7 @@ class Notification(models.Model):
         ('customer', 'Customer'),
         ('account', 'Account'),
         ('system', 'System'),
-<<<<<<< HEAD
         ('product', 'New Arrival'),
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     ]
 
     title = models.CharField(max_length=200)
@@ -793,10 +800,7 @@ class Notification(models.Model):
 
 class SiteSettings(models.Model):
     ENV_CHOICES = [('sandbox', 'Sandbox'), ('production', 'Production')]
-<<<<<<< HEAD
     ACCOUNT_TYPE_CHOICES = [('paybill', 'PayBill'), ('till', 'Till Number (Buy Goods)')]
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 
     # Branding
     store_name = models.CharField(max_length=160, default='Reeves Boutique')
@@ -864,13 +868,10 @@ class SiteSettings(models.Model):
     # M-Pesa
     mpesa_enabled = models.BooleanField(default=False)
     mpesa_environment = models.CharField(max_length=20, choices=ENV_CHOICES, default='sandbox')
-<<<<<<< HEAD
     mpesa_account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, default='paybill')
     mpesa_business_name = models.CharField(
         max_length=160, blank=True, default='',
         help_text='Internal label to identify this M-Pesa account (e.g. the business name).')
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     mpesa_consumer_key = models.CharField(max_length=300, blank=True, default='')
     mpesa_consumer_secret = models.CharField(max_length=300, blank=True, default='')
     mpesa_shortcode = models.CharField(max_length=50, blank=True, default='')
@@ -878,6 +879,53 @@ class SiteSettings(models.Model):
     mpesa_callback_url = models.URLField(blank=True, default='')
     mpesa_account_reference = models.CharField(max_length=100, default='Reeves Boutique')
     mpesa_transaction_desc = models.CharField(max_length=200, default='Payment for Reeves Boutique order')
+
+    # Storefront showcase & animations
+    ANIMATION_SPEED_CHOICES = [
+        ('slow', 'Slow (Relaxed luxury)'),
+        ('normal', 'Normal (Boutique)'),
+        ('fast', 'Fast (Energetic)'),
+    ]
+    HERO_STYLE_CHOICES = [
+        ('hero_slider', 'Hero Showcase (Ken Burns Slider)'),
+        ('coverflow', '3D Rotating Coverflow'),
+        ('grid', 'Scroll-Reveal Grid'),
+        ('off', 'Classic Static Hero'),
+    ]
+    SECTION_STYLE_CHOICES = [
+        ('coverflow', '3D Rotating Coverflow'),
+        ('marquee', 'Infinite Marquee Strip'),
+        ('grid', 'Scroll-Reveal Grid'),
+        ('off', 'Static Grid'),
+    ]
+    CATALOGUE_STYLE_CHOICES = [
+        ('grid', 'Scroll-Reveal Staggered Grid'),
+        ('off', 'Static Grid'),
+    ]
+    animations_enabled = models.BooleanField(
+        default=True,
+        help_text='Master switch to enable or disable storefront showcase animations.'
+    )
+    animation_speed = models.CharField(
+        max_length=12, choices=ANIMATION_SPEED_CHOICES, default='normal',
+        help_text='Controls transition and auto-rotation pace across the storefront.'
+    )
+    hero_style = models.CharField(
+        max_length=20, choices=HERO_STYLE_CHOICES, default='hero_slider',
+        help_text='Animation style for the homepage Hero Showcase section.'
+    )
+    featured_style = models.CharField(
+        max_length=20, choices=SECTION_STYLE_CHOICES, default='coverflow',
+        help_text='Animation style for the Featured Collection section.'
+    )
+    arrivals_style = models.CharField(
+        max_length=20, choices=SECTION_STYLE_CHOICES, default='marquee',
+        help_text='Animation style for New Arrivals & Best Sellers.'
+    )
+    catalogue_style = models.CharField(
+        max_length=20, choices=CATALOGUE_STYLE_CHOICES, default='grid',
+        help_text='Animation style for the Shop / Catalogue and Category grids.'
+    )
 
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -921,7 +969,6 @@ class SiteSettings(models.Model):
         if not self.tax_enabled:
             return Decimal('0.00')
         return (subtotal * self.tax_rate / Decimal('100')).quantize(Decimal('0.01'))
-<<<<<<< HEAD
 
 
 class UserProfile(models.Model):
@@ -1092,5 +1139,3 @@ class DataDeletionAuditLog(models.Model):
 
     def __str__(self):
         return f'{self.actor_username or "System"} deleted {self.records_deleted} {self.data_type} records on {self.created_at:%Y-%m-%d %H:%M}'
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03

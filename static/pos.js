@@ -1,12 +1,7 @@
-<<<<<<< HEAD
 /* Point-of-Sale terminal.
    Supermarket-grade product register, hardware barcode scanner support,
    customer selection/registration, multi-tender split payments, live tax
    calculation, and multi-monitor customer display synchronization. */
-=======
-/* Point-of-Sale terminal. The browser only describes intent — every price,
-   stock check and total is recomputed server-side at checkout. */
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 (function () {
   'use strict';
 
@@ -14,7 +9,6 @@
   if (!root) return;
 
   var SEARCH_URL = root.dataset.searchUrl;
-<<<<<<< HEAD
   var CATALOGUE_URL = root.dataset.catalogueUrl;
   var SCAN_URL = root.dataset.scanUrl;
   var RECOMMENDATIONS_URL = root.dataset.recommendationsUrl;
@@ -27,17 +21,10 @@
   var CAN_DISCOUNT = root.dataset.canDiscount === '1';
   var TAX_ENABLED = root.dataset.taxEnabled === '1';
   var TAX_RATE = parseFloat(root.dataset.taxRate || '0');
-=======
-  var CHECKOUT_URL = root.dataset.checkoutUrl;
-  var STATE_URL_BASE = root.dataset.stateUrlBase;
-  var CURRENCY = root.dataset.currency || 'KES';
-  var CAN_DISCOUNT = root.dataset.canDiscount === '1';
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   var CSRF = root.querySelector('[name=csrfmiddlewaretoken]').value;
 
   var searchInput = document.getElementById('posSearch');
   var resultsBox = document.getElementById('posResults');
-<<<<<<< HEAD
   var grid = document.getElementById('posProductGrid');
   var gridEmpty = document.getElementById('posGridEmpty');
   var categoriesBox = document.getElementById('posCategories');
@@ -123,22 +110,6 @@
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
-=======
-  var quickBox = document.getElementById('posQuick');
-  var cartBody = document.getElementById('posCartBody');
-  var subtotalEl = document.getElementById('posSubtotal');
-  var totalEl = document.getElementById('posTotal');
-  var discountEl = document.getElementById('posDiscount');
-  var payBtn = document.getElementById('posPayBtn');
-  var clearBtn = document.getElementById('posClear');
-
-  /* cart: {id: {product, quantity}} */
-  var cart = {};
-  var searchTimer = null;
-
-  function money(v) {
-    return CURRENCY + ' ' + Number(v).toLocaleString(undefined, { maximumFractionDigits: 2 });
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   }
 
   function postJSON(url, body) {
@@ -153,7 +124,6 @@
   }
 
   /* ------------------------------------------------------------------ */
-<<<<<<< HEAD
   /* Multi-Screen Customer Display Sync                                  */
   /* ------------------------------------------------------------------ */
 
@@ -320,35 +290,12 @@
         searchInput.value = '';
         searchInput.focus();
       });
-=======
-  /* Search                                                              */
-  /* ------------------------------------------------------------------ */
-
-  function renderResult(p) {
-    var row = document.createElement('button');
-    row.type = 'button';
-    row.className = 'pos-result' + (p.out_of_stock ? ' is-out' : '');
-    row.setAttribute('role', 'option');
-    var img = p.image
-      ? '<img src="' + p.image + '" alt="">'
-      : '<span class="pos-result-ph">' + (p.name || '?').charAt(0).toUpperCase() + '</span>';
-    row.innerHTML =
-      img +
-      '<span class="pos-result-name"><b>' + escapeHtml(p.name) + '</b>' +
-      '<small>' + escapeHtml(p.sku || '') + (p.stock <= 5 && !p.out_of_stock ? ' · only ' + p.stock + ' left' : '') + '</small></span>' +
-      '<span class="pos-result-meta"><b>' + money(p.price) + '</b>' +
-      (p.out_of_stock ? '<small class="is-out">OUT OF STOCK</small>' : '<small>Stock: ' + p.stock + '</small>') +
-      '</span>';
-    if (!p.out_of_stock) {
-      row.addEventListener('click', function () { addToCart(p); });
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     }
     return row;
   }
 
   function showResults(list) {
     resultsBox.innerHTML = '';
-<<<<<<< HEAD
     list.forEach(function (p) { resultsBox.appendChild(resultRow(p)); });
     resultsBox.hidden = list.length === 0;
   }
@@ -456,16 +403,6 @@
 
   function doSearch(q, autoAddSingle) {
     if (!q) return;
-=======
-    list.forEach(function (p) { resultsBox.appendChild(renderResult(p)); });
-    resultsBox.hidden = list.length === 0;
-    if (list.length) {
-      quickBox.hidden = true;
-    }
-  }
-
-  function doSearch(q, autoAddSingle) {
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     return fetch(SEARCH_URL + '?q=' + encodeURIComponent(q), {
       headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin'
     })
@@ -474,7 +411,6 @@
         var results = data.results || [];
         if (autoAddSingle && results.length === 1 && !results[0].out_of_stock) {
           addToCart(results[0]);
-<<<<<<< HEAD
           playScanBeep();
           searchInput.value = '';
           resultsBox.hidden = true;
@@ -495,37 +431,6 @@
     clearTimeout(catalogueTimer);
     resultsBox.hidden = true;
     catalogueTimer = setTimeout(function () { loadCatalogue(); }, 150);
-=======
-          searchInput.value = '';
-          resultsBox.hidden = true;
-          quickBox.hidden = false;
-          return;
-        }
-        showResults(results);
-        renderQuick(results);
-      })
-      .catch(function () { /* network hiccup; next keystroke retries */ });
-  }
-
-  function renderQuick(list) {
-    quickBox.innerHTML = '';
-    if (!list.length) {
-      quickBox.innerHTML = '<p class="muted small">No products matched. Check the spelling or scan the barcode.</p>';
-    }
-    list.forEach(function (p) {
-      var chip = renderResult(p);
-      chip.classList.add('pos-chip');
-      quickBox.appendChild(chip);
-    });
-    quickBox.hidden = false;
-  }
-
-  searchInput.addEventListener('input', function () {
-    clearTimeout(searchTimer);
-    var q = searchInput.value.trim();
-    if (q.length < 2) { resultsBox.hidden = true; return; }
-    searchTimer = setTimeout(function () { doSearch(q, false); }, 160);
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   });
 
   searchInput.addEventListener('keydown', function (e) {
@@ -533,19 +438,14 @@
     e.preventDefault();
     var q = searchInput.value.trim();
     if (!q) return;
-<<<<<<< HEAD
     // First try exact barcode/SKU scan endpoint, then fallback to general search
     scanBarcodeAndAdd(q, function () {
       doSearch(q, true);
     });
-=======
-    doSearch(q, true);
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   });
 
   document.addEventListener('click', function (e) {
     if (!resultsBox.contains(e.target) && e.target !== searchInput) resultsBox.hidden = true;
-<<<<<<< HEAD
     if (customerSearchPopover && !customerSearchPopover.contains(e.target) && e.target !== selectCustomerBtn) {
       customerSearchPopover.hidden = true;
     }
@@ -676,15 +576,6 @@
 
   /* ------------------------------------------------------------------ */
   /* Cart & Tax Calculations                                             */
-=======
-  });
-  document.getElementById('posSearchBtn').addEventListener('click', function () {
-    doSearch(searchInput.value.trim(), true);
-  });
-
-  /* ------------------------------------------------------------------ */
-  /* Cart                                                                */
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   /* ------------------------------------------------------------------ */
 
   function addToCart(p, qty) {
@@ -699,10 +590,7 @@
     } else {
       entry.quantity += qty;
     }
-<<<<<<< HEAD
     endSaleAttempt();
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     renderCart();
   }
 
@@ -711,10 +599,7 @@
     if (!entry) return;
     qty = Math.max(0, Math.min(qty, entry.product.stock));
     if (qty === 0) { delete cart[id]; } else { entry.quantity = qty; }
-<<<<<<< HEAD
     endSaleAttempt();
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     renderCart();
   }
 
@@ -726,19 +611,15 @@
     return Object.keys(cart).reduce(function (sum, id) { return sum + lineTotal(cart[id]); }, 0);
   }
 
-<<<<<<< HEAD
   function cartQuantity() {
     return Object.keys(cart).reduce(function (sum, id) { return sum + cart[id].quantity; }, 0);
   }
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   function discountValue() {
     var d = CAN_DISCOUNT && discountEl ? parseFloat(discountEl.value || '0') : 0;
     return isFinite(d) && d > 0 ? Math.min(d, cartSubtotal()) : 0;
   }
 
-<<<<<<< HEAD
   function cartTax() {
     if (!TAX_ENABLED) return 0;
     var taxable = Math.max(0, cartSubtotal() - discountValue());
@@ -753,13 +634,10 @@
     return Math.round((taxable + tax) * 100) / 100;
   }
 
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   function renderCart() {
     var ids = Object.keys(cart);
     cartBody.innerHTML = '';
     if (!ids.length) {
-<<<<<<< HEAD
       cartBody.innerHTML =
         '<div class="pos-ticket-empty">' +
         '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12l-1.5 4H7.5L6 2z"/><path d="M5 6h14l-1 14H6L5 6z"/><path d="M9 10h6M9 14h6"/></svg>' +
@@ -900,47 +778,10 @@
     cart = {};
     discountEl.value = '0';
     endSaleAttempt();
-=======
-      cartBody.innerHTML = '<tr class="pos-empty"><td colspan="5" class="muted">No items yet. Search or scan to begin.</td></tr>';
-    }
-    ids.forEach(function (id) {
-      var e = cart[id];
-      var tr = document.createElement('tr');
-      tr.innerHTML =
-        '<td><b>' + escapeHtml(e.product.name) + '</b><small class="muted">' + escapeHtml(e.product.sku || '') + '</small></td>' +
-        '<td><div class="qty-stepper">' +
-        '<button type="button" data-step="-1" aria-label="Decrease">\u2212</button>' +
-        '<input type="number" min="1" max="' + e.product.stock + '" value="' + e.quantity + '" aria-label="Quantity">' +
-        '<button type="button" data-step="1" aria-label="Increase">+</button></div></td>' +
-        '<td>' + money(e.product.price) + '</td>' +
-        '<td><b>' + money(lineTotal(e)) + '</b></td>' +
-        '<td><button type="button" class="pos-remove" aria-label="Remove">\u00d7</button></td>';
-      tr.querySelector('[data-step="-1"]').addEventListener('click', function () { setQty(id, e.quantity - 1); });
-      tr.querySelector('[data-step="1"]').addEventListener('click', function () { setQty(id, e.quantity + 1); });
-      tr.querySelector('input').addEventListener('change', function (ev) {
-        setQty(id, parseInt(ev.target.value || '0', 10));
-      });
-      tr.querySelector('.pos-remove').addEventListener('click', function () { setQty(id, 0); });
-      cartBody.appendChild(tr);
-    });
-    var sub = cartSubtotal();
-    subtotalEl.textContent = money(sub);
-    totalEl.textContent = money(sub - discountValue());
-    payBtn.disabled = !ids.length;
-    clearBtn.disabled = !ids.length;
-  }
-
-  discountEl.addEventListener('input', renderCart);
-
-  clearBtn.addEventListener('click', function () {
-    if (!Object.keys(cart).length) return;
-    cart = {};
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     renderCart();
   });
 
   /* ------------------------------------------------------------------ */
-<<<<<<< HEAD
   /* Inline Customer Display modal                                       */
   /* ------------------------------------------------------------------ */
 
@@ -1004,8 +845,6 @@
   document.getElementById('cdClose').addEventListener('click', closeCustomerDisplay);
 
   /* ------------------------------------------------------------------ */
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   /* Printer preference                                                  */
   /* ------------------------------------------------------------------ */
 
@@ -1023,17 +862,12 @@
   });
 
   /* ------------------------------------------------------------------ */
-<<<<<<< HEAD
   /* Payment Modal & Split Tenders                                       */
-=======
-  /* Payment                                                             */
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   /* ------------------------------------------------------------------ */
 
   var modal = document.getElementById('payModal');
   var payMethod = 'cash';
   var busy = false;
-<<<<<<< HEAD
   var splitTendersContainer = document.getElementById('splitTendersContainer');
   var addSplitTenderBtn = document.getElementById('addSplitTenderBtn');
   var splitRemainingEl = document.getElementById('splitRemaining');
@@ -1053,16 +887,6 @@
       method: 'CASH',
       prompt_message: 'Please hand ' + money(total) + ' to the cashier.'
     });
-=======
-
-  payBtn.addEventListener('click', function () {
-    if (!Object.keys(cart).length) return;
-    document.getElementById('payTotalLabel').textContent = money(cartSubtotal() - discountValue());
-    document.getElementById('cashReceived').value = (cartSubtotal() - discountValue()).toFixed(2);
-    updateChange();
-    openModal(modal);
-    selectMethod('cash');
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   });
 
   document.querySelectorAll('.pay-method').forEach(function (btn) {
@@ -1077,7 +901,6 @@
     document.querySelectorAll('.pay-body[data-panel]').forEach(function (p) {
       p.hidden = p.dataset.panel !== m;
     });
-<<<<<<< HEAD
 
     var total = cartTotal();
     var msg = 'Please pay ' + money(total) + ' to the cashier.';
@@ -1232,20 +1055,6 @@
     }
   }
 
-=======
-    hideError();
-  }
-
-  function updateChange() {
-    var received = parseFloat(document.getElementById('cashReceived').value || '0');
-    var total = cartSubtotal() - discountValue();
-    var change = received - total;
-    document.getElementById('changeDue').textContent = money(Math.max(0, change));
-    document.getElementById('cashError').hidden = !(received < total);
-  }
-  document.getElementById('cashReceived').addEventListener('input', updateChange);
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   document.getElementById('payClose').addEventListener('click', function () { closeModal(modal); });
   modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(modal); });
 
@@ -1253,7 +1062,6 @@
     if (busy) return;
     hideError();
 
-<<<<<<< HEAD
     var total = cartTotal();
     var received = null;
 
@@ -1261,35 +1069,19 @@
       received = parseFloat(document.getElementById('cashReceived').value || '0');
       if (received < total) {
         showError('Cash received is less than the total due.');
-=======
-    if (payMethod === 'cash') {
-      var received = parseFloat(document.getElementById('cashReceived').value || '0');
-      if (received < cartSubtotal() - discountValue()) {
-        showError('Cash received is less than the total.');
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         return;
       }
     }
 
-<<<<<<< HEAD
     var items = Object.keys(cart).map(function (id) {
       return { id: Number(id), quantity: cart[id].quantity };
     });
 
-=======
-    busy = true;
-    this.disabled = true;
-
-    var items = Object.keys(cart).map(function (id) {
-      return { id: Number(id), quantity: cart[id].quantity };
-    });
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     var body = {
       items: items,
       payment_method: payMethod,
       discount: CAN_DISCOUNT ? discountValue() : 0,
       token: saleToken(),
-<<<<<<< HEAD
       customer_id: currentCustomer.id,
       customer_name: currentCustomer.name || document.getElementById('customerName').value || ''
     };
@@ -1361,31 +1153,12 @@
       finish();
       if (!r.data.ok) {
         if (r.status === 403) { closeModal(modal); flash(r.data.error || 'Not authorized.'); return; }
-=======
-      customer_name: document.getElementById('customerName').value || ''
-    };
-    if (payMethod === 'cash') body.cash_received = received;
-    if (payMethod === 'mpesa') {
-      body.phone = document.getElementById('mpesaPhone').value.trim();
-      if (!body.phone) { showError('Enter the customer phone number.'); busy = false; this.disabled = false; return; }
-    }
-    if (payMethod === 'other') {
-      body.customer_name = body.customer_name || document.getElementById('otherName').value || '';
-    }
-
-    postJSON(CHECKOUT_URL, body).then(function (r) {
-      busy = false;
-      payConfirmBtn().disabled = false;
-      if (!r.data.ok) {
-        if (r.status === 403) { closeModal(modal); flash(r.data.error || 'Not allowed.'); return; }
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         showError(r.data.error || 'The sale could not be completed.');
         return;
       }
       closeModal(modal);
       handleSaleResult(r.data.sale);
     }).catch(function () {
-<<<<<<< HEAD
       finish();
       showError('Network problem — the sale may or may not be recorded. Press Complete again to retry safely.');
     });
@@ -1412,38 +1185,18 @@
 
   /* ------------------------------------------------------------------ */
   /* Sale Completion & Receipts                                         */
-=======
-      busy = false;
-      payConfirmBtn().disabled = false;
-      showError('Network problem \u2014 the sale was NOT recorded. Try again.');
-    });
-  });
-
-  function payConfirmBtn() { return document.getElementById('payConfirm'); }
-
-  /* ------------------------------------------------------------------ */
-  /* Result handling                                                     */
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   /* ------------------------------------------------------------------ */
 
   var doneModal = document.getElementById('doneModal');
   var pollTimer = null;
 
   function handleSaleResult(sale) {
-<<<<<<< HEAD
-=======
-    cart = {};
-    renderCart();
-    searchInput.value = '';
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     document.getElementById('donePending').hidden = true;
     document.getElementById('donePaid').hidden = true;
     document.getElementById('doneFailed').hidden = true;
     document.getElementById('donePrintError').hidden = true;
 
     if (sale.pending_mpesa) {
-<<<<<<< HEAD
       cart = {};
       endSaleAttempt();
       renderCart();
@@ -1452,13 +1205,10 @@
         method: 'M-PESA',
         prompt_message: 'M-Pesa STK prompt sent to phone. Enter your PIN to approve ' + money(sale.total) + '.'
       });
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       document.getElementById('donePending').hidden = false;
       openModal(doneModal);
       pollPayment(sale.number);
     } else if (sale.payment_status === 'paid') {
-<<<<<<< HEAD
       lastSaleSnapshot = null;
       cart = {};
       endSaleAttempt();
@@ -1478,13 +1228,6 @@
       document.getElementById('doneFailed').hidden = false;
       var closeBtn = document.getElementById('doneClose');
       if (closeBtn) closeBtn.textContent = 'Return to Till / Try Again';
-=======
-      showPaid(sale);
-    } else {
-      document.getElementById('failedReason').textContent =
-        sale.result_description || 'The payment did not go through.';
-      document.getElementById('doneFailed').hidden = false;
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
       openModal(doneModal);
     }
   }
@@ -1493,7 +1236,6 @@
     document.getElementById('doneSummary').textContent =
       sale.method_display + ' \u00b7 ' + money(sale.total) + ' \u00b7 ' + sale.number;
 
-<<<<<<< HEAD
     document.getElementById('donePending').hidden = true;
     document.getElementById('doneFailed').hidden = true;
     document.getElementById('donePrintError').hidden = true;
@@ -1516,40 +1258,11 @@
   }
 
   /* Thermal Auto-Print */
-=======
-    // Store receipt URL for retry / download / view
-    doneModal.dataset.receiptUrl = sale.receipt_url;
-    doneModal.dataset.receiptNumber = sale.number;
-
-    var link = document.getElementById('receiptLink');
-    link.href = sale.receipt_url;
-    document.getElementById('receiptPrint').href = sale.receipt_url + '?print=1';
-    document.getElementById('receiptDownload').href = sale.receipt_url + '?download=1';
-
-    document.getElementById('donePaid').hidden = false;
-    document.getElementById('donePrintError').hidden = true;
-    openModal(doneModal);
-
-    // Auto-print receipt
-    autoPrintReceipt(sale.receipt_url, sale.number);
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Auto-print receipt                                                  */
-  /* ------------------------------------------------------------------ */
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   var printIframe = null;
   var printTimeout = null;
 
   function autoPrintReceipt(receiptUrl, orderNumber) {
-<<<<<<< HEAD
     cleanupPrintIframe();
-=======
-    // Create a hidden iframe to load the receipt for printing
-    cleanupPrintIframe();
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     printIframe = document.createElement('iframe');
     printIframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;';
     printIframe.setAttribute('aria-hidden', 'true');
@@ -1558,7 +1271,6 @@
     var size = getPrinterSize();
     var autoUrl = receiptUrl + '?auto=1&size=' + size;
 
-<<<<<<< HEAD
     var messageHandler = function (e) {
       if (!e.data || typeof e.data.type !== 'string') return;
       if (e.data.number !== orderNumber) return;
@@ -1568,38 +1280,6 @@
     printIframe._messageHandler = messageHandler;
 
     printTimeout = setTimeout(function () {}, 8000);
-=======
-    // Listen for messages from the iframe
-    var messageHandler = function (e) {
-      if (!e.data || typeof e.data.type !== 'string') return;
-      if (e.data.number !== orderNumber) return;
-
-      if (e.data.type === 'receipt-print-triggered') {
-        clearTimeout(printTimeout);
-        // Print was triggered successfully — show the sale complete state
-        showPrintSuccess();
-      } else if (e.data.type === 'receipt-print-failed') {
-        clearTimeout(printTimeout);
-        showPrintError(orderNumber);
-      }
-    };
-    window.addEventListener('message', messageHandler);
-
-    // Store handler reference for cleanup
-    printIframe._messageHandler = messageHandler;
-
-    // Fallback timeout: if no message received within 8 seconds, assume print dialog
-    // was opened (beforeunload/afterprint not reliable across all browsers)
-    printTimeout = setTimeout(function () {
-      // Assume print dialog was shown — the user can print or cancel
-      showPrintSuccess();
-    }, 8000);
-
-    printIframe.onload = function () {
-      // iframe loaded; the receipt page script will auto-trigger print
-    };
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     document.body.appendChild(printIframe);
     printIframe.src = autoUrl;
   }
@@ -1616,53 +1296,15 @@
     }
   }
 
-<<<<<<< HEAD
   document.getElementById('retryPrint').addEventListener('click', function () {
     var url = doneModal.dataset.receiptUrl;
     var num = doneModal.dataset.receiptNumber;
     if (url) autoPrintReceipt(url, num);
-=======
-  function showPrintSuccess() {
-    // Print dialog was shown or print succeeded — all good
-    // The done modal stays as-is with View/Print/Download options
-  }
-
-  function showPrintError(orderNumber) {
-    // Print failed — show retry/download options
-    var printErrorEl = document.getElementById('donePrintError');
-    var paidEl = document.getElementById('donePaid');
-    if (printErrorEl) {
-      printErrorEl.hidden = false;
-    }
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Manual print / retry / download from done modal                     */
-  /* ------------------------------------------------------------------ */
-
-  document.getElementById('retryPrint').addEventListener('click', function () {
-    var url = doneModal.dataset.receiptUrl;
-    var num = doneModal.dataset.receiptNumber;
-    if (!url) return;
-    document.getElementById('donePrintError').hidden = true;
-    autoPrintReceipt(url, num);
-  });
-
-  document.getElementById('manualPrint').addEventListener('click', function () {
-    var url = doneModal.dataset.receiptUrl;
-    if (!url) return;
-    var size = getPrinterSize();
-    window.open(url + '?print=1&size=' + size, '_blank');
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   });
 
   document.getElementById('downloadReceipt').addEventListener('click', function () {
     var url = doneModal.dataset.receiptUrl;
     if (!url) return;
-<<<<<<< HEAD
-=======
-    // Trigger download via a temporary link
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     var a = document.createElement('a');
     a.href = url + '?download=1';
     a.download = 'receipt-' + (doneModal.dataset.receiptNumber || '') + '.html';
@@ -1671,33 +1313,20 @@
     document.body.removeChild(a);
   });
 
-<<<<<<< HEAD
   /* M-Pesa Polling */
-=======
-  /* ------------------------------------------------------------------ */
-  /* M-Pesa polling                                                      */
-  /* ------------------------------------------------------------------ */
-
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   function pollPayment(number) {
     clearInterval(pollTimer);
     var attempts = 0;
     pollTimer = setInterval(function () {
       attempts += 1;
-<<<<<<< HEAD
       fetch(STATE_URL_BASE.replace('NUMBER', encodeURIComponent(number)), {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin'
       })
-=======
-      fetch(STATE_URL_BASE.replace('NUMBER', encodeURIComponent(number)),
-            { headers: { 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
         .then(function (r) { return r.json(); })
         .then(function (s) {
           if (s.payment_status === 'paid') {
             clearInterval(pollTimer);
             document.getElementById('pendingNote').hidden = true;
-<<<<<<< HEAD
             lastSaleSnapshot = null;
             broadcastDisplay('paid', {
               method: 'M-PESA',
@@ -1708,16 +1337,10 @@
           } else if (s.payment_status === 'failed' || s.payment_status === 'cancelled') {
             clearInterval(pollTimer);
             restoreOnClose = true;
-=======
-            showPaid(s);
-          } else if (s.payment_status === 'failed' || s.payment_status === 'cancelled') {
-            clearInterval(pollTimer);
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
             document.getElementById('failedReason').textContent =
               s.result_description || 'The customer did not complete the payment.';
             document.getElementById('donePending').hidden = true;
             document.getElementById('doneFailed').hidden = false;
-<<<<<<< HEAD
             var pollCloseBtn = document.getElementById('doneClose');
             if (pollCloseBtn) pollCloseBtn.textContent = 'Return to Till / Try Again';
             broadcastDisplay('idle', { prompt_message: 'Payment was not completed.' });
@@ -1729,16 +1352,6 @@
           }
         })
         .catch(function () {});
-=======
-          } else if (attempts > 60) {
-            clearInterval(pollTimer);
-            var note = document.getElementById('pendingNote');
-            note.textContent = 'Still waiting after 3 minutes. The sale stays pending until M-Pesa confirms or fails \u2014 check Sales history.';
-            note.hidden = false;
-          }
-        })
-        .catch(function () { /* transient; keep polling */ });
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     }, 3000);
   }
 
@@ -1746,7 +1359,6 @@
     clearInterval(pollTimer);
     cleanupPrintIframe();
     closeModal(doneModal);
-<<<<<<< HEAD
     if (restoreOnClose) {
       restoreOnClose = false;
       restoreSnapshot(lastSaleSnapshot);
@@ -1755,13 +1367,10 @@
     } else {
       setCustomer(null);
     }
-=======
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
     searchInput.focus();
   });
 
   /* ------------------------------------------------------------------ */
-<<<<<<< HEAD
   /* Shortcuts & Modals                                                 */
   /* ------------------------------------------------------------------ */
 
@@ -1791,11 +1400,6 @@
     m.classList.remove('open');
     document.body.classList.remove('modal-open');
   }
-=======
-
-  function openModal(m) { m.hidden = false; document.body.classList.add('modal-open'); }
-  function closeModal(m) { m.hidden = true; document.body.classList.remove('modal-open'); }
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
   function showError(msg) { var el = document.getElementById('payError'); el.textContent = msg; el.hidden = false; }
   function hideError() { document.getElementById('payError').hidden = true; }
 
@@ -1814,7 +1418,6 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
-<<<<<<< HEAD
   function escapeAttr(s) { return escapeHtml(s); }
 
   function saleToken() {
@@ -1830,13 +1433,4 @@
 
   renderCart();
   loadCatalogue();
-=======
-
-  function saleToken() {
-    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
-    return 'pos-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-  }
-
-  renderCart();
->>>>>>> 0eaeef0d594c7530f656b8338be122ce644eab03
 })();

@@ -1,0 +1,1308 @@
+/* ============================================================================
+   Reeves Boutique — Storefront Product Showcase & Animations
+   GPU-composited (transform + opacity), mobile-first, light & dark mode ready,
+   prefers-reduced-motion compliant.
+   ============================================================================ */
+
+:root {
+  /* Motion timing & easing tokens (tweak here or via Store Settings pace) */
+  --rb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --rb-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --rb-duration: 550ms;
+  --rb-duration-fast: 260ms;
+  --rb-hero-interval: 6000ms;
+  --rb-hero-zoom-duration: 7200ms;
+  --rb-cf-duration: 620ms;
+  --rb-marquee-duration: 34s;
+  --rb-stagger-step: 65ms;
+  --rb-tilt-max: 8deg;
+
+  /* Boutique surfaces & glass accents (Light theme) */
+  --rb-glass: rgba(255, 255, 255, 0.84);
+  --rb-glass-dark: rgba(20, 16, 14, 0.56);
+  --rb-glass-border: rgba(255, 255, 255, 0.28);
+  --rb-elevated-shadow: 0 22px 48px rgba(34, 24, 16, 0.14);
+  --rb-card-shadow-hover: 0 18px 36px rgba(34, 24, 16, 0.14);
+  --rb-scrim: linear-gradient(105deg, rgba(18, 13, 22, 0.88) 0%, rgba(28, 19, 16, 0.70) 52%, rgba(28, 19, 16, 0.28) 100%);
+  --rb-scrim-mobile: linear-gradient(180deg, rgba(18, 13, 22, 0.55) 0%, rgba(18, 13, 22, 0.88) 60%, rgba(18, 13, 22, 0.96) 100%);
+  --rb-placeholder-bg: linear-gradient(135deg, color-mix(in srgb, var(--brand) 16%, var(--bg)), color-mix(in srgb, var(--ink) 6%, var(--bg)));
+}
+
+html[data-theme="dark"] {
+  --rb-glass: rgba(32, 27, 21, 0.86);
+  --rb-glass-dark: rgba(12, 10, 8, 0.68);
+  --rb-glass-border: rgba(255, 255, 255, 0.14);
+  --rb-elevated-shadow: 0 24px 56px rgba(0, 0, 0, 0.62);
+  --rb-card-shadow-hover: 0 20px 42px rgba(0, 0, 0, 0.55);
+  --rb-scrim: linear-gradient(105deg, rgba(12, 9, 15, 0.92) 0%, rgba(20, 15, 13, 0.78) 54%, rgba(20, 15, 13, 0.36) 100%);
+}
+
+/* Speed presets controlled from Manage -> Store Settings */
+body[data-anim-speed="slow"] {
+  --rb-duration: 760ms;
+  --rb-hero-interval: 8500ms;
+  --rb-hero-zoom-duration: 9800ms;
+  --rb-cf-duration: 820ms;
+  --rb-marquee-duration: 50s;
+  --rb-stagger-step: 90ms;
+}
+
+body[data-anim-speed="fast"] {
+  --rb-duration: 380ms;
+  --rb-hero-interval: 4200ms;
+  --rb-hero-zoom-duration: 5000ms;
+  --rb-cf-duration: 420ms;
+  --rb-marquee-duration: 22s;
+  --rb-stagger-step: 40ms;
+}
+
+/* Shared boutique helpers */
+.rb-section-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand);
+  margin-bottom: 4px;
+}
+
+.rb-empty-showcase {
+  text-align: center;
+  padding: 36px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.rb-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--rb-placeholder-bg);
+  color: var(--muted);
+  font-weight: 900;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+}
+
+.rb-circle-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--rb-glass-border);
+  background: var(--rb-glass-dark);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform var(--rb-duration-fast) var(--rb-ease), background var(--rb-duration-fast) ease, border-color var(--rb-duration-fast) ease;
+}
+
+.rb-circle-btn:hover {
+  transform: scale(1.07);
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-ink);
+}
+
+.rb-circle-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.rb-circle-btn--surface {
+  background: var(--card);
+  color: var(--ink);
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+}
+
+.rb-circle-btn--surface:hover {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-color: var(--brand);
+}
+
+/* ============================================================================
+   1. HERO SHOWCASE — Ken Burns Auto-Rotating Slider
+   ============================================================================ */
+
+.hero.rb-hero-slider {
+  display: block;
+  padding: 0;
+  border-radius: 24px;
+  position: relative;
+  overflow: hidden;
+  min-height: 520px;
+  background: linear-gradient(135deg, #1a1420 0%, #2a1a10 100%);
+  box-shadow: var(--rb-elevated-shadow);
+  color: #ffffff;
+}
+
+.rb-hero-slides {
+  position: relative;
+  width: 100%;
+  min-height: 520px;
+}
+
+.rb-hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 720ms var(--rb-ease), visibility 720ms linear;
+  display: flex;
+  align-items: center;
+}
+
+.rb-hero-slide.is-active {
+  position: relative;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.rb-hero-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.rb-hero-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(18px) saturate(1.15);
+  transform: scale(1.12);
+  opacity: 0.48;
+  will-change: transform;
+}
+
+.rb-hero-bg-fallback {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 75% 30%, color-mix(in srgb, var(--brand) 42%, #1a1420), #17121c 70%);
+}
+
+.rb-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--rb-scrim);
+}
+
+.rb-hero-grid {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 32px;
+  align-items: center;
+  padding: 46px 52px 86px;
+}
+
+.rb-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+}
+
+.rb-hero-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 13px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  color: #f8f5f0;
+  backdrop-filter: blur(8px);
+}
+
+.rb-hero-pill--sale {
+  background: var(--bad);
+  border-color: transparent;
+  color: #ffffff;
+  margin-left: 6px;
+}
+
+.rb-hero-title {
+  margin: 0;
+  font-size: clamp(1.95rem, 4.4vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+}
+
+.rb-hero-desc {
+  margin: 0;
+  color: #e6dfd5;
+  font-size: 1.02rem;
+  line-height: 1.6;
+  max-width: 48ch;
+}
+
+.rb-hero-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.rb-hero-price {
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.rb-hero-old-price {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.rb-hero-slider .rb-hero-cta {
+  background: #ffffff;
+  color: #18131d;
+  border-radius: 12px;
+  padding: 13px 24px;
+  font-weight: 700;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
+}
+
+.rb-hero-slider .rb-hero-cta:hover {
+  transform: translateY(-2px);
+  background: #f5f0ff;
+  color: #18131d;
+}
+
+.rb-hero-slider .rb-hero-secondary {
+  border-color: rgba(255, 255, 255, 0.42);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 13px 22px;
+}
+
+.rb-hero-slider .rb-hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+/* Staggered text entrance when slide activates */
+.rb-hero-stagger {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 600ms var(--rb-ease), transform 650ms var(--rb-ease);
+}
+
+.rb-hero-slide.is-active .rb-hero-stagger {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.rb-hero-slide.is-active .rb-stagger-1 { transition-delay: 80ms; }
+.rb-hero-slide.is-active .rb-stagger-2 { transition-delay: 160ms; }
+.rb-hero-slide.is-active .rb-stagger-3 { transition-delay: 240ms; }
+.rb-hero-slide.is-active .rb-stagger-4 { transition-delay: 310ms; }
+.rb-hero-slide.is-active .rb-stagger-5 { transition-delay: 380ms; }
+
+/* Framed product showcase with Ken Burns zoom */
+.rb-hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rb-hero-frame {
+  display: block;
+  width: 100%;
+  max-width: 390px;
+  aspect-ratio: 4 / 4.6;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translate3d(0, 14px, 0) scale(0.96);
+  opacity: 0;
+  transition: transform 760ms var(--rb-ease), opacity 700ms var(--rb-ease);
+}
+
+.rb-hero-slide.is-active .rb-hero-frame {
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+}
+
+.rb-hero-product-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.0);
+  will-change: transform;
+}
+
+.rb-hero-slide.is-active .rb-hero-product-img {
+  animation: rb-ken-burns var(--rb-hero-zoom-duration) ease-out forwards;
+}
+
+.rb-hero-slider.is-paused .rb-hero-product-img,
+.rb-hero-slider:hover .rb-hero-product-img {
+  animation-play-state: paused;
+}
+
+@keyframes rb-ken-burns {
+  0% { transform: scale(1.0) translate3d(0, 0, 0); }
+  100% { transform: scale(1.09) translate3d(-1.5%, -1.5%, 0); }
+}
+
+.rb-hero-monogram {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(217, 119, 6, 0.25));
+}
+
+/* Hero controls bar */
+.rb-hero-controls {
+  position: absolute;
+  left: 52px;
+  right: 52px;
+  bottom: 22px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rb-hero-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rb-hero-dot {
+  position: relative;
+  width: 28px;
+  height: 5px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.28);
+  cursor: pointer;
+  overflow: hidden;
+  transition: width 300ms var(--rb-ease), background 240ms ease;
+}
+
+.rb-hero-dot.is-active {
+  width: 54px;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.rb-hero-dot-progress {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.rb-hero-dot.is-active .rb-hero-dot-progress {
+  animation: rb-progress-fill var(--rb-hero-interval) linear forwards;
+}
+
+.rb-hero-slider.is-paused .rb-hero-dot.is-active .rb-hero-dot-progress,
+.rb-hero-slider:hover .rb-hero-dot.is-active .rb-hero-dot-progress {
+  animation-play-state: paused;
+}
+
+@keyframes rb-progress-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.rb-hero-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rb-hero-counter {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.82);
+  margin-right: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rb-hero-slider [data-hero-pause] .icon-play { display: none; }
+.rb-hero-slider.is-user-paused [data-hero-pause] .icon-pause { display: none; }
+.rb-hero-slider.is-user-paused [data-hero-pause] .icon-play { display: block; }
+
+.rb-hero-static-frame {
+  width: 260px;
+  height: 300px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.35);
+}
+
+.rb-hero-static-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ============================================================================
+   2. 3D ROTATING CAROUSEL (COVERFLOW)
+   ============================================================================ */
+
+.rb-coverflow {
+  position: relative;
+  padding: 18px 0 10px;
+  outline: none;
+  user-select: none;
+  touch-action: pan-y;
+}
+
+.rb-coverflow:focus-visible .rb-cf-stage {
+  outline: 2px solid var(--brand);
+  outline-offset: 6px;
+  border-radius: 20px;
+}
+
+.rb-cf-stage {
+  position: relative;
+  height: 445px;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.rb-cf-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.rb-cf-slide {
+  position: absolute;
+  width: clamp(248px, 28vw, 315px);
+  top: 50%;
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0);
+  transition:
+    transform var(--rb-cf-duration) var(--rb-ease),
+    opacity var(--rb-cf-duration) var(--rb-ease),
+    filter var(--rb-cf-duration) var(--rb-ease);
+  will-change: transform, opacity;
+  z-index: 1;
+}
+
+.rb-cf-slide.is-center {
+  z-index: 10;
+  filter: blur(0px);
+  opacity: 1;
+}
+
+.rb-cf-slide:not(.is-center) {
+  cursor: pointer;
+}
+
+.rb-cf-slide:not(.is-center) .rb-cf-card {
+  pointer-events: none;
+}
+
+.rb-cf-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--rb-elevated-shadow);
+  display: flex;
+  flex-direction: column;
+}
+
+.rb-cf-media {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.rb-cf-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 520ms var(--rb-ease);
+}
+
+.rb-cf-slide.is-center .rb-cf-card:hover .rb-cf-media img {
+  transform: scale(1.05);
+}
+
+.rb-cf-info {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rb-cf-info h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rb-cf-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rb-cf-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.rb-cf-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.rb-cf-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.rb-cf-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  border: 0;
+  padding: 0;
+  background: var(--line);
+  cursor: pointer;
+  transition: width 280ms var(--rb-ease), background 240ms ease;
+}
+
+.rb-cf-dot.is-active {
+  width: 28px;
+  background: var(--brand);
+}
+
+.rb-cf-hint {
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+/* ============================================================================
+   3. INFINITE MARQUEE STRIP (Dual Opposite-Direction Rows)
+   ============================================================================ */
+
+.rb-marquee-section {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.rb-marquee-viewport {
+  position: relative;
+  overflow: hidden;
+  padding: 10px 0 18px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%);
+}
+
+.rb-marquee-viewport:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+.rb-marquee-viewport.is-static {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.rb-marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.rb-marquee-viewport.is-static .rb-marquee-track {
+  width: 100%;
+  justify-content: center;
+}
+
+.rb-marquee-group {
+  display: flex;
+  align-items: stretch;
+  gap: 20px;
+  padding-right: 20px;
+  flex-shrink: 0;
+}
+
+.rb-marquee-item {
+  width: 264px;
+  flex: 0 0 264px;
+  display: flex;
+}
+
+.rb-marquee-item > .product-card {
+  width: 100%;
+}
+
+.rb-marquee-viewport.is-animated[data-direction="left"] .rb-marquee-track {
+  animation: rb-marquee-left var(--rb-marquee-duration) linear infinite;
+}
+
+.rb-marquee-viewport.is-animated[data-direction="right"] .rb-marquee-track {
+  animation: rb-marquee-right var(--rb-marquee-duration) linear infinite;
+}
+
+.rb-marquee-viewport:hover .rb-marquee-track,
+.rb-marquee-viewport:focus-within .rb-marquee-track,
+.rb-marquee-viewport.is-paused .rb-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes rb-marquee-left {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes rb-marquee-right {
+  from { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+/* ============================================================================
+   4. PRODUCT CARDS — 3D Tilt, Second Image Reveal, Slide-in Actions & Heart
+   ============================================================================ */
+
+.product-card.rb-tilt-card {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --glare-x: 50%;
+  --glare-y: 50%;
+  --glare-opacity: 0;
+  position: relative;
+  border-radius: 18px;
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translate3d(0, 0, 0);
+  transition: transform 320ms var(--rb-ease), box-shadow 320ms var(--rb-ease), border-color 240ms ease;
+  will-change: transform;
+}
+
+.product-card.rb-tilt-card:hover {
+  transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translate3d(0, -6px, 0);
+  box-shadow: var(--rb-card-shadow-hover);
+  border-color: color-mix(in srgb, var(--brand) 38%, var(--line));
+}
+
+.rb-tilt-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: inherit;
+  opacity: var(--glare-opacity);
+  background: radial-gradient(circle at var(--glare-x) var(--glare-y), rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 62%);
+  transition: opacity 260ms ease;
+}
+
+html[data-theme="dark"] .rb-tilt-glare {
+  background: radial-gradient(circle at var(--glare-x) var(--glare-y), rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 62%);
+}
+
+.rb-card-media {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: var(--bg);
+  overflow: hidden;
+  display: block;
+}
+
+.rb-media-link {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.rb-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 560ms var(--rb-ease), opacity 420ms var(--rb-ease);
+}
+
+.rb-card-img--secondary {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.04);
+}
+
+.rb-tilt-card:hover .rb-card-img--primary {
+  transform: scale(1.07);
+}
+
+.rb-tilt-card:hover .rb-card-img--secondary {
+  opacity: 1;
+  transform: scale(1.02);
+}
+
+.rb-card-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.rb-badge-new {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-color: transparent;
+}
+
+/* Quick view slide-in bar */
+.rb-card-overlay {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition: opacity 280ms var(--rb-ease), transform 320ms var(--rb-ease);
+}
+
+.rb-tilt-card:hover .rb-card-overlay,
+.rb-tilt-card:focus-within .rb-card-overlay {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.rb-quick-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--rb-glass);
+  color: var(--ink);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  transition: background 180ms ease, color 180ms ease, transform 180ms var(--rb-ease);
+}
+
+.rb-quick-btn:hover {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+/* Wishlist heart spring animation */
+.rb-wish-form {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 4;
+}
+
+.rb-wish-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--rb-glass);
+  color: var(--ink);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 240ms var(--rb-ease-spring), color 180ms ease, border-color 180ms ease;
+}
+
+.rb-wish-btn:hover {
+  transform: scale(1.12);
+  color: var(--bad);
+  border-color: var(--bad);
+}
+
+.rb-wish-btn.active {
+  color: var(--bad);
+  border-color: color-mix(in srgb, var(--bad) 50%, var(--line));
+}
+
+.rb-wish-btn.is-popping svg {
+  animation: rb-heart-pop 460ms var(--rb-ease-spring);
+}
+
+@keyframes rb-heart-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.42); }
+  70% { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+.rb-card-cat {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.rb-cart-btn {
+  transition: transform 220ms var(--rb-ease), filter 160ms ease, box-shadow 220ms ease;
+}
+
+.rb-tilt-card:hover .rb-cart-btn:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 32%, transparent);
+}
+
+/* ============================================================================
+   5. SCROLL-REVEAL STAGGERED GRID (IntersectionObserver)
+   ============================================================================ */
+
+/* Progressive enhancement: items stay visible unless JS adds .rb-reveal-armed */
+.rb-reveal-armed [data-reveal-item] {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition:
+    opacity var(--rb-duration) var(--rb-ease),
+    transform var(--rb-duration) var(--rb-ease);
+  transition-delay: calc(min(var(--stagger-index, 0), 8) * var(--rb-stagger-step));
+}
+
+.rb-reveal-armed [data-reveal-item].is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.rb-cat-card {
+  transition: transform 320ms var(--rb-ease), box-shadow 320ms var(--rb-ease);
+}
+
+.rb-cat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--rb-card-shadow-hover);
+}
+
+/* ============================================================================
+   6. PRODUCT DETAIL GALLERY — Smooth Zoom + Interactive 360° Spin
+   ============================================================================ */
+
+.rb-gallery-stage {
+  position: relative;
+  border-radius: 20px;
+  cursor: zoom-in;
+  touch-action: pan-y;
+}
+
+.rb-gallery-stage.is-spin-mode {
+  cursor: grab;
+  touch-action: none;
+}
+
+.rb-gallery-stage.is-spin-mode.is-dragging {
+  cursor: grabbing;
+}
+
+.rb-gallery-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 220ms ease, transform 240ms var(--rb-ease);
+  will-change: transform, opacity;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.rb-gallery-main-img.is-fading {
+  opacity: 0.25;
+}
+
+.rb-gallery-stage.is-zooming .rb-gallery-main-img {
+  transform: scale(1.9);
+  transition: transform 80ms linear;
+}
+
+.rb-gallery-hud {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.rb-hud-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--rb-glass);
+  color: var(--ink);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.rb-hud-pill[aria-pressed="true"],
+.rb-hud-pill:hover:not(.rb-hud-pill--muted) {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-color: var(--brand);
+}
+
+.rb-hud-pill--muted {
+  cursor: default;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.rb-spin-badge {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--rb-glass-dark);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.rb-thumb {
+  transition: transform 200ms var(--rb-ease), border-color 200ms ease, opacity 200ms ease;
+  opacity: 0.75;
+}
+
+.rb-thumb:hover,
+.rb-thumb.active {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* ============================================================================
+   7. QUICK VIEW MODAL
+   ============================================================================ */
+
+.rb-qv-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(12, 10, 14, 0.64);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 260ms var(--rb-ease), visibility 260ms linear;
+}
+
+.rb-qv-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.rb-qv-modal {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: var(--rb-elevated-shadow);
+  transform: translate3d(0, 18px, 0) scale(0.97);
+  transition: transform 320ms var(--rb-ease);
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.rb-qv-backdrop.open .rb-qv-modal {
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.rb-qv-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.rb-qv-close:hover {
+  background: var(--brand);
+  color: var(--brand-ink);
+  border-color: var(--brand);
+}
+
+.rb-qv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.rb-qv-media {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+
+.rb-qv-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rb-qv-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+.rb-qv-title {
+  margin: 6px 0 10px;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.rb-qv-prices {
+  font-size: 1.25rem;
+  margin: 0 0 10px;
+}
+
+.rb-qv-stock {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.rb-qv-desc {
+  font-size: 0.92rem;
+  margin: 0 0 18px;
+  line-height: 1.55;
+}
+
+.rb-qv-actions {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+.rb-qv-actions .btn {
+  flex: 1;
+}
+
+.rb-qv-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.rb-qv-link:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================================
+   RESPONSIVE BREAKPOINTS (Mobile-first adjustments)
+   ============================================================================ */
+
+@media (max-width: 900px) {
+  .rb-hero-grid {
+    grid-template-columns: 1fr;
+    padding: 32px 24px 82px;
+    gap: 22px;
+  }
+
+  .rb-hero-visual {
+    order: -1;
+  }
+
+  .rb-hero-frame {
+    max-width: 280px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .rb-hero-scrim {
+    background: var(--rb-scrim-mobile);
+  }
+
+  .rb-hero-controls {
+    left: 24px;
+    right: 24px;
+    bottom: 18px;
+  }
+
+  .rb-cf-stage {
+    height: 410px;
+  }
+
+  .rb-qv-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero.rb-hero-slider,
+  .rb-hero-slides {
+    min-height: 480px;
+    border-radius: 18px;
+  }
+
+  .rb-marquee-item {
+    width: 220px;
+    flex: 0 0 220px;
+  }
+
+  /* Keep Quick View reachable on touch devices without requiring hover */
+  .rb-card-overlay {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ============================================================================
+   ADMIN MASTER OFF SWITCH & PREFERS-REDUCED-MOTION COMPLIANCE
+   ============================================================================ */
+
+body[data-animations="off"] .rb-hero-product-img,
+body[data-animations="off"] .rb-hero-dot.is-active .rb-hero-dot-progress,
+body[data-animations="off"] .rb-marquee-track,
+body[data-animations="off"] .rb-wish-btn.is-popping svg {
+  animation: none !important;
+}
+
+body[data-animations="off"] .rb-reveal-armed [data-reveal-item] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+body[data-animations="off"] .product-card.rb-tilt-card,
+body[data-animations="off"] .product-card.rb-tilt-card:hover {
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rb-hero-product-img,
+  .rb-hero-dot.is-active .rb-hero-dot-progress,
+  .rb-marquee-track,
+  .rb-wish-btn.is-popping svg {
+    animation: none !important;
+  }
+
+  .rb-hero-slide,
+  .rb-hero-stagger,
+  .rb-hero-frame,
+  .rb-cf-slide,
+  .product-card.rb-tilt-card,
+  .rb-card-img,
+  .rb-reveal-armed [data-reveal-item] {
+    transition: none !important;
+  }
+
+  .rb-reveal-armed [data-reveal-item] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .rb-marquee-viewport {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
